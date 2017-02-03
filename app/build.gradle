@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    buildTypes.each {
+        it.buildConfigField 'String', 'TMDB_API_KEY_V3', TMDBApiKeyV3
+    }
 }
 
 dependencies {
@@ -26,4 +29,10 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
+
+    // Picasso - Square - http://square.github.io/picasso/
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+    // Support
+    compile 'com.android.support:recyclerview-v7:25.1.1'
 }
