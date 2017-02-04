@@ -10,6 +10,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        // JAVA 8 -----
+        jackOptions { enabled true }
+        // JAVA 8 -----
     }
     buildTypes {
         release {
@@ -20,6 +24,12 @@ android {
     buildTypes.each {
         it.buildConfigField 'String', 'TMDB_API_KEY_V3', TMDBApiKeyV3
     }
+    // JAVA 8 -----
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    // JAVA 8 -----
 }
 
 dependencies {
@@ -39,6 +49,8 @@ dependencies {
     // Support
     compile 'com.android.support:recyclerview-v7:25.1.1'
 
-
-
+    // LeakCanary -  Square - https://github.com/square/leakcanary
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
+    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 }

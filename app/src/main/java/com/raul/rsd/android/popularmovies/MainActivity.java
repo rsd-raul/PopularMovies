@@ -8,12 +8,12 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
+import com.squareup.leakcanary.LeakCanary;
 
 import java.net.URL;
 
@@ -24,11 +24,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
     private SwipeRefreshLayout mSwipeRefresh;
+    public String sActiveSort = NetworkUtils.POPULAR;   // By default to popular
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Configure Leak Canary to warn about memory leaks
+        if (LeakCanary.isInAnalyzerProcess(this))
+            return;
+        LeakCanary.install(getApplication());
 
         // Get references
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
@@ -42,19 +48,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mRecyclerView.setHasFixedSize(true);
 
         // Configure Swipe Refresh
-        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                loadData();
-            }
-        });
+        mSwipeRefresh.setOnRefreshListener(this::loadData);
+
+        // Configure FAM and FABs
+        new FloatingActionMenuConfigurator().configure(this);
 
         // Load data in the RecyclerView
         loadData();
     }
 
-    private void loadData(){
-        new FetchMoviesTask().execute(NetworkUtils.POPULAR);
+    public void loadData(){
+        new FetchMoviesTask().execute(sActiveSort);
     }
 
     @Override
@@ -85,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
             try {
                 String jsonResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
-                return TMDBUtils.extractMoviesFromJson(MainActivity.this, jsonResponse);
+                return TMDBUtils.extractMoviesFromJson(jsonResponse);
             } catch (Exception ex) {
                 Log.e(TAG, "doInBackground: Exception parsing JSON", ex);
                 return null;

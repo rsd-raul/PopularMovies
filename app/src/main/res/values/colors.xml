@@ -31,7 +31,7 @@
 
     <!-- FAM and FAB -->
 
-    <color name="background">#C8FEFEFE</color>
+    <color name="background">#95fefefe</color>
     <color name="transparent">#00FEFEFE</color>
     <color name="shadow">#66000000</color>
 </resources>

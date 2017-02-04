@@ -29,7 +29,7 @@ public final class TMDBUtils {
 
     // -------------------------- USE CASES --------------------------
 
-    public static Movie[] extractMoviesFromJson(Context context, String moviesJson) throws JSONException {
+    public static Movie[] extractMoviesFromJson(String moviesJson) throws JSONException {
 
         // Build a JSONObject with the response, then check for errors and handle them accordingly
         JSONObject results = new JSONObject(moviesJson);
