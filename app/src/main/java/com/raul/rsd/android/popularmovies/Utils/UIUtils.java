@@ -41,6 +41,8 @@ public class UIUtils {
         return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
     }
 
+    // TODO - Review for API < LOLLIPOP
+    // http://stackoverflow.com/questions/22192291/how-to-change-the-status-bar-color-in-android
     public static void adaptAppBarAndStatusBarColors(AppCompatActivity activity, int color){
         int colorPrimary = ContextCompat.getColor(activity, color);
 

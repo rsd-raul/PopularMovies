@@ -40,7 +40,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         String poster_path = mMovies[position].getPoster_path();
         Uri posterUri = NetworkUtils.buildMovieImageURL(poster_path);
 
-        Picasso.with(moviePoster.getContext()).load(posterUri).into(moviePoster);
+
+        // TODO - BUG - RecyclerView scrolls with the image collapsed, then the images load and throw the location of
+        Picasso.with(moviePoster.getContext())
+                .load(posterUri)
+                .into(moviePoster);
     }
 
     @Override

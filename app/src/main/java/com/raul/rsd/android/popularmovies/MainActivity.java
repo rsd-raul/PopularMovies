@@ -1,6 +1,7 @@
 package com.raul.rsd.android.popularmovies;
 
 import android.os.AsyncTask;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -21,27 +22,38 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static final String TAG = "MainActivity";
 
     private RecyclerView mRecyclerView;
-    private ProgressBar mLoadingIndicator;
     private MoviesAdapter mMoviesAdapter;
+    private SwipeRefreshLayout mSwipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-        // Configure RecyclerView
+        // Get references
+        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
+        mMoviesAdapter = new MoviesAdapter(this);
 
+        // Configure RecyclerView
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(layoutManager);
-
-        mMoviesAdapter = new MoviesAdapter(this);
         mRecyclerView.setAdapter(mMoviesAdapter);
-
         mRecyclerView.setHasFixedSize(true);
 
+        // Configure Swipe Refresh
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadData();
+            }
+        });
+
         // Load data in the RecyclerView
+        loadData();
+    }
+
+    private void loadData(){
         new FetchMoviesTask().execute(NetworkUtils.POPULAR);
     }
 
@@ -60,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
+            mSwipeRefresh.setRefreshing(true);
         }
 
         @Override
@@ -82,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         @Override
         protected void onPostExecute(Movie[] movies) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            mSwipeRefresh.setRefreshing(false);
 
             if (movies == null)
                 showErrorMessage();

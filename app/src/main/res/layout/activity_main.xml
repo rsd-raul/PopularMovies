@@ -7,15 +7,17 @@
     android:padding="3dp"
     tools:context="com.raul.rsd.android.popularmovies.MainActivity">
 
-    <ProgressBar
-        android:id="@+id/pb_loading_indicator"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_gravity="center"
-        android:visibility="invisible"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_movies"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:context=".MainActivity">
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_movies"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
 </FrameLayout>
