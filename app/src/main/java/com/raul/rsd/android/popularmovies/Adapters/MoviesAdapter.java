@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import com.raul.rsd.android.popularmovies.Movie;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
@@ -38,12 +37,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     public void onBindViewHolder(MoviesAdapterViewHolder viewHolder, int position) {
         ImageView moviePoster = viewHolder.mMoviePoster;
         String poster_path = mMovies[position].getPoster_path();
-        Uri posterUri = NetworkUtils.buildMovieImageURL(poster_path);
+        Uri posterUri = NetworkUtils.buildMovieImageURI(poster_path);
 
-
-        // TODO - BUG - RecyclerView scrolls with the image collapsed, then the images load and throw the location of
         Picasso.with(moviePoster.getContext())
                 .load(posterUri)
+                .placeholder(R.drawable.placeholder_poster)
                 .into(moviePoster);
     }
 

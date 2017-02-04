@@ -32,6 +32,10 @@ android {
     // JAVA 8 -----
 }
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
@@ -43,7 +47,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.1.1'
     compile 'com.android.support:appcompat-v7:25.1.1'
     compile 'com.android.support:design:25.1.1'
-
 
     // Picasso - Square - http://square.github.io/picasso
     compile 'com.squareup.picasso:picasso:2.5.2'

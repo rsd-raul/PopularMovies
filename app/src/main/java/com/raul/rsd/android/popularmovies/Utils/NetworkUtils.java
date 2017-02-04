@@ -66,7 +66,7 @@ public final class NetworkUtils {
         return getUrl(builtUri);
     }
 
-    public static Uri buildMovieImageURL(String imagePath){
+    public static Uri buildMovieImageURI(String imagePath){
         return Uri.parse(BASE_IMAGE_URL).buildUpon()
                 .appendPath(IMAGE_SIZE)
                 .appendPath(imagePath.substring(1))
