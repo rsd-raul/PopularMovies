@@ -4,14 +4,13 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
-import com.raul.rsd.android.popularmovies.Utils.Constants;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 
@@ -51,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         // Start intent
 
         // Send id
+        Toast.makeText(this, "Movie selected with id: " + selectedMovieId, Toast.LENGTH_SHORT).show();
     }
 
     // ------------------------- ASYNC TASK --------------------------

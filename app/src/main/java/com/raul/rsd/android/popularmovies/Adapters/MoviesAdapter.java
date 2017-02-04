@@ -14,6 +14,8 @@ import com.squareup.picasso.Picasso;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
+    private static final String TAG = "MoviesAdapter";
+
     private Movie[] mMovies;
     private final MoviesAdapterOnClickHandler mClickHandler;
 

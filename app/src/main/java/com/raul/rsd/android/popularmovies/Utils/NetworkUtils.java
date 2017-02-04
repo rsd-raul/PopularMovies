@@ -45,7 +45,7 @@ public final class NetworkUtils {
     private static final String API_PARAM = "api_key";
 
     // "w92", "w154", "w185", "w342", "w500", "w780", or "original"
-    private static final String IMAGE_SIZE = "w185";
+    private static final String IMAGE_SIZE = "w500";
 
 
     // -------------------------- USE CASES --------------------------
@@ -69,7 +69,7 @@ public final class NetworkUtils {
     public static Uri buildMovieImageURL(String imagePath){
         return Uri.parse(BASE_IMAGE_URL).buildUpon()
                 .appendPath(IMAGE_SIZE)
-                .appendPath(imagePath)
+                .appendPath(imagePath.substring(1))
                 .build();
     }
 
@@ -77,7 +77,6 @@ public final class NetworkUtils {
         URL url = null;
         try {
             url = new URL(uri.toString());
-            Log.i(TAG, "Built URI: " + url);
         } catch (MalformedURLException e) {
             Log.e(TAG, "Malformed URL", e);
         }
