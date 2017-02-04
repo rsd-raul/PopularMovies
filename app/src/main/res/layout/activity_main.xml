@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="3dp"
     tools:context="com.raul.rsd.android.popularmovies.MainActivity">
+
+    <android.support.design.widget.AppBarLayout style="@style/appBarLayout" >
+
+        <android.support.v7.widget.Toolbar style="@style/toolbar"
+            android:id="@+id/toolbar"
+            app:layout_scrollFlags="scroll|enterAlways" />
+
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
-
+        tools:context=".MainActivity"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_movies"
@@ -31,4 +40,5 @@
             android:id="@+id/topRatedFAB"/>
 
     </com.github.clans.fab.FloatingActionMenu>
-</FrameLayout>
+
+</android.support.design.widget.CoordinatorLayout>

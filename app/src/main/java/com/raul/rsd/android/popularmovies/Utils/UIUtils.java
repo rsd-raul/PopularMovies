@@ -14,6 +14,17 @@ import android.view.WindowManager;
 public class UIUtils {
 
 
+    public static void setSubtitle(AppCompatActivity activity, String activeFilter){
+        // Format the filter
+        String filter = activeFilter.replace('_',' ');
+        filter = filter.substring(0, 1).toUpperCase() + filter.substring(1);
+
+        // Set the subtitle
+        ActionBar actionBar = activity.getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setSubtitle("Filter: " + filter);
+    }
+
     // Prueba Palette, de Google
     // http://stackoverflow.com/questions/8471236/finding-the-dominant-color-of-an-image-in-an-android-drawable
     public static int getDominantColor(Bitmap bitmap) {

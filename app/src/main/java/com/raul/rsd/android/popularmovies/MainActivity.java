@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
+import com.raul.rsd.android.popularmovies.Utils.UIUtils;
 import com.squareup.leakcanary.LeakCanary;
 
 import java.net.URL;
@@ -35,6 +37,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         if (LeakCanary.isInAnalyzerProcess(this))
             return;
         LeakCanary.install(getApplication());
+
+        // Set ActionBar
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
         // Get references
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
@@ -59,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     public void loadData(){
         new FetchMoviesTask().execute(sActiveSort);
+        UIUtils.setSubtitle(this, sActiveSort);
     }
 
     @Override
