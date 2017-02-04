@@ -30,9 +30,15 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.1'
     testCompile 'junit:junit:4.12'
 
-    // Picasso - Square - http://square.github.io/picasso/
+    // Picasso - Square - http://square.github.io/picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
+
+    // FloatingActionButton - Clans - https://github.com/Clans/FloatingActionButton
+    compile 'com.github.clans:fab:1.6.4'
 
     // Support
     compile 'com.android.support:recyclerview-v7:25.1.1'
+
+
+
 }

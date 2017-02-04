@@ -5,4 +5,7 @@
     <string name="info_movie_poster">Poster for the movie</string>
 
 
+    <string name="popular">Popularity</string>
+    <string name="top_rated">Top rated</string>
+
 </resources>

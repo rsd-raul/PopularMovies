@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- Custom Palette -->
+
     <color name="colorPrimaryDark">#FF061419</color>
     <color name="colorPrimary">#081c24</color>
+    <color name="colorAccentDark">#FF034C31</color>
     <color name="colorAccent">#046d46</color>
+
+    <!-- Functions Palette -->
+
+    <color name="amberDark">#FFFFA000</color>
+    <color name="amber">#FFFFC107</color>
+    <color name="redDark">#D32F2F</color>
+    <color name="red">#F44336</color>
+
+    <color name="tealDark">#FF00796B</color>
+    <color name="teal">#FF009688</color>
+    <color name="indigoDark">#303F9F</color>
+    <color name="indigo">#3F51B5</color>
+
 
 
     <color name="colorPrimaryText">#212121</color>
@@ -11,4 +28,10 @@
 
     <color name="colorLightPrimary">#FFCDD2</color>
     <color name="colorDivider">#BDBDBD</color>
+
+    <!-- FAM and FAB -->
+
+    <color name="background">#C8FEFEFE</color>
+    <color name="transparent">#00FEFEFE</color>
+    <color name="shadow">#66000000</color>
 </resources>

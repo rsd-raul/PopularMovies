@@ -1,6 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
+
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -8,4 +9,51 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <!-- FAB Buttons -->
+
+    <style name="menuFAB">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_gravity">bottom|end</item>
+        <item name="android:padding">@dimen/fab_margin</item>
+
+        <item name="menu_shadowColor">@color/shadow</item>
+        <item name="menu_shadowRadius">2dp</item>
+        <item name="menu_shadowYOffset">1dp</item>
+        <item name="menu_shadowXOffset">0dp</item>
+
+        <item name="menu_colorNormal">@color/colorAccent</item>
+        <item name="menu_colorPressed">@color/colorAccentDark</item>
+        <item name="menu_colorRipple">#99FFFFFF</item>
+
+        <item name="menu_labels_colorNormal">@color/colorTextIcons</item>
+        <item name="menu_labels_colorPressed">@color/colorSecondaryText</item>
+        <item name="menu_labels_colorRipple">#66FFFFFF</item>
+        <item name="menu_labels_textColor">@color/colorPrimaryText</item>
+        <item name="menu_labels_margin">16dp</item>
+
+        <item name="menu_icon">@drawable/ic_filter_24dp</item>
+    </style>
+
+    <style name="fabMenuChild">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="fab_shadowXOffset">0dp</item>
+        <item name="fab_size">mini</item>
+    </style>
+
+    <style name="fabPopular" parent="fabMenuChild">
+        <item name="fab_label">@string/popular</item>
+        <item name="android:src">@drawable/ic_popular_24dp</item>
+        <item name="fab_colorNormal">@color/red</item>
+        <item name="fab_colorPressed">@color/redDark</item>
+    </style>
+
+    <style name="fabTopRated" parent="fabMenuChild">
+        <item name="fab_label">@string/top_rated</item>
+        <item name="android:src">@drawable/ic_rate_24dp</item>
+        <item name="fab_colorNormal">@color/amber</item>
+        <item name="fab_colorPressed">@color/amberDark</item>
+    </style>
 </resources>
