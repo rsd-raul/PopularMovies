@@ -7,6 +7,7 @@ public class Movie {
     // ------------------------- ATTRIBUTES --------------------------
 
     private long id;
+    private String title;
     private String poster_path;
     private String backdrop_path;
     private Date release_date;
@@ -25,6 +26,13 @@ public class Movie {
     }
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPoster_path() {

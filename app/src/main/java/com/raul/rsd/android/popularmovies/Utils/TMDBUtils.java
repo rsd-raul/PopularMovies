@@ -1,15 +1,13 @@
 package com.raul.rsd.android.popularmovies.Utils;
 
-import android.content.Context;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
 import com.raul.rsd.android.popularmovies.Movie;
+import com.raul.rsd.android.popularmovies.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.net.HttpURLConnection;
 import java.util.Date;
 
 public final class TMDBUtils {
@@ -21,6 +19,7 @@ public final class TMDBUtils {
     private final static String TMDB_STATUS_CODE = "status_code";
 
     private final static String TMDB_ID = "id";
+    private final static String TMDB_TITLE = "title";
     private final static String TMDB_POSTER = "poster_path";
     private final static String TMDB_BACKDROP = "backdrop_path";
     private final static String TMDB_RELEASE_DATE = "release_date";
@@ -28,6 +27,39 @@ public final class TMDBUtils {
     private final static String TMDB_SYNOPSIS = "overview";
 
     // -------------------------- USE CASES --------------------------
+
+    /**
+     * Auxiliary method to obtain a String representation of a given Movie based
+     * on the locale of the user.
+     *
+     * @param movie Movie we wish to convert to String
+     * @param activity Activity to obtain Locale based headers
+     * @return String representation of the Movie
+     */
+    public static String toStringMovie(Movie movie, AppCompatActivity activity){
+        // Using builder to facilitate handling of different types of data
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(activity.getString(R.string.title_to_string))
+                .append(' ')
+                .append(movie.getTitle())
+                .append('\n');
+        builder.append(activity.getString(R.string.synopsis_to_string))
+                .append(' ')
+                .append(movie.getSynopsis())
+                .append('\n');
+        builder.append(activity.getString(R.string.vote_avg_to_string))
+                .append(' ')
+                .append(movie.getVote_avg())
+                .append('\n');
+        builder.append(activity.getString(R.string.release_date_to_string))
+                .append(' ')
+                .append(DateUtils.getStringFromDate(movie.getRelease_date()));
+        builder.append("\n\n\t\t#")
+                .append(activity.getString(R.string.app_name));
+
+        return builder.toString();
+    }
 
     public static Movie[] extractMoviesFromJson(String moviesJson) throws JSONException {
 
@@ -60,7 +92,7 @@ public final class TMDBUtils {
         return extractedMovies;
     }
 
-    public static Movie extractSingleMovieFromJson(Context context, String movieJson) throws JSONException {
+    public static Movie extractSingleMovieFromJson(String movieJson) throws JSONException {
 
         // Build a JSONObject with the response, then check for errors and handle them accordingly
         JSONObject movie = new JSONObject(movieJson);
@@ -73,6 +105,7 @@ public final class TMDBUtils {
         Movie extractedMovie = new Movie();
 
         extractedMovie.setId(movie.getLong(TMDB_ID));
+        extractedMovie.setTitle(movie.getString(TMDB_TITLE));
         extractedMovie.setPoster_path(movie.getString(TMDB_POSTER));
         extractedMovie.setBackdrop_path(movie.getString(TMDB_BACKDROP));
         extractedMovie.setVote_avg(movie.getDouble(TMDB_VOTES_AVG));

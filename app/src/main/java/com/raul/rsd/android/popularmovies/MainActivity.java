@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -9,8 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
-
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
@@ -42,10 +41,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        // Get references
+        // Get references and values
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
         mMoviesAdapter = new MoviesAdapter(this);
+        NetworkUtils.setPosterSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
@@ -70,11 +70,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onClick(long selectedMovieId) {
-        // Start intent
-
-        // Send id
-        Toast.makeText(this, "Movie selected with id: " + selectedMovieId, Toast.LENGTH_SHORT).show();
+        // Build the intent and store the ID
+        Intent intentDetailsActivity = new Intent(this, DetailsActivity.class);
+        intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
+        startActivity(intentDetailsActivity);
     }
+
+//    @Override
+//    public void onClick(String weatherForDay) {
+//        Context context = this;
+//        Class destinationClass = DetailActivity.class;
+//        Intent intentToStartDetailActivity = new Intent(context, destinationClass);
+//        intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, weatherForDay);
+//        startActivity(intentToStartDetailActivity);
+//    }
 
     // ------------------------- ASYNC TASK --------------------------
 
@@ -92,10 +101,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 return null;
 
             String sortMode = params[0];
-            URL movieRequestUrl = NetworkUtils.buildSortMoviesURL(sortMode);
+            URL moviesRequestUrl = NetworkUtils.buildSortMoviesURL(sortMode);
 
             try {
-                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
+                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
                 return TMDBUtils.extractMoviesFromJson(jsonResponse);
             } catch (Exception ex) {
                 Log.e(TAG, "doInBackground: Exception parsing JSON", ex);

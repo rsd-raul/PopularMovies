@@ -16,6 +16,7 @@
 package com.raul.rsd.android.popularmovies.Utils;
 
 import android.net.Uri;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.raul.rsd.android.popularmovies.BuildConfig;
@@ -45,7 +46,7 @@ public final class NetworkUtils {
     private static final String API_PARAM = "api_key";
 
     // "w92", "w154", "w185", "w342", "w500", "w780", or "original"
-    private static final String IMAGE_SIZE = "w500";
+    private static String POSTER_SIZE;
 
 
     // -------------------------- USE CASES --------------------------
@@ -68,9 +69,26 @@ public final class NetworkUtils {
 
     public static Uri buildMovieImageURI(String imagePath){
         return Uri.parse(BASE_IMAGE_URL).buildUpon()
-                .appendPath(IMAGE_SIZE)
+                .appendPath(POSTER_SIZE)
                 .appendPath(imagePath.substring(1))
                 .build();
+    }
+
+    public static void setPosterSizeWithDpi(int deviceDPI){
+        switch (deviceDPI){
+            case DisplayMetrics.DENSITY_XHIGH:
+                POSTER_SIZE = "w342";
+                break;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                POSTER_SIZE = "w500";
+                break;
+            case DisplayMetrics.DENSITY_XXXHIGH:
+                POSTER_SIZE = "w780";
+                break;
+            default:
+                POSTER_SIZE = "w185";
+                break;
+        }
     }
 
     private static URL getUrl(Uri uri) {
@@ -94,16 +112,9 @@ public final class NetworkUtils {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
             InputStream in = urlConnection.getInputStream();
+            Scanner scanner = new Scanner(in).useDelimiter("\\A");
 
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
-            if (hasInput) {
-                return scanner.next();
-            } else {
-                return null;
-            }
+            return scanner.hasNext() ? scanner.next() : null;
         } finally {
             urlConnection.disconnect();
         }
