@@ -31,7 +31,8 @@ class FloatingActionMenuConfigurator {
 
     // -------------------------- FAB menu ---------------------------
 
-    // TODO - UI Enhancement - Change filterIcon to closeIcon when opening FAM.
+    // TODO - UI Enhancement - Change filterIcon to closeIcon when opening FAM. or change LIB to:
+    // https://github.com/gowong/material-sheet-fab
     private void configureMenu(){
 
         // Change the background depending on the fabMenu Status

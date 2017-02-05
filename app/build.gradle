@@ -11,7 +11,8 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        vectorDrawables.useSupportLibrary = true
+//        REMOVED, CONFLICTS ON Android 4.4 - Note 3
+//        vectorDrawables.useSupportLibrary = true
 
         // JAVA 8 -----
         jackOptions { enabled true }

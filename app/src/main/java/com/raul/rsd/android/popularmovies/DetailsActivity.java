@@ -1,6 +1,7 @@
 package com.raul.rsd.android.popularmovies;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -9,12 +10,15 @@ import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.ImageView;
+
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
+import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity{
 
     private static final String TAG = "DetailsActivity";
     private Movie mMovie;
@@ -39,9 +43,23 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void displayMovie(){
+        // Setup backdrop <- First, so Picasso gets a head start.
+        ImageView imageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
+        Uri backDropUri = NetworkUtils.buildMovieImageURI(mMovie.getBackdrop_path());
+
+        // FIXME adapt uri for backdrop (+ resolution)
+        Log.e(TAG, "displayMovie: " + backDropUri.toString());
+        Picasso.with(this)
+                .load(backDropUri)
+                .placeholder(R.drawable.placeholder_backdrop)
+                .into(imageView);
+
+        // Customize the Toolbar with the movie title
         CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         // FIXME Title to big and it we have Ellipsis <- Bad
         collapsingToolbar.setTitle(mMovie.getTitle());
+
+
     }
 
     private void shareMovie(){

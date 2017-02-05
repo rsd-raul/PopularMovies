@@ -12,6 +12,7 @@ public class Movie {
     private String backdrop_path;
     private Date release_date;
     private double vote_avg;
+    private long vote_count;
     private String synopsis;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -61,6 +62,13 @@ public class Movie {
     }
     public void setVote_avg(double vote_avg) {
         this.vote_avg = vote_avg;
+    }
+
+    public long getVote_count() {
+        return vote_count;
+    }
+    public void setVote_count(long vote_count) {
+        this.vote_count = vote_count;
     }
 
     public String getSynopsis() {
