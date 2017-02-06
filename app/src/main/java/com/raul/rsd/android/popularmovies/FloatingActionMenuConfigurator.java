@@ -57,14 +57,6 @@ class FloatingActionMenuConfigurator {
         mFAM.setClosedOnTouchOutside(true);
     }
 
-    // TODO React to Snackbars and such
-//    // Make the menu react to external stimuli such as a Snackbar
-//    private void menuCustomizeBehaviour(){
-//        CoordinatorLayout.LayoutParams params = (CoordinatorLayout.LayoutParams) fam.getLayoutParams();
-//        params.setBehavior(new FloatingActionMenuBehavior());
-//        fam.requestLayout();
-//    }
-
     // -------------------------- FAB child --------------------------
 
     private void configureChildren(){

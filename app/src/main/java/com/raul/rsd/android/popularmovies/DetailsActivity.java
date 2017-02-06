@@ -10,6 +10,7 @@ import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -45,8 +46,15 @@ public class DetailsActivity extends AppCompatActivity{
     }
 
     private void displayMovie(){
-        // Get references and values
+        // Setup backdrop <- First, so Picasso gets a head start.
         ImageView imageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
+        Uri backDropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
+        Picasso.with(this)
+                .load(backDropUri)
+                .placeholder(R.drawable.placeholder_backdrop)
+                .into(imageView);
+
+        // Get references and values
         CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         TextView rateMain = (TextView) findViewById(R.id.tv_rate_main_tmdb);
         TextView rateSecondary = (TextView) findViewById(R.id.tv_rate_secondary_tmdb);
@@ -54,13 +62,6 @@ public class DetailsActivity extends AppCompatActivity{
         TextView durationMain = (TextView) findViewById(R.id.tv_duration_main);
         TextView durationSecondary = (TextView) findViewById(R.id.tv_duration_secondary);
         TextView releaseDateMain = (TextView) findViewById(R.id.tv_release_date_main);
-
-        // Setup backdrop <- First, so Picasso gets a head start.
-        Uri backDropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        Picasso.with(this)
-                .load(backDropUri)
-                .placeholder(R.drawable.placeholder_backdrop)
-                .into(imageView);
 
         // Customize the Toolbar with the movie title
         collapsingToolbar.setTitle(mMovie.getTitle());
@@ -132,5 +133,18 @@ public class DetailsActivity extends AppCompatActivity{
 
         private void showErrorMessage(){
         }
+    }
+
+    // --------------------------- DETAILS ---------------------------
+
+    // Overriding "back" not to reload the Main Activity as setting parentActivityName would
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

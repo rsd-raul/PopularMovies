@@ -19,11 +19,13 @@
         </activity>
         <activity
             android:name=".DetailsActivity"
-            android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.raul.rsd.android.popularmovies.MainActivity" />
+
+            <!--Deprecated -> Overriding android.R.id.home click doesn't reload the Main Activity-->
+            <!--android:parentActivityName=".MainActivity"-->
+            <!--<meta-data-->
+                <!--android:name="android.support.PARENT_ACTIVITY"-->
+                <!--android:value="com.raul.rsd.android.popularmovies.MainActivity" />-->
         </activity>
     </application>
 
