@@ -2,6 +2,11 @@
     <!--Activities-->
     <string name="app_name">PopularMovies</string>
 
+    <string name="tmdb">The Movie Database</string>
+    <string name="time_hours">Hours</string>
+    <string name="time_minutes">Minutes</string>
+    <string name="votes">Votes</string>
+
     <string name="share_movie_chooser">Select app to share movie</string>
 
     <!--Content Description -->
@@ -14,10 +19,11 @@
     <string name="top_rated">Top rated</string>
 
     <!--Movie-->
-    <string name="title_to_string">Title: </string>
-    <string name="synopsis_to_string">Synopsis: </string>
-    <string name="vote_avg_to_string">Rating: </string>
-    <string name="release_date_to_string">Release date: </string>
+    <string name="title_to_string">Title:</string>
+    <string name="synopsis_to_string">Synopsis:</string>
+    <string name="vote_avg_to_string">Rating:</string>
+    <string name="release_date_to_string">Release date:</string>
+    <string name="duration_to_string">Runtime:</string>
 
 
 

@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
         mMoviesAdapter = new MoviesAdapter(this);
-        NetworkUtils.setPosterSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
+        NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);

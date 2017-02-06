@@ -11,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.raul.rsd.android.popularmovies.Utils.DateUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.squareup.picasso.Picasso;
@@ -43,22 +45,34 @@ public class DetailsActivity extends AppCompatActivity{
     }
 
     private void displayMovie(){
-        // Setup backdrop <- First, so Picasso gets a head start.
+        // Get references and values
         ImageView imageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
-        Uri backDropUri = NetworkUtils.buildMovieImageURI(mMovie.getBackdrop_path());
+        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
+        TextView rateMain = (TextView) findViewById(R.id.tv_rate_main_tmdb);
+        TextView rateSecondary = (TextView) findViewById(R.id.tv_rate_secondary_tmdb);
+        TextView descriptionMain = (TextView) findViewById(R.id.tv_description_main);
+        TextView durationMain = (TextView) findViewById(R.id.tv_duration_main);
+        TextView durationSecondary = (TextView) findViewById(R.id.tv_duration_secondary);
+        TextView releaseDateMain = (TextView) findViewById(R.id.tv_release_date_main);
 
-        // FIXME adapt uri for backdrop (+ resolution)
-        Log.e(TAG, "displayMovie: " + backDropUri.toString());
+        // Setup backdrop <- First, so Picasso gets a head start.
+        Uri backDropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
         Picasso.with(this)
                 .load(backDropUri)
                 .placeholder(R.drawable.placeholder_backdrop)
                 .into(imageView);
 
         // Customize the Toolbar with the movie title
-        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
-        // FIXME Title to big and it we have Ellipsis <- Bad
         collapsingToolbar.setTitle(mMovie.getTitle());
+        // FIXME Title to big and it we have Ellipsis <- Bad
 
+        // Customize movie details
+        rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
+        rateSecondary.setText(String.format("%d %s", mMovie.getVote_count(), getString(R.string.votes)));
+        descriptionMain.setText(mMovie.getSynopsis());
+        durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
+        durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
+        releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
 
     }
 

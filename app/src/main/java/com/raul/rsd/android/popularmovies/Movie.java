@@ -8,11 +8,12 @@ public class Movie {
 
     private long id;
     private String title;
-    private String poster_path;
-    private String backdrop_path;
+    private String poster_path;     // Null TODO Both poster and backdrop can be null, handle that...
+    private String backdrop_path;   // Null
     private Date release_date;
     private double vote_avg;
     private long vote_count;
+    private int duration;
     private String synopsis;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -76,5 +77,12 @@ public class Movie {
     }
     public void setSynopsis(String synopsis) {
         this.synopsis = synopsis;
+    }
+
+    public int getDuration() {
+        return duration;
+    }
+    public void setDuration(int duration) {
+        this.duration = duration;
     }
 }

@@ -26,6 +26,7 @@ public final class TMDBUtils {
     private final static String TMDB_VOTES_AVG = "vote_average";
     private final static String TMDB_VOTES_COUNT = "vote_count";
     private final static String TMDB_SYNOPSIS = "overview";
+    private final static String TMDB_DURATION = "runtime";
 
     // -------------------------- USE CASES --------------------------
 
@@ -55,7 +56,11 @@ public final class TMDBUtils {
                 .append('\n');
         builder.append(activity.getString(R.string.release_date_to_string))
                 .append(' ')
-                .append(DateUtils.getStringFromDate(movie.getRelease_date()));
+                .append(DateUtils.getStringFromDate(movie.getRelease_date()))
+                .append('\n');
+        builder.append(activity.getString(R.string.duration_to_string))
+                .append(' ')
+                .append(String.format("%d %s", movie.getDuration(), activity.getString(R.string.time_minutes)));
         builder.append("\n\n\t\t#")
                 .append(activity.getString(R.string.app_name));
 
@@ -110,8 +115,9 @@ public final class TMDBUtils {
         extractedMovie.setPoster_path(movie.getString(TMDB_POSTER));
         extractedMovie.setBackdrop_path(movie.getString(TMDB_BACKDROP));
         extractedMovie.setVote_avg(movie.getDouble(TMDB_VOTES_AVG));
-        extractedMovie.setVote_avg(movie.getLong(TMDB_VOTES_COUNT));
+        extractedMovie.setVote_count(movie.getLong(TMDB_VOTES_COUNT));
         extractedMovie.setSynopsis(movie.getString(TMDB_SYNOPSIS));
+        extractedMovie.setDuration(movie.getInt(TMDB_DURATION));
         Date parsedDate = DateUtils.getDateFromString(movie.getString(TMDB_RELEASE_DATE));
         extractedMovie.setRelease_date(parsedDate);
 

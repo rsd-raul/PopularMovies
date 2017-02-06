@@ -21,7 +21,9 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:expandedTitleMarginStart="72dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title">
 
             <ImageView
                 android:id="@+id/iv_movie_backdrop"
@@ -32,8 +34,6 @@
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.7"
                 android:contentDescription="@string/info_movie_backdrop" />
-            <!--FIXME This gets the real image dimension-->
-            <!--android:scaleType="centerInside"-->
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"

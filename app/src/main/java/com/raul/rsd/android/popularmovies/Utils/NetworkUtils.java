@@ -45,11 +45,11 @@ public final class NetworkUtils {
 
     private static final String API_PARAM = "api_key";
 
-    // "w92", "w154", "w185", "w342", "w500", "w780", or "original"
     private static String POSTER_SIZE;
+    private static String BACKDROP_SIZE;
 
 
-    // -------------------------- USE CASES --------------------------
+    // ------------------------- URL - DATA --------------------------
 
     public static URL buildMovieURL(long id){
         Uri builtUri = Uri.parse(BASE_MOVIE_URL).buildUpon()
@@ -67,30 +67,6 @@ public final class NetworkUtils {
         return getUrl(builtUri);
     }
 
-    public static Uri buildMovieImageURI(String imagePath){
-        return Uri.parse(BASE_IMAGE_URL).buildUpon()
-                .appendPath(POSTER_SIZE)
-                .appendPath(imagePath.substring(1))
-                .build();
-    }
-
-    public static void setPosterSizeWithDpi(int deviceDPI){
-        switch (deviceDPI){
-            case DisplayMetrics.DENSITY_XHIGH:
-                POSTER_SIZE = "w342";
-                break;
-            case DisplayMetrics.DENSITY_XXHIGH:
-                POSTER_SIZE = "w500";
-                break;
-            case DisplayMetrics.DENSITY_XXXHIGH:
-                POSTER_SIZE = "w780";
-                break;
-            default:
-                POSTER_SIZE = "w185";
-                break;
-        }
-    }
-
     private static URL getUrl(Uri uri) {
         URL url = null;
         try {
@@ -100,6 +76,52 @@ public final class NetworkUtils {
         }
         return url;
     }
+
+    // ------------------------ URI - IMAGES -------------------------
+
+    public static Uri buildMovieBackdropURI(String backdropPath){
+        return buildMovieImageURI(backdropPath, true);
+    }
+
+    public static Uri buildMoviePosterURI(String posterPath){
+        return buildMovieImageURI(posterPath, false);
+    }
+
+    private static Uri buildMovieImageURI(String imagePath, boolean backdrop){
+        // Select size based on the image <- POSTER by default as it's much more frequent
+        String size = POSTER_SIZE;
+        if(backdrop)
+            size = BACKDROP_SIZE;
+
+        return Uri.parse(BASE_IMAGE_URL).buildUpon()
+                .appendPath(size)
+                .appendPath(imagePath.substring(1))
+                .build();
+    }
+
+    // "w92", "w154", "w185", "w342", "w500", "w780", "w1000", "w1920" or "original"
+    public static void setImagesSizeWithDpi(int deviceDPI){
+        switch (deviceDPI){
+            case DisplayMetrics.DENSITY_XHIGH:
+                POSTER_SIZE = "w342";
+                BACKDROP_SIZE = "w780";
+                break;
+            case DisplayMetrics.DENSITY_XXHIGH:
+                POSTER_SIZE = "w500";
+                BACKDROP_SIZE = "w1000";
+                break;
+            case DisplayMetrics.DENSITY_XXXHIGH:
+                POSTER_SIZE = "w780";
+                BACKDROP_SIZE = "w1920";
+                break;
+            default:
+                POSTER_SIZE = "w185";
+                BACKDROP_SIZE = "w500";
+                break;
+        }
+    }
+
+    // --------------------------- NETWORK ---------------------------
 
     /**
      * This method returns the entire result from the HTTP response.
