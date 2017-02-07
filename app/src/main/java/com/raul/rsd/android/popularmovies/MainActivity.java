@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
+import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;

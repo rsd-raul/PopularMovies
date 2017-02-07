@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies;
+package com.raul.rsd.android.popularmovies.Domain;
 
 import java.util.Date;
 
@@ -10,6 +10,7 @@ public class Movie {
     private String title;
     private String poster_path;     // Null TODO Both poster and backdrop can be null, handle that...
     private String backdrop_path;   // Null
+    private Genre[] genres;
     private Date release_date;
     private double vote_avg;
     private long vote_count;
@@ -49,6 +50,13 @@ public class Movie {
     }
     public void setBackdrop_path(String backdrop_path) {
         this.backdrop_path = backdrop_path;
+    }
+
+    public Genre[] getGenres() {
+        return genres;
+    }
+    public void setGenres(Genre[] genres) {
+        this.genres = genres;
     }
 
     public Date getRelease_date() {

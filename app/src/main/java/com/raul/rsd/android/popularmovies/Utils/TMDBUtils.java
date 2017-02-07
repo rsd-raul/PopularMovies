@@ -2,7 +2,9 @@ package com.raul.rsd.android.popularmovies.Utils;
 
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import com.raul.rsd.android.popularmovies.Movie;
+
+import com.raul.rsd.android.popularmovies.Domain.Genre;
+import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
 
 import org.json.JSONArray;
@@ -20,6 +22,7 @@ public final class TMDBUtils {
 
     private final static String TMDB_ID = "id";
     private final static String TMDB_TITLE = "title";
+    private final static String TMDB_NAME = "name";
     private final static String TMDB_POSTER = "poster_path";
     private final static String TMDB_BACKDROP = "backdrop_path";
     private final static String TMDB_RELEASE_DATE = "release_date";
@@ -86,11 +89,11 @@ public final class TMDBUtils {
 
         // Iterate over the movies on JSON, process the data and store movies in the array
         for (int i = 0; i < moviesArray.length(); i++) {
-            JSONObject movieJson = moviesArray.getJSONObject(i);
+            JSONObject movieObj = moviesArray.getJSONObject(i);
 
             Movie aux = new Movie();
-            aux.setId(movieJson.getLong(TMDB_ID));
-            aux.setPoster_path(movieJson.getString(TMDB_POSTER));
+            aux.setId(movieObj.getLong(TMDB_ID));
+            aux.setPoster_path(movieObj.getString(TMDB_POSTER));
 
             extractedMovies[i] = aux;
         }
@@ -101,25 +104,40 @@ public final class TMDBUtils {
     public static Movie extractSingleMovieFromJson(String movieJson) throws JSONException {
 
         // Build a JSONObject with the response, then check for errors and handle them accordingly
-        JSONObject movie = new JSONObject(movieJson);
+        JSONObject movieObj = new JSONObject(movieJson);
 
         // Check if the status is valid, if it isn't, handle the problem and exit the method
-        if (movie.has(TMDB_STATUS_CODE) && processStatusCode(movie.getInt(TMDB_STATUS_CODE)))
+        if (movieObj.has(TMDB_STATUS_CODE) && processStatusCode(movieObj.getInt(TMDB_STATUS_CODE)))
             return null;
 
         // Initialize a Movie array to that size
         Movie extractedMovie = new Movie();
 
-        extractedMovie.setId(movie.getLong(TMDB_ID));
-        extractedMovie.setTitle(movie.getString(TMDB_TITLE));
-        extractedMovie.setPoster_path(movie.getString(TMDB_POSTER));
-        extractedMovie.setBackdrop_path(movie.getString(TMDB_BACKDROP));
-        extractedMovie.setVote_avg(movie.getDouble(TMDB_VOTES_AVG));
-        extractedMovie.setVote_count(movie.getLong(TMDB_VOTES_COUNT));
-        extractedMovie.setSynopsis(movie.getString(TMDB_SYNOPSIS));
-        extractedMovie.setDuration(movie.getInt(TMDB_DURATION));
-        Date parsedDate = DateUtils.getDateFromString(movie.getString(TMDB_RELEASE_DATE));
+        extractedMovie.setId(movieObj.getLong(TMDB_ID));
+        extractedMovie.setTitle(movieObj.getString(TMDB_TITLE));
+        extractedMovie.setPoster_path(movieObj.getString(TMDB_POSTER));
+        extractedMovie.setBackdrop_path(movieObj.getString(TMDB_BACKDROP));
+        extractedMovie.setVote_avg(movieObj.getDouble(TMDB_VOTES_AVG));
+        extractedMovie.setVote_count(movieObj.getLong(TMDB_VOTES_COUNT));
+        extractedMovie.setSynopsis(movieObj.getString(TMDB_SYNOPSIS));
+        extractedMovie.setDuration(movieObj.getInt(TMDB_DURATION));
+        Date parsedDate = DateUtils.getDateFromString(movieObj.getString(TMDB_RELEASE_DATE));
         extractedMovie.setRelease_date(parsedDate);
+
+        JSONArray genresArray = movieObj.getJSONArray("genres");
+        Genre[] extractedGenres = new Genre[genresArray.length()];
+
+        for(int i = 0 ; i < genresArray.length() ; i++) {
+            JSONObject genreObj = genresArray.getJSONObject(i);
+
+            Genre genre = new Genre();
+            genre.setId(genreObj.getLong(TMDB_ID));
+            genre.setTitle(genreObj.getString(TMDB_NAME));
+
+            extractedGenres[i] = genre;
+        }
+
+        extractedMovie.setGenres(extractedGenres);
 
         return extractedMovie;
     }

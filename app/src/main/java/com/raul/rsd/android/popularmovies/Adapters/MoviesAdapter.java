@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.raul.rsd.android.popularmovies.Movie;
+import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.squareup.picasso.Picasso;

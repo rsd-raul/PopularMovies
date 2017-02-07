@@ -15,6 +15,45 @@
         android:weightSum="1">
 
         <RelativeLayout
+            android:id="@+id/rl_title_genre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="166dp"
+            android:background="@color/red"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:paddingLeft="72dp"
+            android:paddingStart="72dp">
+            <!--166 = 300(poster)/2(because anchor) + 16 (margin)-->
+
+            <Space
+                android:id="@+id/poster_space"
+                android:layout_width="80dp"
+                android:layout_height="100dp" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/poster_space"
+                android:layout_toEndOf="@id/poster_space"
+                android:layout_marginTop="20dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textColor="#212121"/>
+
+            <TextView
+                android:id="@+id/tv_genres"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_title"
+                android:layout_toRightOf="@id/poster_space"
+                android:layout_toEndOf="@id/poster_space"
+                android:layout_marginTop="8dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="#727272" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
