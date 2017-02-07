@@ -46,6 +46,8 @@
 
     </android.support.design.widget.AppBarLayout>
 
+    <include layout="@layout/content_details" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
@@ -54,8 +56,6 @@
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
         android:src="@drawable/ic_share_24dp" />
-
-    <include layout="@layout/content_details" />
 
     <ImageView
         android:id="@+id/iv_movie_poster"

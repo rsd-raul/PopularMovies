@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.Utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -7,8 +8,11 @@ import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.view.Window;
 import android.view.WindowManager;
+
+import com.raul.rsd.android.popularmovies.R;
 
 
 public class UIUtils {
@@ -25,13 +29,14 @@ public class UIUtils {
             actionBar.setSubtitle("Filter: " + filter);
     }
 
-    // Prueba Palette, de Google
-    // http://stackoverflow.com/questions/8471236/finding-the-dominant-color-of-an-image-in-an-android-drawable
-    public static int getDominantColor(Bitmap bitmap) {
-        Bitmap newBitmap = Bitmap.createScaledBitmap(bitmap, 1, 1, true);
-        final int color = newBitmap.getPixel(0, 0);
-        newBitmap.recycle();
-        return color;
+    public static int getDominantColor(Bitmap bitmap, Context context) {
+        Palette palette = Palette.from(bitmap).generate();
+        return palette.getDominantColor(ContextCompat.getColor(context, R.color.colorPrimary));
+    }
+
+    public static boolean isColorDark(int color){
+        double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114*Color.blue(color))/255;
+        return darkness >= 0.5;
     }
 
     // less than 1.0f to darken -> 0.7 seems ideal

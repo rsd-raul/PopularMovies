@@ -1,6 +1,9 @@
 package com.raul.rsd.android.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,14 +21,16 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Space;
 import android.widget.TextView;
-
 import com.raul.rsd.android.popularmovies.Domain.Genre;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Utils.DateUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
+import com.raul.rsd.android.popularmovies.Utils.UIUtils;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
@@ -54,17 +59,32 @@ public class DetailsActivity extends AppCompatActivity{
         new FetchMovieTask().execute(movieId);
     }
 
-    private TextView mTitleMain, mGenresMain;
-    private ImageView mPosterImageView;
+    private ImageView mPosterImageView, backdropImageView;
 
     private void displayMovie(){
         // Setup backdrop <- First, so Picasso gets a head start.
-        ImageView backdropImageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
+        backdropImageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
+        Context context = this;
+        TextView titleMain = (TextView) findViewById(R.id.tv_title);
         Picasso.with(this)
                 .load(backdropUri)
                 .placeholder(R.drawable.placeholder_backdrop)
-                .into(backdropImageView);
+                .into(backdropImageView, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        Bitmap bitmap = ((BitmapDrawable)backdropImageView.getDrawable()).getBitmap();
+                        RelativeLayout titleGenreLayout = (RelativeLayout) findViewById(R.id.rl_title_genre);
+                        int dominantColor = UIUtils.getDominantColor(bitmap, getApplicationContext());
+                        titleGenreLayout.setBackgroundColor(dominantColor);
+
+                        if(UIUtils.isColorDark(dominantColor))
+                            titleMain.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryTextLight));
+                    }
+
+                    @Override
+                    public void onError() { }
+                });
 
         // Setup poster <- Second, so Picasso gets a head start.
         mPosterImageView = (ImageView) findViewById(R.id.iv_movie_poster);
@@ -82,8 +102,7 @@ public class DetailsActivity extends AppCompatActivity{
         TextView durationMain = (TextView) findViewById(R.id.tv_duration_main);
         TextView durationSecondary = (TextView) findViewById(R.id.tv_duration_secondary);
         TextView releaseDateMain = (TextView) findViewById(R.id.tv_release_date_main);
-        mTitleMain = (TextView) findViewById(R.id.tv_title);
-        mGenresMain = (TextView) findViewById(R.id.tv_genres);
+        TextView genresMain = (TextView) findViewById(R.id.tv_genres);
 
         // Customize the Toolbar with the movie title
         collapsingToolbar.setTitle(mMovie.getTitle());
@@ -98,7 +117,7 @@ public class DetailsActivity extends AppCompatActivity{
         });
 
         // Customize movie details
-        mTitleMain.setText(mMovie.getTitle());
+        titleMain.setText(mMovie.getTitle());
         rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
         rateSecondary.setText(String.format("%d %s", mMovie.getVote_count(), getString(R.string.votes)));
         descriptionMain.setText(mMovie.getSynopsis());
@@ -108,13 +127,9 @@ public class DetailsActivity extends AppCompatActivity{
         Genre[] movieGenres = mMovie.getGenres();
         for(int i = 0; i < movieGenres.length; i++){
             if(i > 0)
-                mGenresMain.append(" - ");
-            mGenresMain.append(movieGenres[i].getTitle());
+                genresMain.append(" - ");
+            genresMain.append(movieGenres[i].getTitle());
         }
-
-//        RelativeLayout titleGenreLayout = (RelativeLayout) findViewById(R.id.rl_title_genre);
-//
-//        titleGenreLayout.setBackgroundColor(UIUtils.getDominantColor());
     }
 
     private void actionBarScrollControl(int verticalOffset){
