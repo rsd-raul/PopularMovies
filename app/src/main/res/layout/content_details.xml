@@ -18,17 +18,17 @@
             android:id="@+id/rl_title_genre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="166dp"
+            android:minHeight="106dp"
             android:background="@color/colorPrimary"
             android:padding="@dimen/activity_horizontal_margin"
             android:paddingLeft="72dp"
             android:paddingStart="72dp">
-            <!--166 = 300(poster)/2(because anchor) + 16 (margin)-->
+            <!--106 = 180(poster)/2(because anchor) + 16 (margin)-->
 
             <Space
                 android:id="@+id/poster_space"
                 android:layout_width="80dp"
-                android:layout_height="100dp" />
+                android:layout_height="1dp" />
 
             <TextView
                 android:id="@+id/tv_title"

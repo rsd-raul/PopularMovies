@@ -1,6 +1,5 @@
 package com.raul.rsd.android.popularmovies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -39,7 +38,7 @@ import java.net.URL;
 public class DetailsActivity extends AppCompatActivity{
 
     private static final String TAG = "DetailsActivity";
-    private Movie mMovie;
+    private Movie mMovie = new Movie();
     private ImageView mPosterImageView, mBackdropImageView;
 
     @Override
@@ -135,7 +134,6 @@ public class DetailsActivity extends AppCompatActivity{
         float fromXY = 0f, toXY = 0f;
         boolean react = false;
 
-        // FIXME It's not -150 any more, probably -200 or so
         if(verticalOffset > -150 && visibility != View.VISIBLE) {
             visibility = View.VISIBLE;
             toXY = 1f;
