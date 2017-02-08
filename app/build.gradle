@@ -11,9 +11,6 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-//        REMOVED, CONFLICTS ON Android 4.4 - Note 3
-//        vectorDrawables.useSupportLibrary = true
-
         // JAVA 8 -----
         jackOptions { enabled true }
         // JAVA 8 -----
@@ -57,6 +54,9 @@ dependencies {
 
     // FloatingActionButton - Clans - https://github.com/Clans/FloatingActionButton
     compile 'com.github.clans:fab:1.6.4'
+
+    // Material Dialogs -  Afollestad - https://github.com/afollestad/material-dialogs
+    compile 'com.afollestad.material-dialogs:commons:0.9.3.0'
 
     // LeakCanary -  Square - https://github.com/square/leakcanary
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'

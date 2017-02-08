@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.raul.rsd.android.popularmovies.Domain.Genre;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Utils.DateUtils;
+import com.raul.rsd.android.popularmovies.Utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
@@ -39,11 +40,22 @@ public class DetailsActivity extends AppCompatActivity{
 
     private static final String TAG = "DetailsActivity";
     private Movie mMovie;
+    private ImageView mPosterImageView, mBackdropImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        setupActivity();
+    }
+
+    private void setupActivity(){
+        // Notify the user if there is no internet, offer to retry or to close the app
+        if(!NetworkUtils.isNetworkAvailable(this)){
+            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity());
+            return;
+        }
 
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -55,36 +67,20 @@ public class DetailsActivity extends AppCompatActivity{
         fab.setOnClickListener(view -> shareMovie());
 
         // Retrieve the ID sent and fetch the movie from TMDB
-        Long movieId = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
-        new FetchMovieTask().execute(movieId);
+        mMovie.setId(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
+        new FetchMovieTask().execute();
     }
 
-    private ImageView mPosterImageView, backdropImageView;
-
     private void displayMovie(){
+
         // Setup backdrop <- First, so Picasso gets a head start.
-        backdropImageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
+        mBackdropImageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        Context context = this;
         TextView titleMain = (TextView) findViewById(R.id.tv_title);
         Picasso.with(this)
                 .load(backdropUri)
                 .placeholder(R.drawable.placeholder_backdrop)
-                .into(backdropImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        Bitmap bitmap = ((BitmapDrawable)backdropImageView.getDrawable()).getBitmap();
-                        RelativeLayout titleGenreLayout = (RelativeLayout) findViewById(R.id.rl_title_genre);
-                        int dominantColor = UIUtils.getDominantColor(bitmap, getApplicationContext());
-                        titleGenreLayout.setBackgroundColor(dominantColor);
-
-                        if(UIUtils.isColorDark(dominantColor))
-                            titleMain.setTextColor(ContextCompat.getColor(context, R.color.colorPrimaryTextLight));
-                    }
-
-                    @Override
-                    public void onError() { }
-                });
+                .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
         // Setup poster <- Second, so Picasso gets a head start.
         mPosterImageView = (ImageView) findViewById(R.id.iv_movie_poster);
@@ -132,11 +128,14 @@ public class DetailsActivity extends AppCompatActivity{
         }
     }
 
+    // -------------------------- INTERFACE --------------------------
+
     private void actionBarScrollControl(int verticalOffset){
         int visibility = mPosterImageView.getVisibility();
         float fromXY = 0f, toXY = 0f;
         boolean react = false;
 
+        // FIXME It's not -150 any more, probably -200 or so
         if(verticalOffset > -150 && visibility != View.VISIBLE) {
             visibility = View.VISIBLE;
             toXY = 1f;
@@ -169,6 +168,29 @@ public class DetailsActivity extends AppCompatActivity{
         poster_space.setVisibility(visibility);
     }
 
+    private Callback adaptColorByBackdropCallback (AppCompatActivity activity, TextView titleMain){
+        return new Callback() {
+            @Override
+            public void onSuccess() {
+                Bitmap bitmap = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
+                RelativeLayout titleGenreLayout = (RelativeLayout) findViewById(R.id.rl_title_genre);
+                int dominantColor = UIUtils.getDominantColor(bitmap, activity);
+                titleGenreLayout.setBackgroundColor(dominantColor);
+
+                // FIXME - Not mandatory, but right now it paints the action bar over the transparency
+//                UIUtils.adaptAppBarAndStatusBarColors(activity, dominantColor);
+
+                if(UIUtils.isColorDark(dominantColor))
+                    titleMain.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimaryTextLight));
+            }
+
+            @Override
+            public void onError() { }
+        };
+    }
+
+    // -------------------------- USE CASES --------------------------
+
     private void shareMovie(){
         // If the movie has not been fetched yet, don't try to share
         if(mMovie == null)
@@ -189,7 +211,7 @@ public class DetailsActivity extends AppCompatActivity{
 
     // ------------------------- ASYNC TASK --------------------------
 
-    public class FetchMovieTask extends AsyncTask<Long, Void, Movie> {
+    public class FetchMovieTask extends AsyncTask<Void, Void, Movie> {
 
         @Override
         protected void onPreExecute() {
@@ -197,12 +219,11 @@ public class DetailsActivity extends AppCompatActivity{
         }
 
         @Override
-        protected Movie doInBackground(Long... params) {
-            if (params == null || params.length == 0)
+        protected Movie doInBackground(Void... params) {
+            if (mMovie.getId() == -1)
                 return null;
 
-            Long id = params[0];
-            URL movieRequestUrl = NetworkUtils.buildMovieURL(id);
+            URL movieRequestUrl = NetworkUtils.buildMovieURL(mMovie.getId());
 
             try {
                 String jsonResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
@@ -215,16 +236,17 @@ public class DetailsActivity extends AppCompatActivity{
 
         @Override
         protected void onPostExecute(Movie movie) {
-            if (movie == null)
-                showErrorMessage();
-            else{
+            if (movie != null){
+                // Set the DataSource for the Activity and initialize the layout
                 mMovie = movie;
                 displayMovie();
-            }
+            } else
+                showErrorMessage();
         }
+    }
 
-        private void showErrorMessage(){
-        }
+    private void showErrorMessage(){
+        DialogsUtils.showErrorDialog(this, (dialog, which) -> new FetchMovieTask().execute());
     }
 
     // --------------------------- DETAILS ---------------------------

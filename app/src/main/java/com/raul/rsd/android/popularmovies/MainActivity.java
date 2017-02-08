@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
+import com.raul.rsd.android.popularmovies.Utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
@@ -32,6 +33,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setupActivity();
+    }
+
+    private void setupActivity() {
+        // Notify the user if there is no internet, offer to retry or to close the app
+        if(!NetworkUtils.isNetworkAvailable(this)) {
+            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity());
+            return;
+        }
 
         // Configure Leak Canary to warn about memory leaks
         if (LeakCanary.isInAnalyzerProcess(this))
@@ -58,9 +69,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mSwipeRefresh.setOnRefreshListener(this::loadData);
 
         // Configure FAM and FABs
-        new FloatingActionMenuConfigurator().configure(this);
+        new FAMConfigurator().configure(this);
 
-        // Load data in the RecyclerView
+        // Load data in the RecyclerView with the default sorting
         loadData();
     }
 
@@ -119,7 +130,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         private void showMainRecyclerView(){
             mRecyclerView.setVisibility(View.VISIBLE);
         }
-        private void showErrorMessage(){
-        }
+    }
+
+    private void showErrorMessage(){
+        DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
     }
 }

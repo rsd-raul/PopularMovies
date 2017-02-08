@@ -7,7 +7,7 @@ import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 
-class FloatingActionMenuConfigurator {
+class FAMConfigurator {
 
     // ------------------------- Attributes --------------------------
 
@@ -16,7 +16,7 @@ class FloatingActionMenuConfigurator {
 
     // ------------------------- Constructor -------------------------
 
-    FloatingActionMenuConfigurator() {
+    FAMConfigurator() {
     }
 
     // -------------------------- Use Cases --------------------------
@@ -46,10 +46,12 @@ class FloatingActionMenuConfigurator {
 
             @Override
             public void onMenuToggle(boolean opened) {
-                if (opened)
+                if (opened) {
                     backgroundColorAnimator.start();
-                else
+                    mFAM.setBackgroundResource(R.drawable.ic_duration_24dp);
+                }else {
                     backgroundColorAnimator.reverse();
+                }
             }
         });
 

@@ -14,10 +14,14 @@ import android.view.WindowManager;
 
 import com.raul.rsd.android.popularmovies.R;
 
-
 public class UIUtils {
 
-
+    /**
+     * Sets the active sort as a subtitle in the ActionBar.
+     *
+     * @param activity The Activity that contains the Actionbar
+     * @param activeFilter The filter currently active
+     */
     public static void setSubtitle(AppCompatActivity activity, String activeFilter){
         // Format the filter
         String filter = activeFilter.replace('_',' ');
@@ -29,39 +33,37 @@ public class UIUtils {
             actionBar.setSubtitle("Filter: " + filter);
     }
 
+    /**
+     * Extract the predominant color from an Image (Bitmap).
+     *
+     * @param bitmap The image we wish to obtain the color from
+     * @param context Needed to access a default color to return if Palette cannot obtain a dominant
+     * @return The dominant color on that picture
+     */
     public static int getDominantColor(Bitmap bitmap, Context context) {
         Palette palette = Palette.from(bitmap).generate();
         return palette.getDominantColor(ContextCompat.getColor(context, R.color.colorPrimary));
     }
 
+    /**
+     * Method to discern whether a given Color is considered Dark or not
+     *
+     * @param color Color to analyse
+     * @return true if the color is considered Dark, false otherwise
+     */
     public static boolean isColorDark(int color){
         double darkness = 1-(0.299*Color.red(color) + 0.587*Color.green(color) + 0.114*Color.blue(color))/255;
         return darkness >= 0.5;
     }
 
-    // less than 1.0f to darken -> 0.7 seems ideal
-
     /**
-     * Modify a color programmatically in order to obtain different shades of the same color.
+     * Method to customize the Actionbar and Statusbar with a given color and a darker version of
+     * itself (following Material Guidelines -> primaryColor, primaryDark).
      *
-     * @param color color to modify
-     * @param factor more than 1 makes the color lighter, less than 1 makes it darker
-     * @return modified color
+     * @param activity The Activity containing the Actionbar
+     * @param colorPrimary The color we wish to use as primary
      */
-    public static int manipulateColor(int color, float factor) {
-        int a = Color.alpha(color);
-        int r = Math.round(Color.red(color) * factor);
-        int g = Math.round(Color.green(color) * factor);
-        int b = Math.round(Color.blue(color) * factor);
-        // Math.min handles that the value does not exceeds 255
-        return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
-    }
-
-    // TODO - Review for API < LOLLIPOP
-    // http://stackoverflow.com/questions/22192291/how-to-change-the-status-bar-color-in-android
-    public static void adaptAppBarAndStatusBarColors(AppCompatActivity activity, int color){
-        int colorPrimary = ContextCompat.getColor(activity, color);
-
+    public static void adaptAppBarAndStatusBarColors(AppCompatActivity activity, int colorPrimary){
         // Get the ActionBar and customize color
         ActionBar actionBar = activity.getSupportActionBar();
         if(actionBar != null)
@@ -76,5 +78,21 @@ public class UIUtils {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.setStatusBarColor(colorPrimaryDark);
+    }
+
+    /**
+     * Modify a color programmatically in order to obtain different shades of the same color.
+     *
+     * @param color color to modify
+     * @param factor more than 1 makes the color lighter, less than 1 makes it darker (0.7f for primaryDark)
+     * @return modified color
+     */
+    private static int manipulateColor(int color, float factor) {
+        int a = Color.alpha(color);
+        int r = Math.round(Color.red(color) * factor);
+        int g = Math.round(Color.green(color) * factor);
+        int b = Math.round(Color.blue(color) * factor);
+        // Math.min handles that the value does not exceeds 255
+        return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
     }
 }

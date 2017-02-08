@@ -6,6 +6,14 @@
     <string name="time_hours">Hours</string>
     <string name="time_minutes">Minutes</string>
     <string name="votes">Votes</string>
+    <string name="try_again">Retry</string>
+    <string name="close">Close</string>
+
+    <!--Problems-->
+    <string name="no_network_title">No internet connection</string>
+    <string name="no_network_content">Ups, it seems like you don\'t have Internet right now, since we need that to access our databases, I\'m afraid we can only try again now or go back and try again later.</string>
+    <string name="no_fetch_title">Problems fetching data</string>
+    <string name="no_fetch_content">We have problems getting the info from our servers, try again in now or go back and try again later.</string>
 
     <string name="share_movie_chooser">Select app to share movie</string>
 
