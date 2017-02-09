@@ -20,12 +20,14 @@
     <color name="indigoDark">#303F9F</color>
     <color name="indigo">#3F51B5</color>
 
-
+    <!-- Text -->
 
     <color name="colorPrimaryText">#212121</color>
-    <color name="colorSecondaryText">#a6a6a6</color>
+    <color name="colorSecondaryText">#727272</color>
     <color name="colorPrimaryTextLight">#ebebeb</color>
     <color name="colorTextIcons">#FFFFFF</color>
+
+    <!-- Extras -->
 
     <color name="colorLightPrimary">#FFCDD2</color>
     <color name="colorDivider">#BDBDBD</color>

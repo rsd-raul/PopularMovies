@@ -57,9 +57,4 @@ dependencies {
 
     // Material Dialogs -  Afollestad - https://github.com/afollestad/material-dialogs
     compile 'com.afollestad.material-dialogs:commons:0.9.3.0'
-
-    // LeakCanary -  Square - https://github.com/square/leakcanary
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
-    testCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 }

@@ -7,6 +7,7 @@
 
     <application
         android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -14,15 +15,15 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".DetailsActivity"
+            android:label="@string/none"
             android:theme="@style/AppTheme">
 
-            <!--Deprecated -> Overriding android.R.id.home click doesn't reload the Main Activity-->
+            <!--Deprecated: By overriding android.R.id.home click we avoid reload the Main Activity-->
             <!--android:parentActivityName=".MainActivity"-->
             <!--<meta-data-->
                 <!--android:name="android.support.PARENT_ACTIVITY"-->

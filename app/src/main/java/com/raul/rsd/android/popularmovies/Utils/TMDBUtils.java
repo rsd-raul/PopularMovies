@@ -35,12 +35,13 @@ public final class TMDBUtils {
 
     /**
      * Auxiliary method to obtain a String representation of a given Movie based
-     * on the locale of the user.
+     * on the user's locale.
      *
      * @param movie Movie we wish to convert to String
      * @param activity Activity to obtain Locale based headers
      * @return String representation of the Movie
      */
+    @SuppressWarnings("all")
     public static String toStringMovie(Movie movie, AppCompatActivity activity){
         // Using builder to facilitate handling of different types of data
         StringBuilder builder = new StringBuilder();
@@ -81,10 +82,8 @@ public final class TMDBUtils {
 
         final String TMDB_RESULTS = "results";
 
-        // Get an array of all the movies
+        // Get an array of all the movies and initialize a Movie array to that size
         JSONArray moviesArray = results.getJSONArray(TMDB_RESULTS);
-
-        // Initialize a Movie array to that size
         Movie[] extractedMovies = new Movie[moviesArray.length()];
 
         // Iterate over the movies on JSON, process the data and store movies in the array
@@ -97,7 +96,6 @@ public final class TMDBUtils {
 
             extractedMovies[i] = aux;
         }
-
         return extractedMovies;
     }
 
@@ -110,7 +108,7 @@ public final class TMDBUtils {
         if (movieObj.has(TMDB_STATUS_CODE) && processStatusCode(movieObj.getInt(TMDB_STATUS_CODE)))
             return null;
 
-        // Initialize a Movie array to that size
+        // Initialize an empty Movie and store its particular data
         Movie extractedMovie = new Movie();
 
         extractedMovie.setId(movieObj.getLong(TMDB_ID));
@@ -124,9 +122,9 @@ public final class TMDBUtils {
         Date parsedDate = DateUtils.getDateFromString(movieObj.getString(TMDB_RELEASE_DATE));
         extractedMovie.setRelease_date(parsedDate);
 
+        // Extract the genres and save them in a list that will be ultimately stored on the movie
         JSONArray genresArray = movieObj.getJSONArray("genres");
         Genre[] extractedGenres = new Genre[genresArray.length()];
-
         for(int i = 0 ; i < genresArray.length() ; i++) {
             JSONObject genreObj = genresArray.getJSONObject(i);
 
@@ -136,14 +134,20 @@ public final class TMDBUtils {
 
             extractedGenres[i] = genre;
         }
-
         extractedMovie.setGenres(extractedGenres);
 
+        // Return the array of extracted movies
         return extractedMovie;
     }
 
     // -------------------------- AUXILIARY --------------------------
 
+    /**
+     * Process a possible status code from TMDB APi and send a signal to stop if necessary.
+     *
+     * @param status_code Status code extracted from the JSON response
+     * @return true if the status is not controlled
+     */
     private static boolean processStatusCode(int status_code) {
         boolean problem = false;
         switch (status_code) {

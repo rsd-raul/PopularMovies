@@ -20,9 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
             app:expandedTitleMarginStart="72dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
             app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title">
 
             <ImageView
@@ -59,8 +58,8 @@
 
     <ImageView
         android:id="@+id/iv_movie_poster"
-        android:layout_width="120dp"
-        android:layout_height="180dp"
+        android:layout_width="@dimen/details_poster_width"
+        android:layout_height="@dimen/details_poster_height"
         android:layout_margin="@dimen/fab_margin"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|start"

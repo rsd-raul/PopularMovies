@@ -13,7 +13,7 @@ import com.squareup.picasso.Picasso;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
-    private static final String TAG = "MoviesAdapter";
+    // ------------------------- ATTRIBUTES --------------------------
 
     private Movie[] mMovies;
     private final MoviesAdapterOnClickHandler mClickHandler;
@@ -63,7 +63,6 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     public interface MoviesAdapterOnClickHandler {
         void onClick(long selectedMovieId);
     }
-
 
     // ------------------------- VIEW HOLDER -------------------------
 

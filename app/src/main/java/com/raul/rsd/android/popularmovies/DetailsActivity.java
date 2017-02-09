@@ -3,14 +3,15 @@ package com.raul.rsd.android.popularmovies;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,7 +21,6 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.Space;
 import android.widget.TextView;
 import com.raul.rsd.android.popularmovies.Domain.Genre;
@@ -37,9 +37,17 @@ import java.net.URL;
 
 public class DetailsActivity extends AppCompatActivity{
 
+    // --------------------------- VALUES ----------------------------
+
     private static final String TAG = "DetailsActivity";
+
+    // ------------------------- ATTRIBUTES --------------------------
+
     private Movie mMovie = new Movie();
     private ImageView mPosterImageView, mBackdropImageView;
+    private Space mPosterSpace;
+
+    // ------------------------- CONSTRUCTOR -------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +67,6 @@ public class DetailsActivity extends AppCompatActivity{
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Configure FAB
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -70,6 +77,7 @@ public class DetailsActivity extends AppCompatActivity{
         new FetchMovieTask().execute();
     }
 
+    @SuppressWarnings("all")
     private void displayMovie(){
 
         // Setup backdrop <- First, so Picasso gets a head start.
@@ -89,8 +97,16 @@ public class DetailsActivity extends AppCompatActivity{
                 .placeholder(R.drawable.placeholder_poster)
                 .into(mPosterImageView);
 
+        // Customize the Appbar behaviour and react to scroll
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override                           // Don't use Lambda -> It's a trap!!
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                actionBarScrollControl(verticalOffset);
+            }
+        });
+
         // Get references and values
-        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.toolbar_layout);
         TextView rateMain = (TextView) findViewById(R.id.tv_rate_main_tmdb);
         TextView rateSecondary = (TextView) findViewById(R.id.tv_rate_secondary_tmdb);
         TextView descriptionMain = (TextView) findViewById(R.id.tv_description_main);
@@ -98,26 +114,15 @@ public class DetailsActivity extends AppCompatActivity{
         TextView durationSecondary = (TextView) findViewById(R.id.tv_duration_secondary);
         TextView releaseDateMain = (TextView) findViewById(R.id.tv_release_date_main);
         TextView genresMain = (TextView) findViewById(R.id.tv_genres);
+        mPosterSpace = (Space) findViewById(R.id.poster_space);
 
-        // Customize the Toolbar with the movie title
-        collapsingToolbar.setTitle(mMovie.getTitle());
-        collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.transparent));
-        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
-                                                // Don't use Lambda -> It's a trap!!
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                actionBarScrollControl(verticalOffset);
-            }
-        });
-
-        // Customize movie details
+        // Fill interface with formated movie details
         titleMain.setText(mMovie.getTitle());
+        durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
+        durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
         rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
         rateSecondary.setText(String.format("%d %s", mMovie.getVote_count(), getString(R.string.votes)));
         descriptionMain.setText(mMovie.getSynopsis());
-        durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
-        durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
         Genre[] movieGenres = mMovie.getGenres();
         for(int i = 0; i < movieGenres.length; i++){
@@ -134,6 +139,7 @@ public class DetailsActivity extends AppCompatActivity{
         float fromXY = 0f, toXY = 0f;
         boolean react = false;
 
+        // Estimate when to hide the movie poster so it doesn't collide with the ActionBar
         if(verticalOffset > -150 && visibility != View.VISIBLE) {
             visibility = View.VISIBLE;
             toXY = 1f;
@@ -159,27 +165,39 @@ public class DetailsActivity extends AppCompatActivity{
         mPosterImageView.startAnimation(expandAnimation);
 
         // Modify the title and genre margin based on the poster
-        Space poster_space = (Space) findViewById(R.id.poster_space);
-
         if(visibility == View.INVISIBLE)
             visibility = View.GONE;
-        poster_space.setVisibility(visibility);
+        mPosterSpace.setVisibility(visibility);
     }
 
     private Callback adaptColorByBackdropCallback (AppCompatActivity activity, TextView titleMain){
         return new Callback() {
             @Override
             public void onSuccess() {
-                Bitmap bitmap = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
-                RelativeLayout titleGenreLayout = (RelativeLayout) findViewById(R.id.rl_title_genre);
-                int dominantColor = UIUtils.getDominantColor(bitmap, activity);
-                titleGenreLayout.setBackgroundColor(dominantColor);
+                // Get the image we just loaded and obtain his dominant color
+                Bitmap backdrop = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
+                int dominantColor = UIUtils.getDominantColor(backdrop, activity);
 
-                // FIXME - Not mandatory, but right now it paints the action bar over the transparency
-//                UIUtils.adaptAppBarAndStatusBarColors(activity, dominantColor);
-
+                // Adapt the interface to that color
+                findViewById(R.id.rl_title_genre).setBackgroundColor(dominantColor);
                 if(UIUtils.isColorDark(dominantColor))
                     titleMain.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimaryTextLight));
+
+                // Get the subsection of the backdrop under the back arrow and its dominant color
+                Bitmap backButtonSection = Bitmap.createBitmap(backdrop, 16, 16, 24, 24);
+                dominantColor = UIUtils.getDominantColor(backButtonSection, activity);
+
+                // Check the actionbar presence
+                ActionBar actionBar = getSupportActionBar();
+                if(actionBar == null)
+                    return;
+
+                // If the dominant color is light or default turn the arrow Black
+                if(dominantColor == -16245724 || !UIUtils.isColorDark(dominantColor)){
+                    final Drawable upArrow = ContextCompat.getDrawable(activity, R.drawable.ic_back_black_24dp);
+                    actionBar.setHomeAsUpIndicator(upArrow);
+                }
+                actionBar.setDisplayHomeAsUpEnabled(true);
             }
 
             @Override

@@ -8,8 +8,8 @@ public class Movie {
 
     private long id;
     private String title;
-    private String poster_path;     // Null TODO Both poster and backdrop can be null, handle that...
-    private String backdrop_path;   // Null
+    private String poster_path;
+    private String backdrop_path;
     private Genre[] genres;
     private Date release_date;
     private double vote_avg;

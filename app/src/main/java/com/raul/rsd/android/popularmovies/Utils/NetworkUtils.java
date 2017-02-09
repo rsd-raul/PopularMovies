@@ -91,6 +91,13 @@ public final class NetworkUtils {
         return buildMovieImageURI(posterPath, false);
     }
 
+    /**
+     * Build all Image related Uris for TMDB based device DPI.
+     *
+     * @param imagePath Unique path for the desired image
+     * @param backdrop true if it's a backdrop, false if poster
+     * @return Customised Uri pointing to the desired image
+     */
     private static Uri buildMovieImageURI(String imagePath, boolean backdrop){
         // Select size based on the image <- POSTER by default as it's much more frequent
         String size = POSTER_SIZE;
@@ -103,6 +110,11 @@ public final class NetworkUtils {
                 .build();
     }
 
+    /**
+     * Set the approximate size of both poster and backdrop to match the device DPI
+     *
+     * @param deviceDPI Current device DPI
+     */
     // "w92", "w154", "w185", "w342", "w500", "w780", "w1000", "w1920" or "original"
     public static void setImagesSizeWithDpi(int deviceDPI){
         switch (deviceDPI){
@@ -146,6 +158,12 @@ public final class NetworkUtils {
         }
     }
 
+    /**
+     * Check whether the device is connected to the internet or not
+     *
+     * @param activity The activity you wish to check from
+     * @return true if the device is connected, false otherwise
+     */
     public static boolean isNetworkAvailable(AppCompatActivity activity) {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);

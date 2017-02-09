@@ -18,16 +18,17 @@
             android:id="@+id/rl_title_genre"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="106dp"
+            android:minHeight="@dimen/details_title_genre_min_height"
             android:background="@color/colorPrimary"
             android:padding="@dimen/activity_horizontal_margin"
-            android:paddingLeft="72dp"
-            android:paddingStart="72dp">
-            <!--106 = 180(poster)/2(because anchor) + 16 (margin)-->
+            android:paddingLeft="@dimen/details_title_genre_left_padding"
+            android:paddingStart="@dimen/details_title_genre_left_padding"
+            android:paddingRight="@dimen/details_title_genre_right_padding"
+            android:paddingEnd="@dimen/details_title_genre_right_padding">
 
             <Space
                 android:id="@+id/poster_space"
-                android:layout_width="80dp"
+                android:layout_width="@dimen/details_space_width"
                 android:layout_height="1dp" />
 
             <TextView
@@ -38,7 +39,7 @@
                 android:layout_toEndOf="@id/poster_space"
                 android:layout_marginTop="20dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="#212121"/>
+                android:textColor="@color/colorPrimaryText"/>
 
             <TextView
                 android:id="@+id/tv_genres"
@@ -47,9 +48,9 @@
                 android:layout_below="@id/tv_title"
                 android:layout_toRightOf="@id/poster_space"
                 android:layout_toEndOf="@id/poster_space"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/details_tv_secondary_margin_top"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                android:textColor="@color/colorSecondaryText" />
 
         </RelativeLayout>
 
@@ -67,7 +68,7 @@
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_rate_average_24dp"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="@dimen/details_iv_marginTop"
                 android:contentDescription="@string/info_item_icon"/>
 
             <TextView
@@ -79,7 +80,7 @@
                 android:layout_toRightOf="@id/iv_rate_icon_tmdb"
                 android:layout_toEndOf="@id/iv_rate_icon_tmdb"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121"
+                android:textColor="@color/colorPrimaryText"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true" />
@@ -91,11 +92,11 @@
                 android:layout_below="@id/tv_rate_main_tmdb"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/details_tv_secondary_margin_top"
                 android:layout_toEndOf="@id/iv_rate_icon_tmdb"
                 android:layout_toRightOf="@id/iv_rate_icon_tmdb"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                android:textColor="@color/colorSecondaryText" />
 
         </RelativeLayout>
 
@@ -112,7 +113,7 @@
                 android:id="@+id/iv_description_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="@dimen/details_iv_marginTop"
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_description_24dp"
@@ -128,7 +129,7 @@
                 android:layout_toEndOf="@id/iv_description_icon"
                 android:ellipsize="end"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121"
+                android:textColor="@color/colorPrimaryText"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />
 
@@ -150,7 +151,7 @@
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_duration_24dp"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="@dimen/details_iv_marginTop"
                 android:contentDescription="@string/info_item_icon"/>
 
             <TextView
@@ -162,7 +163,7 @@
                 android:layout_toRightOf="@id/iv_duration_icon"
                 android:layout_toEndOf="@id/iv_duration_icon"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121"
+                android:textColor="@color/colorPrimaryText"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true" />
@@ -174,11 +175,11 @@
                 android:layout_below="@id/tv_duration_main"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
                 android:layout_marginStart="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/details_tv_secondary_margin_top"
                 android:layout_toEndOf="@id/iv_duration_icon"
                 android:layout_toRightOf="@id/iv_duration_icon"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#727272" />
+                android:textColor="@color/colorSecondaryText" />
 
         </RelativeLayout>
 
@@ -186,7 +187,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="78dp"
+            android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:padding="@dimen/activity_horizontal_margin">
@@ -198,7 +199,8 @@
                 android:layout_marginEnd="@dimen/activity_horizontal_margin"
                 android:layout_marginRight="@dimen/activity_horizontal_margin"
                 android:src="@drawable/ic_release_date_24dp"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="@dimen/details_iv_marginTop"
+                android:layout_marginBottom="@dimen/details_iv_marginTop"
                 android:contentDescription="@string/info_item_icon" />
 
             <TextView
@@ -210,7 +212,7 @@
                 android:layout_toRightOf="@id/iv_release_date_icon"
                 android:layout_toEndOf="@id/iv_release_date_icon"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="#212121"
+                android:textColor="@color/colorPrimaryText"
                 android:layout_centerVertical="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true" />

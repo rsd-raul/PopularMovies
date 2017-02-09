@@ -1,7 +1,10 @@
 package com.raul.rsd.android.popularmovies;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,25 +12,32 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
+
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
-import com.squareup.leakcanary.LeakCanary;
-
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
 
+    // --------------------------- VALUES ----------------------------
+
     private static final String TAG = "MainActivity";
+
+    // ------------------------- ATTRIBUTES --------------------------
 
     private RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
     private SwipeRefreshLayout mSwipeRefresh;
-    public String sActiveSort = NetworkUtils.POPULAR;   // By default to popular
+    private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
+    private FloatingActionMenu mFAM;
+
+    // ------------------------- CONSTRUCTOR -------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +53,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity());
             return;
         }
-
-        // Configure Leak Canary to warn about memory leaks
-        if (LeakCanary.isInAnalyzerProcess(this))
-            return;
-        LeakCanary.install(getApplication());
 
         // Set ActionBar
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -69,15 +74,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mSwipeRefresh.setOnRefreshListener(this::loadData);
 
         // Configure FAM and FABs
-        new FAMConfigurator().configure(this);
+        configureMenu();
+        configureChildren();
 
         // Load data in the RecyclerView with the default sorting
         loadData();
     }
 
+    // -------------------------- USE CASES --------------------------
+
     public void loadData(){
-        new FetchMoviesTask().execute(sActiveSort);
-        UIUtils.setSubtitle(this, sActiveSort);
+        new FetchMoviesTask().execute(mActiveSort);
+        UIUtils.setSubtitle(this, mActiveSort);
     }
 
     @Override
@@ -122,17 +130,67 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             if (movies == null)
                 showErrorMessage();
             else{
-                showMainRecyclerView();
                 mMoviesAdapter.setMoviesData(movies);
+                mRecyclerView.smoothScrollToPosition(0);
             }
-        }
-
-        private void showMainRecyclerView(){
-            mRecyclerView.setVisibility(View.VISIBLE);
         }
     }
 
     private void showErrorMessage(){
         DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
+    }
+
+    // ------------------------ FAM and FABs -------------------------
+
+    private void configureMenu(){
+        mFAM = (FloatingActionMenu) findViewById(R.id.menuFAB);
+
+        // Change the background depending on the fabMenu Status
+        mFAM.setIconAnimated(false);
+        mFAM.setOnMenuToggleListener(new FloatingActionMenu.OnMenuToggleListener() {
+            int fromColor = ContextCompat.getColor(getApplicationContext(), R.color.transparent);
+            int toColor = ContextCompat.getColor(getApplicationContext(), R.color.background);
+
+            // Creation of animator to transition between the transparent color and the other one
+            final ObjectAnimator backgroundColorAnimator = ObjectAnimator.ofObject(mFAM,
+                    "backgroundColor", new ArgbEvaluator(), fromColor, toColor).setDuration(100);
+
+            @Override
+            public void onMenuToggle(boolean opened) {
+                int famIcon;
+                if (opened) {
+                    backgroundColorAnimator.start();
+                    famIcon = R.drawable.ic_close_24dp;
+                }else {
+                    backgroundColorAnimator.reverse();
+                    famIcon = R.drawable.ic_filter_24dp;
+                }
+                mFAM.getMenuIconView().setImageResource(famIcon);
+            }
+        });
+
+        // On click outside close the menu
+        mFAM.setClosedOnTouchOutside(true);
+    }
+
+    /**
+     * Configure al FAM children (FAB) behaviour (onClick)
+     */
+    private void configureChildren(){
+        FloatingActionButton popularFAB = (FloatingActionButton) findViewById(R.id.popularFAB);
+        if(popularFAB != null)
+            popularFAB.setOnClickListener(view -> {
+                mFAM.close(false);
+                mActiveSort = NetworkUtils.POPULAR;
+                loadData();
+            });
+
+        FloatingActionButton topRatedFAB = (FloatingActionButton) findViewById(R.id.topRatedFAB);
+        if(topRatedFAB != null)
+            topRatedFAB.setOnClickListener(view -> {
+                mFAM.close(false);
+                mActiveSort = NetworkUtils.TOP_RATED;
+                loadData();
+            });
     }
 }

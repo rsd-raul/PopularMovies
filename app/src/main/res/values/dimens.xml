@@ -3,8 +3,22 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
+    <dimen name="app_bar_height">220dp</dimen>
 
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="app_bar_height">220dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="main_rv_padding">3dp</dimen>
+
+    <dimen name="details_poster_width">120dp</dimen>
+    <dimen name="details_poster_height">180dp</dimen>
+    <dimen name="details_title_genre_left_padding">72dp</dimen>
+    <dimen name="details_title_genre_min_height">106dp</dimen>
+    <!-- 106 = 180(poster)/2(anchor) + 16 (margin) -->
+    <dimen name="details_title_genre_right_padding">16dp</dimen>
+    <dimen name="details_space_width">80dp</dimen>
+    <dimen name="details_iv_marginTop">11dp</dimen>
+    <dimen name="details_tv_secondary_margin_top">8dp</dimen>
+    <!-- 80 = 16 (margin) + 120(poster) - 72 (padding) + 16 (margin) -->
+
 </resources>

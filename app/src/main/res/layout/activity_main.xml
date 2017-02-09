@@ -27,7 +27,7 @@
             android:id="@+id/rv_movies"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="3dp"/>
+            android:padding="@dimen/main_rv_padding"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
