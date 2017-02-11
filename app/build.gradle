@@ -52,6 +52,10 @@ dependencies {
     // Picasso - Square - http://square.github.io/picasso
     compile 'com.squareup.picasso:picasso:2.5.2'
 
+    // Retrofit 2 - Square - https://github.com/square/retrofit
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+
     // FloatingActionButton - Clans - https://github.com/Clans/FloatingActionButton
     compile 'com.github.clans:fab:1.6.4'
 

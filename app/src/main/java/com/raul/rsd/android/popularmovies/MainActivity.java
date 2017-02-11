@@ -13,17 +13,29 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
+import com.raul.rsd.android.popularmovies.Domain.MovieLight;
+import com.raul.rsd.android.popularmovies.Domain.MoviesList;
 import com.raul.rsd.android.popularmovies.Utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.security.auth.login.LoginException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
 
@@ -89,7 +101,32 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     // -------------------------- USE CASES --------------------------
 
     public void loadData(){
-        new FetchMoviesTask().execute(mActiveSort);
+//        new FetchMoviesTask().execute(mActiveSort);
+        mSwipeRefresh.setRefreshing(true);
+
+        NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
+            @Override
+            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                mSwipeRefresh.setRefreshing(false);
+
+                ArrayList<MovieLight> responseMovies = response.body().getResults();
+
+                if (responseMovies != null) {
+                    MovieLight[] movies = new MovieLight[responseMovies.size()];
+                    movies = responseMovies.toArray(movies);
+
+                    mMoviesAdapter.setMoviesData(movies);
+                    mRecyclerView.smoothScrollToPosition(0);
+                } else
+                    showErrorMessage();
+            }
+
+            @Override
+            public void onFailure(Call<MoviesList> call, Throwable t) {
+                Log.e(TAG, "loadData/onFailure: Failed to fetch movies from Server", t);
+                showErrorMessage();
+            }
+        });
         UIUtils.setSubtitle(this, mActiveSort);
     }
 
@@ -103,43 +140,43 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     // ------------------------- ASYNC TASK --------------------------
 
-    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mSwipeRefresh.setRefreshing(true);
-        }
-
-        @Override
-        protected Movie[] doInBackground(String... params) {
-            if (params == null || params.length == 0)
-                return null;
-
-            String sortMode = params[0];
-            URL moviesRequestUrl = NetworkUtils.buildSortMoviesURL(sortMode);
-
-            try {
-                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
-                return TMDBUtils.extractMoviesFromJson(jsonResponse);
-            } catch (Exception ex) {
-                Log.e(TAG, "doInBackground: Exception parsing JSON", ex);
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Movie[] movies) {
-            mSwipeRefresh.setRefreshing(false);
-
-            if (movies == null)
-                showErrorMessage();
-            else{
-                mMoviesAdapter.setMoviesData(movies);
-                mRecyclerView.smoothScrollToPosition(0);
-            }
-        }
-    }
+//    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
+//
+//        @Override
+//        protected void onPreExecute() {
+//            super.onPreExecute();
+//            mSwipeRefresh.setRefreshing(true);
+//        }
+//
+//        @Override
+//        protected Movie[] doInBackground(String... params) {
+//            if (params == null || params.length == 0)
+//                return null;
+//
+//            String sortMode = params[0];
+//            URL moviesRequestUrl = NetworkUtils.buildSortMoviesURL(sortMode);
+//
+//            try {
+//                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
+//                return TMDBUtils.extractMoviesFromJson(jsonResponse);
+//            } catch (Exception ex) {
+//                Log.e(TAG, "doInBackground: Exception parsing JSON", ex);
+//                return null;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Movie[] movies) {
+//            mSwipeRefresh.setRefreshing(false);
+//
+//            if (movies == null)
+//                showErrorMessage();
+//            else{
+//                mMoviesAdapter.setMoviesData(movies);
+//                mRecyclerView.smoothScrollToPosition(0);
+//            }
+//        }
+//    }
 
     private void showErrorMessage(){
         DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());

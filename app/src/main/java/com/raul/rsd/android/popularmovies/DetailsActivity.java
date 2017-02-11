@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
@@ -34,7 +33,6 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.net.URL;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -91,17 +89,19 @@ public class DetailsActivity extends AppCompatActivity{
     private void displayMovie(){
         // Setup backdrop <- First, so Picasso gets a head start.
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        Picasso.with(this)
-                .load(backdropUri)
-                .placeholder(R.drawable.placeholder_backdrop)
-                .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
+        if(mBackdropImageView != null)
+            Picasso.with(this)
+                    .load(backdropUri)
+                    .placeholder(R.drawable.placeholder_backdrop)
+                    .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
         // Setup poster <- Second, so Picasso gets a head start.
         Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
-        Picasso.with(this)
-                .load(posterUri)
-                .placeholder(R.drawable.placeholder_poster)
-                .into(mPosterImageView);
+        if(mPosterImageView != null)
+            Picasso.with(this)
+                    .load(posterUri)
+                    .placeholder(R.drawable.placeholder_poster)
+                    .into(mPosterImageView);
 
         // Customize the Appbar behaviour and react to scroll
         AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
@@ -113,7 +113,8 @@ public class DetailsActivity extends AppCompatActivity{
         });
 
         // Fill interface with formated movie details
-        titleMain.setText(mMovie.getTitle());
+        if(titleMain != null)
+            titleMain.setText(mMovie.getTitle());
         durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
         durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
         rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
@@ -176,6 +177,7 @@ public class DetailsActivity extends AppCompatActivity{
 
                 // Adapt the interface to that color
                 findViewById(R.id.rl_title_genre).setBackgroundColor(dominantColor);
+
                 if(UIUtils.isColorDark(dominantColor))
                     titleMain.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimaryTextLight));
 

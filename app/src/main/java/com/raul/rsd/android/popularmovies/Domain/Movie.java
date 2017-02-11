@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.Domain;
 
+import java.util.Arrays;
 import java.util.Date;
 
 public class Movie {
@@ -12,10 +13,10 @@ public class Movie {
     private String backdrop_path;
     private Genre[] genres;             // Popular/TopRated doesn't provide genres name
     private Date release_date;
-    private double vote_avg;
+    private double vote_average;
     private long vote_count;
-    private int duration;               // Popular/TopRated doesn't provide duration
-    private String synopsis;
+    private int runtime;               // Popular/TopRated doesn't provide duration
+    private String overview;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -67,10 +68,10 @@ public class Movie {
     }
 
     public double getVote_avg() {
-        return vote_avg;
+        return vote_average;
     }
     public void setVote_avg(double vote_avg) {
-        this.vote_avg = vote_avg;
+        this.vote_average = vote_avg;
     }
 
     public long getVote_count() {
@@ -81,16 +82,33 @@ public class Movie {
     }
 
     public String getSynopsis() {
-        return synopsis;
+        return overview;
     }
     public void setSynopsis(String synopsis) {
-        this.synopsis = synopsis;
+        this.overview = synopsis;
     }
 
     public int getDuration() {
-        return duration;
+        return runtime;
     }
     public void setDuration(int duration) {
-        this.duration = duration;
+        this.runtime = duration;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", poster_path='" + poster_path + '\'' +
+                ", backdrop_path='" + backdrop_path + '\'' +
+                ", genres=" + Arrays.toString(genres) +
+                ", release_date=" + release_date +
+                ", vote_avg=" + getVote_avg() +
+                ", vote_count=" + vote_count +
+                ", duration=" + getDuration() +
+                ", synopsis='" + getSynopsis() + '\'' +
+                '}';
     }
 }

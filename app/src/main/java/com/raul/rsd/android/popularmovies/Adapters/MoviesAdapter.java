@@ -6,19 +6,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.raul.rsd.android.popularmovies.Domain.Movie;
+import com.raul.rsd.android.popularmovies.Domain.MovieLight;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private Movie[] mMovies;
+    private MovieLight[] mMovies;
     private final MoviesAdapterOnClickHandler mClickHandler;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -55,7 +52,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     // -------------------------- USE CASES --------------------------
 
-    public void setMoviesData(Movie[] movies) {
+    public void setMoviesData(MovieLight[] movies) {
         mMovies = movies;
         notifyDataSetChanged();
     }

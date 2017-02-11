@@ -24,18 +24,44 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 import com.raul.rsd.android.popularmovies.BuildConfig;
+import com.raul.rsd.android.popularmovies.Domain.Movie;
+import com.raul.rsd.android.popularmovies.Domain.MoviesList;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * These utilities will be used to communicate with the weather servers.
  */
 public final class NetworkUtils {
+
+    public interface TMDBService {
+
+        //    https://api.themoviedb.org/3/movie/popular?api_key=abc
+        @GET("{filter}")
+        Call<MoviesList> getMoviesByFilter(@Path("filter") String filter, @Query("api_key") String api_key);
+
+        public static final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://api.themoviedb.org/3/movie/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
 
     // --------------------------- VALUES ----------------------------
 
@@ -138,6 +164,13 @@ public final class NetworkUtils {
     }
 
     // --------------------------- NETWORK ---------------------------
+
+    public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
+        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create( NetworkUtils.TMDBService.class);
+        Call<MoviesList> call = gitHubService.getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3);
+        call.enqueue(callback);
+    }
+
 
     /**
      * This method returns the entire result from the HTTP response.
