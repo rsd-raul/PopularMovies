@@ -3,6 +3,7 @@ package com.raul.rsd.android.popularmovies;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,8 +13,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-
-import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
@@ -22,6 +21,9 @@ import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
 import java.net.URL;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
 
@@ -31,11 +33,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.rv_movies) RecyclerView mRecyclerView;
     private MoviesAdapter mMoviesAdapter;
-    private SwipeRefreshLayout mSwipeRefresh;
+    @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
-    private FloatingActionMenu mFAM;
+    @BindView(R.id.menuFAB) FloatingActionMenu mFAM;
+    private int mColumnNumber = 2;   // Vertival = 2, Horizontal = 3, TODO -> Horizontal + Details = 2
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -43,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         setupActivity();
     }
@@ -59,13 +63,15 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         setSupportActionBar(mToolbar);
 
         // Get references and values
-        mSwipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        mRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
         mMoviesAdapter = new MoviesAdapter(this);
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+            mColumnNumber = 2;
+        else
+            mColumnNumber = 3;
+        GridLayoutManager layoutManager = new GridLayoutManager(this, mColumnNumber);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mMoviesAdapter);
         mRecyclerView.setHasFixedSize(true);
@@ -73,9 +79,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         // Configure Swipe Refresh
         mSwipeRefresh.setOnRefreshListener(this::loadData);
 
-        // Configure FAM and FABs
+        // Configure FAM
         configureMenu();
-        configureChildren();
 
         // Load data in the RecyclerView with the default sorting
         loadData();
@@ -143,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     // ------------------------ FAM and FABs -------------------------
 
     private void configureMenu(){
-        mFAM = (FloatingActionMenu) findViewById(R.id.menuFAB);
 
         // Change the background depending on the fabMenu Status
         mFAM.setIconAnimated(false);
@@ -173,24 +177,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mFAM.setClosedOnTouchOutside(true);
     }
 
-    /**
-     * Configure al FAM children (FAB) behaviour (onClick)
-     */
-    private void configureChildren(){
-        FloatingActionButton popularFAB = (FloatingActionButton) findViewById(R.id.popularFAB);
-        if(popularFAB != null)
-            popularFAB.setOnClickListener(view -> {
-                mFAM.close(false);
-                mActiveSort = NetworkUtils.POPULAR;
-                loadData();
-            });
-
-        FloatingActionButton topRatedFAB = (FloatingActionButton) findViewById(R.id.topRatedFAB);
-        if(topRatedFAB != null)
-            topRatedFAB.setOnClickListener(view -> {
-                mFAM.close(false);
-                mActiveSort = NetworkUtils.TOP_RATED;
-                loadData();
-            });
+    @OnClick(R.id.topRatedFAB)
+    void changeFilterToTopRated(){
+        mFAM.close(false);
+        mActiveSort = NetworkUtils.TOP_RATED;
+        loadData();
     }
+
+    @OnClick(R.id.popularFAB)
+    void changeFilterToPopular(){
+        mFAM.close(false);
+        mActiveSort = NetworkUtils.POPULAR;
+        loadData();
+    }
+
 }

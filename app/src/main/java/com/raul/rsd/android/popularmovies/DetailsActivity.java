@@ -35,6 +35,10 @@ import com.squareup.picasso.Picasso;
 
 import java.net.URL;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 public class DetailsActivity extends AppCompatActivity{
 
     // --------------------------- VALUES ----------------------------
@@ -44,8 +48,17 @@ public class DetailsActivity extends AppCompatActivity{
     // ------------------------- ATTRIBUTES --------------------------
 
     private Movie mMovie = new Movie();
-    private ImageView mPosterImageView, mBackdropImageView;
-    private Space mPosterSpace;
+    @BindView(R.id.tv_title) TextView titleMain;
+    @BindView(R.id.tv_rate_main_tmdb) TextView rateMain;
+    @BindView(R.id.tv_rate_secondary_tmdb) TextView rateSecondary;
+    @BindView(R.id.tv_description_main)  TextView descriptionMain;
+    @BindView(R.id.tv_duration_main)  TextView durationMain;
+    @BindView(R.id.tv_duration_secondary) TextView durationSecondary;
+    @BindView(R.id.tv_release_date_main) TextView releaseDateMain;
+    @BindView(R.id.tv_genres) TextView genresMain;
+    @BindView(R.id.iv_movie_poster) ImageView mPosterImageView;
+    @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
+    @BindView(R.id.poster_space) Space mPosterSpace;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -53,6 +66,7 @@ public class DetailsActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+        ButterKnife.bind(this);
 
         setupActivity();
     }
@@ -68,10 +82,6 @@ public class DetailsActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Configure FAB
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(view -> shareMovie());
-
         // Retrieve the ID sent and fetch the movie from TMDB
         mMovie.setId(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
         new FetchMovieTask().execute();
@@ -79,18 +89,14 @@ public class DetailsActivity extends AppCompatActivity{
 
     @SuppressWarnings("all")
     private void displayMovie(){
-
         // Setup backdrop <- First, so Picasso gets a head start.
-        mBackdropImageView = (ImageView) findViewById(R.id.iv_movie_backdrop);
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        TextView titleMain = (TextView) findViewById(R.id.tv_title);
         Picasso.with(this)
                 .load(backdropUri)
                 .placeholder(R.drawable.placeholder_backdrop)
                 .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
         // Setup poster <- Second, so Picasso gets a head start.
-        mPosterImageView = (ImageView) findViewById(R.id.iv_movie_poster);
         Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
         Picasso.with(this)
                 .load(posterUri)
@@ -105,16 +111,6 @@ public class DetailsActivity extends AppCompatActivity{
                 actionBarScrollControl(verticalOffset);
             }
         });
-
-        // Get references and values
-        TextView rateMain = (TextView) findViewById(R.id.tv_rate_main_tmdb);
-        TextView rateSecondary = (TextView) findViewById(R.id.tv_rate_secondary_tmdb);
-        TextView descriptionMain = (TextView) findViewById(R.id.tv_description_main);
-        TextView durationMain = (TextView) findViewById(R.id.tv_duration_main);
-        TextView durationSecondary = (TextView) findViewById(R.id.tv_duration_secondary);
-        TextView releaseDateMain = (TextView) findViewById(R.id.tv_release_date_main);
-        TextView genresMain = (TextView) findViewById(R.id.tv_genres);
-        mPosterSpace = (Space) findViewById(R.id.poster_space);
 
         // Fill interface with formated movie details
         titleMain.setText(mMovie.getTitle());
@@ -207,7 +203,8 @@ public class DetailsActivity extends AppCompatActivity{
 
     // -------------------------- USE CASES --------------------------
 
-    private void shareMovie(){
+    @OnClick(R.id.fab)
+    void shareMovie(){
         // If the movie has not been fetched yet, don't try to share
         if(mMovie == null)
             return;

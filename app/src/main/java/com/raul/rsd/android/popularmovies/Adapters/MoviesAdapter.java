@@ -11,6 +11,9 @@ import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
     // ------------------------- ATTRIBUTES --------------------------
@@ -63,6 +66,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     public interface MoviesAdapterOnClickHandler {
         void onClick(long selectedMovieId);
     }
+
 
     // ------------------------- VIEW HOLDER -------------------------
 

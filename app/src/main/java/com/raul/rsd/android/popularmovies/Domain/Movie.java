@@ -10,11 +10,11 @@ public class Movie {
     private String title;
     private String poster_path;
     private String backdrop_path;
-    private Genre[] genres;
+    private Genre[] genres;             // Popular/TopRated doesn't provide genres name
     private Date release_date;
     private double vote_avg;
     private long vote_count;
-    private int duration;
+    private int duration;               // Popular/TopRated doesn't provide duration
     private String synopsis;
 
     // ------------------------- CONSTRUCTOR -------------------------
