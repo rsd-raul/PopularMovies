@@ -1,6 +1,9 @@
 package com.raul.rsd.android.popularmovies.Domain;
 
-public class MovieLight {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class MovieLight implements Parcelable{
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -26,5 +29,41 @@ public class MovieLight {
     }
     public void setPoster_path(String poster_path) {
         this.poster_path = poster_path;
+    }
+
+    @Override
+    public String toString() {
+        return "MovieLight{" +
+                "id=" + id +
+                ", poster_path='" + poster_path + '\'' +
+                '}';
+    }
+
+    // ------------------------- PARCELABLE --------------------------
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        @Override
+        public MovieLight createFromParcel(Parcel in) {
+            return new MovieLight(in);
+        }
+
+        @Override
+        public MovieLight[] newArray(int size) {
+            return new MovieLight[size];
+        }
+    };
+
+    private MovieLight(Parcel in) {
+        id = in.readLong();
+        poster_path = in.readString();
+    }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(id);
+        out.writeString(poster_path);
     }
 }

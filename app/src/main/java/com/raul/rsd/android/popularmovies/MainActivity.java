@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     // --------------------------- VALUES ----------------------------
 
     private static final String TAG = "MainActivity";
+    private static final String MOVIES_KEY = "movies_parcelable";
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -60,13 +61,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        setupActivity();
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
+            setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
+        else
+            setupActivity(null);
     }
 
-    private void setupActivity() {
+    private void setupActivity(MovieLight[] movies) {
         // Notify the user if there is no internet, offer to retry or to close the app
         if(!NetworkUtils.isNetworkAvailable(this)) {
-            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity());
+            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity(movies));
             return;
         }
 
@@ -95,7 +99,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         configureMenu();
 
         // Load data in the RecyclerView with the default sorting
-        loadData();
+        if(movies == null)
+            loadData();
+        else
+            mMoviesAdapter.setMoviesData(movies);
     }
 
     // -------------------------- USE CASES --------------------------
@@ -188,4 +195,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         loadData();
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArray(MOVIES_KEY, mMoviesAdapter.getMoviesData());
+    }
+
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        MovieLight[] movies = (MovieLight[]) savedInstanceState.getParcelableArray("obj");
+//        if(movies != null)
+//            for (int i = 0; i < movies.length; i++)
+//                Log.e(TAG, "onRestoreInstanceState: " + movies[i]);
+//    }
 }

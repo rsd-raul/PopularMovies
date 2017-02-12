@@ -57,6 +57,9 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         notifyDataSetChanged();
     }
 
+    public MovieLight[] getMoviesData() {
+        return mMovies;
+    }
 
     // -------------------------- INTERFACE --------------------------
 

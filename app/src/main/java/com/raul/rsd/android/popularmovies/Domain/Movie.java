@@ -1,9 +1,11 @@
 package com.raul.rsd.android.popularmovies.Domain;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import java.util.Arrays;
 import java.util.Date;
 
-public class Movie {
+public class Movie implements Parcelable{
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -96,6 +98,9 @@ public class Movie {
     }
 
 
+
+
+
     @Override
     public String toString() {
         return "Movie{" +
@@ -110,5 +115,55 @@ public class Movie {
                 ", duration=" + getDuration() +
                 ", synopsis='" + getSynopsis() + '\'' +
                 '}';
+    }
+
+    // ------------------------- PARCELABLE --------------------------
+
+    static final Creator CREATOR = new Creator() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    private Movie(Parcel in) {
+        id = in.readLong();
+        title = in.readString();
+        poster_path = in.readString();
+        backdrop_path = in.readString();
+
+        genres = new Genre[in.readInt()];
+        in.readTypedArray(genres, Genre.CREATOR);
+
+        release_date = new Date(in.readLong());
+        vote_average = in.readDouble();
+        vote_count = in.readLong();
+        runtime = in.readInt();
+        overview = in.readString();
+    }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(id);
+        out.writeString(title);
+        out.writeString(poster_path);
+        out.writeString(backdrop_path);
+
+        out.writeInt(genres.length);
+        out.writeTypedArray(genres, flags);
+
+        out.writeLong(release_date.getTime());
+        out.writeDouble(vote_average);
+        out.writeLong(vote_count);
+        out.writeInt(runtime);
+        out.writeString(overview);
     }
 }
