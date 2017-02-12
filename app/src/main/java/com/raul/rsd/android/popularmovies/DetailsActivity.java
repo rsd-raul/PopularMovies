@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ShareCompat;
@@ -31,11 +30,11 @@ import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
-import java.net.URL;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class DetailsActivity extends AppCompatActivity{
 
@@ -45,7 +44,7 @@ public class DetailsActivity extends AppCompatActivity{
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private Movie mMovie = new Movie();
+    private Movie mMovie;
     @BindView(R.id.tv_title) TextView titleMain;
     @BindView(R.id.tv_rate_main_tmdb) TextView rateMain;
     @BindView(R.id.tv_rate_secondary_tmdb) TextView rateSecondary;
@@ -81,24 +80,48 @@ public class DetailsActivity extends AppCompatActivity{
         setSupportActionBar(toolbar);
 
         // Retrieve the ID sent and fetch the movie from TMDB
-        mMovie.setId(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
-        new FetchMovieTask().execute();
+        loadData();
+    }
+
+    private void loadData(){
+        Long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
+        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+            @Override
+            public void onResponse(Call<Movie> call, Response<Movie> response) {
+                mMovie = response.body();
+
+                if(mMovie != null)
+                    displayMovie();
+                else
+                    showErrorMessage();
+            }
+
+            @Override
+            public void onFailure(Call<Movie> call, Throwable t) {
+                Log.e(TAG, "loadData/onFailure: Failed to fetch movie from Server", t);
+                showErrorMessage();
+            }
+        });
+    }
+
+    private void showErrorMessage(){
+        DialogsUtils.showErrorDialog(this, (dialog, which) -> loadData());
     }
 
     @SuppressWarnings("all")
     private void displayMovie(){
+        Log.e(TAG, "displayMovie: " + mMovie);
+
         // Setup backdrop <- First, so Picasso gets a head start.
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        if(mBackdropImageView != null)
-            Picasso.with(this)
+        Picasso.with(this)
                     .load(backdropUri)
                     .placeholder(R.drawable.placeholder_backdrop)
                     .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
         // Setup poster <- Second, so Picasso gets a head start.
         Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
-        if(mPosterImageView != null)
-            Picasso.with(this)
+        Picasso.with(this)
                     .load(posterUri)
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mPosterImageView);
@@ -113,8 +136,7 @@ public class DetailsActivity extends AppCompatActivity{
         });
 
         // Fill interface with formated movie details
-        if(titleMain != null)
-            titleMain.setText(mMovie.getTitle());
+        titleMain.setText(mMovie.getTitle());
         durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
         durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
         rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
@@ -222,46 +244,6 @@ public class DetailsActivity extends AppCompatActivity{
         // Avoid ActivityNotFoundException
         if(shareIntent.resolveActivity(getPackageManager()) != null)
             startActivity(shareIntent);
-    }
-
-    // ------------------------- ASYNC TASK --------------------------
-
-    public class FetchMovieTask extends AsyncTask<Void, Void, Movie> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Movie doInBackground(Void... params) {
-            if (mMovie.getId() == -1)
-                return null;
-
-            URL movieRequestUrl = NetworkUtils.buildMovieURL(mMovie.getId());
-
-            try {
-                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(movieRequestUrl);
-                return TMDBUtils.extractSingleMovieFromJson(jsonResponse);
-            } catch (Exception ex) {
-                Log.e(TAG, "doInBackground: Exception parsing JSON", ex);
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Movie movie) {
-            if (movie != null){
-                // Set the DataSource for the Activity and initialize the layout
-                mMovie = movie;
-                displayMovie();
-            } else
-                showErrorMessage();
-        }
-    }
-
-    private void showErrorMessage(){
-        DialogsUtils.showErrorDialog(this, (dialog, which) -> new FetchMovieTask().execute());
     }
 
     // --------------------------- DETAILS ---------------------------

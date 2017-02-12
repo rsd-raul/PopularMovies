@@ -21,24 +21,11 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
-
 import com.raul.rsd.android.popularmovies.BuildConfig;
 import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Domain.MoviesList;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
@@ -50,22 +37,7 @@ import retrofit2.http.Query;
  */
 public final class NetworkUtils {
 
-    public interface TMDBService {
-
-        //    https://api.themoviedb.org/3/movie/popular?api_key=abc
-        @GET("{filter}")
-        Call<MoviesList> getMoviesByFilter(@Path("filter") String filter, @Query("api_key") String api_key);
-
-        public static final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org/3/movie/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-    }
-
-
     // --------------------------- VALUES ----------------------------
-
-    private static final String TAG = "NetworkUtils";
 
     public static final String POPULAR = "popular";
     public static final String TOP_RATED = "top_rated";
@@ -77,35 +49,6 @@ public final class NetworkUtils {
 
     private static String POSTER_SIZE;
     private static String BACKDROP_SIZE;
-
-
-    // ------------------------- URL - DATA --------------------------
-
-    public static URL buildMovieURL(long id){
-        Uri builtUri = Uri.parse(BASE_MOVIE_URL).buildUpon()
-                .appendPath(Long.toString(id))
-                .appendQueryParameter(API_PARAM, BuildConfig.TMDB_API_KEY_V3)
-                .build();
-        return getUrl(builtUri);
-    }
-
-    public static URL buildSortMoviesURL(String sortBy){
-        Uri builtUri = Uri.parse(BASE_MOVIE_URL).buildUpon()
-                .appendPath(sortBy)
-                .appendQueryParameter(API_PARAM, BuildConfig.TMDB_API_KEY_V3)
-                .build();
-        return getUrl(builtUri);
-    }
-
-    private static URL getUrl(Uri uri) {
-        URL url = null;
-        try {
-            url = new URL(uri.toString());
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Malformed URL", e);
-        }
-        return url;
-    }
 
     // ------------------------ URI - IMAGES -------------------------
 
@@ -163,32 +106,36 @@ public final class NetworkUtils {
         }
     }
 
+    // -------------------------- RETROFIT 2 -------------------------
+
+    interface TMDBService {
+
+        //  https://api.themoviedb.org/3/movie/popular?api_key=abc
+        @GET("{filter}")
+        Call<MoviesList> getMoviesByFilter(@Path("filter") String filter, @Query(API_PARAM) String api_key);
+
+        //  https://api.themoviedb.org/3/movie/328111?api_key=abc
+        @GET("{id}")
+        Call<Movie> getMovieById(@Path("id") Long id, @Query(API_PARAM) String api_key);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_MOVIE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
     // --------------------------- NETWORK ---------------------------
 
     public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
-        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create( NetworkUtils.TMDBService.class);
+        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
         Call<MoviesList> call = gitHubService.getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3);
         call.enqueue(callback);
     }
 
-
-    /**
-     * This method returns the entire result from the HTTP response.
-     *
-     * @param url The URL to fetch the HTTP response from.
-     * @return The contents of the HTTP response.
-     * @throws IOException Related to network and stream reading
-     */
-    public static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-            Scanner scanner = new Scanner(in).useDelimiter("\\A");
-
-            return scanner.hasNext() ? scanner.next() : null;
-        } finally {
-            urlConnection.disconnect();
-        }
+    public static void getMovieById(Long id, Callback<Movie> callback){
+        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
+        Call<Movie> call = gitHubService.getMovieById(id, BuildConfig.TMDB_API_KEY_V3);
+        call.enqueue(callback);
     }
 
     /**

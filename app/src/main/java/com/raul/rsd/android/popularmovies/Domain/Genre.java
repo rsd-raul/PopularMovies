@@ -5,7 +5,7 @@ public class Genre {
     // ------------------------- ATTRIBUTES --------------------------
 
     private long id;
-    private String title;
+    private String name;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -22,9 +22,9 @@ public class Genre {
     }
 
     public String getTitle() {
-        return title;
+        return name;
     }
     public void setTitle(String title) {
-        this.title = title;
+        this.name = title;
     }
 }

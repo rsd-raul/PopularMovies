@@ -107,8 +107,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
             @Override
             public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                mSwipeRefresh.setRefreshing(false);
-
                 ArrayList<MovieLight> responseMovies = response.body().getResults();
 
                 if (responseMovies != null) {
@@ -119,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                     mRecyclerView.smoothScrollToPosition(0);
                 } else
                     showErrorMessage();
+
+                mSwipeRefresh.setRefreshing(false);
             }
 
             @Override
@@ -130,56 +130,16 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         UIUtils.setSubtitle(this, mActiveSort);
     }
 
+    private void showErrorMessage(){
+        DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
+    }
+
     @Override
     public void onClick(long selectedMovieId) {
         // Build the intent and store the ID
         Intent intentDetailsActivity = new Intent(this, DetailsActivity.class);
         intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
         startActivity(intentDetailsActivity);
-    }
-
-    // ------------------------- ASYNC TASK --------------------------
-
-//    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
-//
-//        @Override
-//        protected void onPreExecute() {
-//            super.onPreExecute();
-//            mSwipeRefresh.setRefreshing(true);
-//        }
-//
-//        @Override
-//        protected Movie[] doInBackground(String... params) {
-//            if (params == null || params.length == 0)
-//                return null;
-//
-//            String sortMode = params[0];
-//            URL moviesRequestUrl = NetworkUtils.buildSortMoviesURL(sortMode);
-//
-//            try {
-//                String jsonResponse = NetworkUtils.getResponseFromHttpUrl(moviesRequestUrl);
-//                return TMDBUtils.extractMoviesFromJson(jsonResponse);
-//            } catch (Exception ex) {
-//                Log.e(TAG, "doInBackground: Exception parsing JSON", ex);
-//                return null;
-//            }
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Movie[] movies) {
-//            mSwipeRefresh.setRefreshing(false);
-//
-//            if (movies == null)
-//                showErrorMessage();
-//            else{
-//                mMoviesAdapter.setMoviesData(movies);
-//                mRecyclerView.smoothScrollToPosition(0);
-//            }
-//        }
-//    }
-
-    private void showErrorMessage(){
-        DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
     }
 
     // ------------------------ FAM and FABs -------------------------
