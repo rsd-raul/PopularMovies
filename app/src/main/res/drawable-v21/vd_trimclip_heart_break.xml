@@ -1,0 +1,50 @@
+<vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="56dp"
+    android:tint="?attr/colorControlNormal"
+    android:viewportHeight="56"
+    android:viewportWidth="56">
+
+    <!-- Stroked heart, 2 paths so can 'draw' them concurrently by animating trim. Initially hidden -->
+    <path
+        android:name="heart_stroke_left_atrium"
+        android:pathData="@string/heart_stroke_left"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2"
+        android:trimPathEnd="0"/>
+
+    <path
+        android:name="heart_stroke_right_atrium"
+        android:pathData="@string/heart_stroke_right"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2"
+        android:trimPathEnd="0"/>
+
+    <!-- Left broken heart, need group to set pivot for rotation anim. -->
+    <group
+        android:name="broken_heart_left_group"
+        android:pivotX="28"
+        android:pivotY="37.3">
+
+        <path
+            android:name="broken_heart_left"
+            android:fillColor="@android:color/white"
+            android:pathData="@string/broken_heart_left"/>
+
+    </group>
+
+    <!-- Right broken heart. -->
+    <group
+        android:name="broken_heart_right_group"
+        android:pivotX="28"
+        android:pivotY="37.3">
+
+        <path
+            android:name="broken_heart_right"
+            android:fillColor="@android:color/white"
+            android:pathData="@string/broken_heart_right"/>
+
+    </group>
+
+</vector>

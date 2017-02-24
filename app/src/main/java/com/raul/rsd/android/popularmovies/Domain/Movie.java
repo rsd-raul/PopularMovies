@@ -2,7 +2,6 @@ package com.raul.rsd.android.popularmovies.Domain;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import java.util.Arrays;
 import java.util.Date;
 
 public class Movie implements Parcelable{
@@ -95,26 +94,6 @@ public class Movie implements Parcelable{
     }
     public void setDuration(int duration) {
         this.runtime = duration;
-    }
-
-
-
-
-
-    @Override
-    public String toString() {
-        return "Movie{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", poster_path='" + poster_path + '\'' +
-                ", backdrop_path='" + backdrop_path + '\'' +
-                ", genres=" + Arrays.toString(genres) +
-                ", release_date=" + release_date +
-                ", vote_avg=" + getVote_avg() +
-                ", vote_count=" + vote_count +
-                ", duration=" + getDuration() +
-                ", synopsis='" + getSynopsis() + '\'' +
-                '}';
     }
 
     // ------------------------- PARCELABLE --------------------------

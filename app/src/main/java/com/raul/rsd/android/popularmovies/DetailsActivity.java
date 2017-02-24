@@ -110,8 +110,6 @@ public class DetailsActivity extends AppCompatActivity{
 
     @SuppressWarnings("all")
     private void displayMovie(){
-        Log.e(TAG, "displayMovie: " + mMovie);
-
         // Setup backdrop <- First, so Picasso gets a head start.
         Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
         Picasso.with(this)
@@ -204,7 +202,7 @@ public class DetailsActivity extends AppCompatActivity{
                     titleMain.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimaryTextLight));
 
                 // Get the subsection of the backdrop under the back arrow and its dominant color
-                Bitmap backButtonSection = Bitmap.createBitmap(backdrop, 16, 16, 24, 24);
+                Bitmap backButtonSection = UIUtils.getPreciseBackBackground(backdrop, 16, 24);
                 dominantColor = UIUtils.getDominantColor(backButtonSection, activity);
 
                 // Check the actionbar presence
@@ -212,11 +210,9 @@ public class DetailsActivity extends AppCompatActivity{
                 if(actionBar == null)
                     return;
 
-                // If the dominant color is light or default turn the arrow Black
-                if(dominantColor == -16245724 || !UIUtils.isColorDark(dominantColor)){
-                    final Drawable upArrow = ContextCompat.getDrawable(activity, R.drawable.ic_back_black_24dp);
-                    actionBar.setHomeAsUpIndicator(upArrow);
-                }
+                // If the dominant color is light turn the arrow Black
+                if(!UIUtils.isColorDark(dominantColor))
+                    actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
 

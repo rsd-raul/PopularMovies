@@ -1,6 +1,7 @@
 package com.raul.rsd.android.popularmovies.Utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -9,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
+import android.util.DisplayMetrics;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -94,5 +96,36 @@ public class UIUtils {
         int b = Math.round(Color.blue(color) * factor);
         // Math.min handles that the value does not exceeds 255
         return Color.argb(a, Math.min(r,255), Math.min(g,255), Math.min(b,255));
+    }
+
+    /**
+     * This method converts dp unit to equivalent pixels, depending on device density.
+     *
+     * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
+     * @return A float value to represent px equivalent to dp depending on device density
+     */
+    private static float convertDpToPixel(float dp){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+    }
+
+    private static int getDeviceWidthPx(){
+        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
+        return metrics.widthPixels;
+    }
+
+    public static Bitmap getPreciseBackBackground(Bitmap source, int marginDp, int sizeDp){
+        int deviceWidthPx = getDeviceWidthPx();
+        int backdropWidthPx = source.getWidth();
+        double ratioPx = deviceWidthPx * 1.0 / backdropWidthPx;
+
+        float arrowMarginPx = convertDpToPixel(marginDp);
+        float arrowSizePx = convertDpToPixel(sizeDp);
+        arrowMarginPx *= ratioPx;
+        arrowSizePx *= ratioPx;
+
+        int marginPx = Math.round(arrowMarginPx);
+        int sizePx = Math.round(arrowSizePx);
+        return Bitmap.createBitmap(source, marginPx, marginPx, sizePx, sizePx);
     }
 }

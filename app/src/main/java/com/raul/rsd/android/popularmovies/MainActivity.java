@@ -4,7 +4,6 @@ import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -13,23 +12,14 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.Toast;
-
 import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.Adapters.MoviesAdapter;
-import com.raul.rsd.android.popularmovies.Domain.Movie;
 import com.raul.rsd.android.popularmovies.Domain.MovieLight;
 import com.raul.rsd.android.popularmovies.Domain.MoviesList;
 import com.raul.rsd.android.popularmovies.Utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
-import com.raul.rsd.android.popularmovies.Utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.Utils.UIUtils;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.security.auth.login.LoginException;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -51,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
     @BindView(R.id.menuFAB) FloatingActionMenu mFAM;
-    private int mColumnNumber = 2;   // Vertival = 2, Horizontal = 3, TODO -> Horizontal + Details = 2
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -61,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // If we have the data already saved, restore those
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
             setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
         else
@@ -83,11 +73,9 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            mColumnNumber = 2;
-        else
-            mColumnNumber = 3;
-        GridLayoutManager layoutManager = new GridLayoutManager(this, mColumnNumber);
+        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+        int columnNumber = isPortrait ? 2 : 3; // TODO -> Horizontal + Details = 2
+        GridLayoutManager layoutManager = new GridLayoutManager(this, columnNumber);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mMoviesAdapter);
         mRecyclerView.setHasFixedSize(true);
@@ -108,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     // -------------------------- USE CASES --------------------------
 
     public void loadData(){
-//        new FetchMoviesTask().execute(mActiveSort);
         mSwipeRefresh.setRefreshing(true);
 
         NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
@@ -202,12 +189,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         outState.putParcelableArray(MOVIES_KEY, mMoviesAdapter.getMoviesData());
     }
 
-//    @Override
+//    @Override // TODO handle restore
 //    protected void onRestoreInstanceState(Bundle savedInstanceState) {
 //        super.onRestoreInstanceState(savedInstanceState);
-//        MovieLight[] movies = (MovieLight[]) savedInstanceState.getParcelableArray("obj");
-//        if(movies != null)
-//            for (int i = 0; i < movies.length; i++)
-//                Log.e(TAG, "onRestoreInstanceState: " + movies[i]);
 //    }
 }

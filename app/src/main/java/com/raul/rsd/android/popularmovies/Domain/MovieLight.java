@@ -31,14 +31,6 @@ public class MovieLight implements Parcelable{
         this.poster_path = poster_path;
     }
 
-    @Override
-    public String toString() {
-        return "MovieLight{" +
-                "id=" + id +
-                ", poster_path='" + poster_path + '\'' +
-                '}';
-    }
-
     // ------------------------- PARCELABLE --------------------------
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
