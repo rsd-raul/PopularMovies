@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies.Utils;
+package com.raul.rsd.android.popularmovies.utils;
 
 import android.support.v7.app.AppCompatActivity;
 

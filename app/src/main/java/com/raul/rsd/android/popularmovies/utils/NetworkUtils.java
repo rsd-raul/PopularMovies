@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.raul.rsd.android.popularmovies.Utils;
+package com.raul.rsd.android.popularmovies.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -22,8 +22,8 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import com.raul.rsd.android.popularmovies.BuildConfig;
-import com.raul.rsd.android.popularmovies.Domain.Movie;
-import com.raul.rsd.android.popularmovies.Domain.MoviesList;
+import com.raul.rsd.android.popularmovies.domain.Movie;
+import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;

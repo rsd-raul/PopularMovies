@@ -1,10 +1,10 @@
-package com.raul.rsd.android.popularmovies.Utils;
+package com.raul.rsd.android.popularmovies.utils;
 
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.raul.rsd.android.popularmovies.Domain.Genre;
-import com.raul.rsd.android.popularmovies.Domain.Movie;
+import com.raul.rsd.android.popularmovies.domain.Genre;
+import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
 
 import org.json.JSONArray;

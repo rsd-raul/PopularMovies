@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies.Domain;
+package com.raul.rsd.android.popularmovies.domain;
 
 import android.os.Parcel;
 import android.os.Parcelable;

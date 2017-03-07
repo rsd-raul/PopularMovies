@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies.Adapters;
+package com.raul.rsd.android.popularmovies.adapters;
 
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import com.raul.rsd.android.popularmovies.Domain.MovieLight;
+import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.R;
-import com.raul.rsd.android.popularmovies.Utils.NetworkUtils;
+import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
