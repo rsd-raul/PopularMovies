@@ -114,7 +114,7 @@ public class UIUtils {
         return metrics.widthPixels;
     }
 
-    public static Bitmap getPreciseBackBackground(Bitmap source, int marginDp, int sizeDp){
+    public static Bitmap getPreciseBackground(Bitmap source, int marginDp, int sizeDp){
         int deviceWidthPx = getDeviceWidthPx();
         int backdropWidthPx = source.getWidth();
         double ratioPx = deviceWidthPx * 1.0 / backdropWidthPx;

@@ -65,4 +65,8 @@ dependencies {
     // ButterKnife - JakeWharton - https://github.com/JakeWharton/butterknife
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+
+    // Dagger 2 - Google - https://github.com/google/dagger/releases
+    compile 'com.google.dagger:dagger:2.10-rc2'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.10-rc2'
 }

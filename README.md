@@ -1,6 +1,7 @@
 # PopularMovies
 
-First project for the Google/Udacity scholarship the "Associate Android Developer Fast Track".
+First and Second project for the Google/Udacity scholarship the "Associate Android Developer Fast Track".
+
 
 ## Features available:
 
@@ -13,13 +14,14 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 
  **DISCLAIMER:** This application is under **ACTIVE** development, use with caution.
  
-## Ext. Libraries
+## Ext. Libraries in use
 
 * [ButterKnife](https://github.com/JakeWharton/butterknife)
 * [Retrofit 2](https://github.com/square/retrofit)
 * [Picasso](https://github.com/bumptech/glide)
 * [FloatingActionButton](https://github.com/Clans/FloatingActionButton)
 * [MaterialDialogs](https://github.com/afollestad/material-dialogs)
+* [Dagger 2](https://google.github.io/dagger/)
 
 ## Future:
 
@@ -28,9 +30,8 @@ Features to be implemented:
 * Access trailers and reviews.
 * Search movies by name or genre.
 
-Libraries to be used:
-* [Dagger 2](https://google.github.io/dagger/)
-* [Realm](https://github.com/realm/realm-java)
+Ext. Libraries to be used:
+* [Realm](https://github.com/realm/realm-java)  // Not allowed
 * [RxJava](https://github.com/ReactiveX/RxJava)
 * [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 * [FastAdapter]( https://github.com/mikepenz/FastAdapter)

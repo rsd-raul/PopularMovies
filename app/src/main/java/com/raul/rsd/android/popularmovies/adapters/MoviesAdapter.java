@@ -9,7 +9,10 @@ import android.widget.ImageView;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
+import com.raul.rsd.android.popularmovies.view.MainActivity;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
 
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdapterViewHolder> {
 
@@ -20,7 +23,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
 
     // ------------------------- CONSTRUCTOR -------------------------
 
-    public MoviesAdapter(MoviesAdapterOnClickHandler clickHandler) {
+    @Inject
+    public MoviesAdapter(MainActivity clickHandler) {
         mClickHandler = clickHandler;
     }
 

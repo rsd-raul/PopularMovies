@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies;
+package com.raul.rsd.android.popularmovies.view;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
@@ -6,13 +6,14 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import com.github.clans.fab.FloatingActionMenu;
+import com.raul.rsd.android.popularmovies.App;
+import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
@@ -27,7 +28,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
+public class MainActivity extends BaseActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
 
     // --------------------------- VALUES ----------------------------
 
@@ -37,10 +38,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     // ------------------------- ATTRIBUTES --------------------------
 
     @BindView(R.id.rv_movies) RecyclerView mRecyclerView;
-    private MoviesAdapter mMoviesAdapter;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
-    private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
     @BindView(R.id.menuFAB) FloatingActionMenu mFAM;
+
+    private MoviesAdapter mMoviesAdapter;
+    private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -48,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Start ButterKnife and Dagger 2
         ButterKnife.bind(this);
 
         // If we have the data already saved, restore those
@@ -55,6 +59,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
         else
             setupActivity(null);
+    }
+
+    @Override
+    protected void inject(App.AppComponent component) {
+        component.inject(this);
     }
 
     private void setupActivity(MovieLight[] movies) {

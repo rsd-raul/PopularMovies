@@ -6,7 +6,7 @@
     android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.raul.rsd.android.popularmovies.MainActivity">
+    tools:context="com.raul.rsd.android.popularmovies.view.MainActivity">
 
     <android.support.design.widget.AppBarLayout style="@style/appBarLayout" >
 
@@ -20,7 +20,7 @@
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity"
+        tools:context=".view.MainActivity"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <android.support.v7.widget.RecyclerView

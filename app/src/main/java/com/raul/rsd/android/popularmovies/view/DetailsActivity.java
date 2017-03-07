@@ -1,4 +1,4 @@
-package com.raul.rsd.android.popularmovies;
+package com.raul.rsd.android.popularmovies.view;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -20,6 +20,9 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
+
+import com.raul.rsd.android.popularmovies.App;
+import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
@@ -35,7 +38,7 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class DetailsActivity extends AppCompatActivity{
+public class DetailsActivity extends BaseActivity{
 
     // --------------------------- VALUES ----------------------------
 
@@ -65,6 +68,11 @@ public class DetailsActivity extends AppCompatActivity{
         ButterKnife.bind(this);
 
         setupActivity();
+    }
+
+    @Override
+    protected void inject(App.AppComponent component) {
+        component.inject(this);
     }
 
     private void setupActivity(){
@@ -201,7 +209,7 @@ public class DetailsActivity extends AppCompatActivity{
                     titleMain.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimaryTextLight));
 
                 // Get the subsection of the backdrop under the back arrow and its dominant color
-                Bitmap backButtonSection = UIUtils.getPreciseBackBackground(backdrop, 16, 24);
+                Bitmap backButtonSection = UIUtils.getPreciseBackground(backdrop, 16, 24);
                 dominantColor = UIUtils.getDominantColor(backButtonSection, activity);
 
                 // Check the actionbar presence
