@@ -2,7 +2,6 @@ package com.raul.rsd.android.popularmovies.view;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -21,6 +20,9 @@ import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import java.util.ArrayList;
+
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -28,7 +30,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
+public class MainActivity extends BaseActivity {
 
     // --------------------------- VALUES ----------------------------
 
@@ -41,7 +43,7 @@ public class MainActivity extends BaseActivity implements MoviesAdapter.MoviesAd
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
     @BindView(R.id.menuFAB) FloatingActionMenu mFAM;
 
-    private MoviesAdapter mMoviesAdapter;
+    @Inject MoviesAdapter mMoviesAdapter;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -78,7 +80,6 @@ public class MainActivity extends BaseActivity implements MoviesAdapter.MoviesAd
         setSupportActionBar(mToolbar);
 
         // Get references and values
-        mMoviesAdapter = new MoviesAdapter(this);
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
@@ -135,14 +136,6 @@ public class MainActivity extends BaseActivity implements MoviesAdapter.MoviesAd
 
     private void showErrorMessage(){
         DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
-    }
-
-    @Override
-    public void onClick(long selectedMovieId) {
-        // Build the intent and store the ID
-        Intent intentDetailsActivity = new Intent(this, DetailsActivity.class);
-        intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
-        startActivity(intentDetailsActivity);
     }
 
     // ------------------------ FAM and FABs -------------------------

@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.data.MovieService;
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
@@ -32,6 +33,9 @@ import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import javax.inject.Inject;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -58,6 +62,8 @@ public class DetailsActivity extends BaseActivity{
     @BindView(R.id.iv_movie_poster) ImageView mPosterImageView;
     @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mPosterSpace;
+
+    @Inject MovieService movieService;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -92,23 +98,34 @@ public class DetailsActivity extends BaseActivity{
 
     private void loadData(){
         Long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
-        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
-            @Override
-            public void onResponse(Call<Movie> call, Response<Movie> response) {
-                mMovie = response.body();
 
-                if(mMovie != null)
-                    displayMovie();
-                else
+        // Try to find the movie offline, if we have it, show the info, and refresh data silently
+        // FIXME do all this asynchronously
+        mMovie = movieService.findOne(id);
+        if(mMovie != null) {
+            displayMovie(true);
+            // TODO After displaying the movie if we are online, update the info and refresh
+
+        // If the info is not on the DB, query the server
+        } else {
+            NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+                @Override
+                public void onResponse(Call<Movie> call, Response<Movie> response) {
+                    mMovie = response.body();
+
+                    if (mMovie != null)
+                        displayMovie(false);
+                    else
+                        showErrorMessage();
+                }
+
+                @Override
+                public void onFailure(Call<Movie> call, Throwable t) {
+                    Log.e(TAG, "loadData/onFailure: Failed to fetch movie from Server", t);
                     showErrorMessage();
-            }
-
-            @Override
-            public void onFailure(Call<Movie> call, Throwable t) {
-                Log.e(TAG, "loadData/onFailure: Failed to fetch movie from Server", t);
-                showErrorMessage();
-            }
-        });
+                }
+            });
+        }
     }
 
     private void showErrorMessage(){
@@ -116,20 +133,29 @@ public class DetailsActivity extends BaseActivity{
     }
 
     @SuppressWarnings("all")
-    private void displayMovie(){
-        // Setup backdrop <- First, so Picasso gets a head start.
-        Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
-        Picasso.with(this)
+    private void displayMovie(boolean offline){
+
+        if(offline){
+            mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
+            adaptColorByBackdropCallback(this, titleMain).onSuccess();
+
+            mPosterImageView.setImageBitmap(mMovie.getPoster());
+
+        }else {
+            // Setup backdrop <- First, so Picasso gets a head start.
+            Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
+            Picasso.with(this)
                     .load(backdropUri)
                     .placeholder(R.drawable.placeholder_backdrop)
                     .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
-        // Setup poster <- Second, so Picasso gets a head start.
-        Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
-        Picasso.with(this)
+            // Setup poster <- Second, so Picasso gets a head start.
+            Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
+            Picasso.with(this)
                     .load(posterUri)
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mPosterImageView);
+        }
 
         // Customize the Appbar behaviour and react to scroll
         AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);

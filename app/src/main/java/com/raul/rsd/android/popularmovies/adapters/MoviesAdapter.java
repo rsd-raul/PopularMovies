@@ -1,5 +1,7 @@
 package com.raul.rsd.android.popularmovies.adapters;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,7 +11,7 @@ import android.widget.ImageView;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
-import com.raul.rsd.android.popularmovies.view.MainActivity;
+import com.raul.rsd.android.popularmovies.view.DetailsActivity;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
@@ -19,14 +21,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     // ------------------------- ATTRIBUTES --------------------------
 
     private MovieLight[] mMovies;
-    private final MoviesAdapterOnClickHandler mClickHandler;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public MoviesAdapter(MainActivity clickHandler) {
-        mClickHandler = clickHandler;
-    }
+    public MoviesAdapter() { }
 
     // -------------------------- OVERRIDE ---------------------------
 
@@ -65,15 +64,19 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         return mMovies;
     }
 
-    // -------------------------- INTERFACE --------------------------
+//    private final MoviesAdapterOnClickHandler mClickHandler;
 
-    public interface MoviesAdapterOnClickHandler {
-        void onClick(long selectedMovieId);
-    }
+//    DEPRECATED in favour of Dependency Injection and local onClick handling
+//    // -------------------------- INTERFACE --------------------------
+//
+//    public interface MoviesAdapterOnClickHandler {
+//        void onClick(long selectedMovieId);
+//    }
 
 
     // ------------------------- VIEW HOLDER -------------------------
 
+    // TODO Add fast adapter
     class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView mMoviePoster;
 
@@ -87,7 +90,11 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
             long selectedMovieId = mMovies[adapterPosition].getId();
-            mClickHandler.onClick(selectedMovieId);
+            Context context = v.getContext();
+
+            Intent intentDetailsActivity = new Intent(context, DetailsActivity.class);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
+            context.startActivity(intentDetailsActivity);
         }
     }
 }

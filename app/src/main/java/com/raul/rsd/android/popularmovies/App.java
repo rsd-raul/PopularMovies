@@ -1,6 +1,8 @@
 package com.raul.rsd.android.popularmovies;
 
 import android.app.Application;
+
+import com.raul.rsd.android.popularmovies.data.MoviesProvider;
 import com.raul.rsd.android.popularmovies.view.DetailsActivity;
 import com.raul.rsd.android.popularmovies.view.MainActivity;
 import javax.inject.Singleton;
@@ -20,6 +22,7 @@ public class App extends Application {
         void inject(App application);
         void inject(MainActivity mainActivity);
         void inject(DetailsActivity detailsActivity);
+        void inject(MoviesProvider moviesProvider);
     }
 
     // ------------------------- CONSTRUCTOR -------------------------

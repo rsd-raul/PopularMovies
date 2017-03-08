@@ -27,11 +27,11 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesEntry.COLUMN_POSTER       + " BLOB, " +   // Store image for offline use
                 MoviesEntry.COLUMN_BACKDROP	    + " BLOB, " +
                 MoviesEntry.COLUMN_GENRES	    + " TEXT, " +   // No offline search -> No need to save genres id
-                MoviesEntry.COLUMN_RELEASE_DATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                MoviesEntry.COLUMN_RELEASE_DATE + " TEXT, " +   // TODO Double check release date type
                 MoviesEntry.COLUMN_VOTE_AVERAGE + " REAL, " +
                 MoviesEntry.COLUMN_VOTE_COUNT   + " REAL, " +
                 MoviesEntry.COLUMN_RUNTIME      + " INTEGER, " +
-                MoviesEntry.COLUMN_OVERVIEW     + " TEXT, " +
+                MoviesEntry.COLUMN_OVERVIEW     + " TEXT" +
         ");";
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIES_TABLE);
     }

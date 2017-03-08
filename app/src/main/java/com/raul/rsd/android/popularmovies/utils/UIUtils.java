@@ -114,6 +114,7 @@ public class UIUtils {
         return metrics.widthPixels;
     }
 
+    // FIXME Problems on details rotation
     public static Bitmap getPreciseBackground(Bitmap source, int marginDp, int sizeDp){
         int deviceWidthPx = getDeviceWidthPx();
         int backdropWidthPx = source.getWidth();

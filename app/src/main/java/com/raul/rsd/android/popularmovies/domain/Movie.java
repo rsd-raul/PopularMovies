@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.domain;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 import java.util.Date;
@@ -11,7 +12,9 @@ public class Movie implements Parcelable{
     private long id;
     private String title;
     private String poster_path;
+    private Bitmap poster;
     private String backdrop_path;
+    private Bitmap backdrop;
     private Genre[] genres;             // Popular/TopRated doesn't provide genres name
     private Date release_date;
     private double vote_average;
@@ -47,11 +50,25 @@ public class Movie implements Parcelable{
         this.poster_path = poster_path;
     }
 
+    public Bitmap getPoster() {
+        return poster;
+    }
+    public void setPoster(Bitmap poster) {
+        this.poster = poster;
+    }
+
     public String getBackdrop_path() {
         return backdrop_path;
     }
     public void setBackdrop_path(String backdrop_path) {
         this.backdrop_path = backdrop_path;
+    }
+
+    public Bitmap getBackdrop() {
+        return backdrop;
+    }
+    public void setBackdrop(Bitmap backdrop) {
+        this.backdrop = backdrop;
     }
 
     public Genre[] getGenres() {
@@ -97,6 +114,8 @@ public class Movie implements Parcelable{
     }
 
     // ------------------------- PARCELABLE --------------------------
+
+    // FIXME add images to parcelable
 
     static final Creator CREATOR = new Creator() {
         @Override
