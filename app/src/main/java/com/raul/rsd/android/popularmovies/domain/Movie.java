@@ -117,7 +117,7 @@ public class Movie implements Parcelable{
 
     // FIXME add images to parcelable
 
-    static final Creator CREATOR = new Creator() {
+    static final Creator<Movie> CREATOR = new Creator<Movie> () {
         @Override
         public Movie createFromParcel(Parcel in) {
             return new Movie(in);

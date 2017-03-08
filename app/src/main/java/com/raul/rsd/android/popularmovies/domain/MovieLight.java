@@ -33,7 +33,7 @@ public class MovieLight implements Parcelable{
 
     // ------------------------- PARCELABLE --------------------------
 
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+    public static final Creator<MovieLight> CREATOR = new Creator<MovieLight>() {
         @Override
         public MovieLight createFromParcel(Parcel in) {
             return new MovieLight(in);

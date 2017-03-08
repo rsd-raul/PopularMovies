@@ -38,7 +38,7 @@ public class Genre implements Parcelable{
 
     // ------------------------- PARCELABLE --------------------------
 
-    public static final Creator CREATOR = new Creator() {
+    public static final Creator<Genre> CREATOR = new Creator<Genre>() {
         @Override
         public Genre createFromParcel(Parcel in) {
             return new Genre(in);

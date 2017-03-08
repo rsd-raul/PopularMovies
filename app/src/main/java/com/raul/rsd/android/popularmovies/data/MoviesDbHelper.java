@@ -14,7 +14,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     @Inject
-    public MoviesDbHelper(Context context) {
+    MoviesDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 

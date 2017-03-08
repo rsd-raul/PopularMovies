@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!--Names-->
     <string name="app_name" translatable="false">PopularMovies</string>
     <string name="none" translatable="false"/>
@@ -34,4 +34,15 @@
     <string name="vote_avg_to_string">Rating:</string>
     <string name="release_date_to_string">Release date:</string>
     <string name="duration_to_string">Runtime:</string>
+
+    <!--Format-->
+    <string name="format_voteAvg">
+        <xliff:g id="vote_avg">%1$.1f</xliff:g> -
+        <xliff:g id="direction">%2$s</xliff:g>
+    </string>
+
+    <string name="format_double_string">
+        <xliff:g id="double">%1$d</xliff:g> -
+        <xliff:g id="string">%2$s</xliff:g>
+    </string>
 </resources>

@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.view;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -29,7 +30,7 @@ import android.widget.TextView;
 
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
-import com.raul.rsd.android.popularmovies.data.MovieService;
+import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
@@ -72,8 +73,7 @@ public class DetailsActivity extends BaseActivity implements
     @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mPosterSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
-
-    @Inject MovieService movieService;
+    @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -112,12 +112,6 @@ public class DetailsActivity extends BaseActivity implements
     private void loadData(){
         long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
 
-        // Try to find the movie offline, if we have it, show the info, and refresh data silently
-        // FIXME do all this asynchronously
-//        Puede ser util mirar lo que hacia sunchine de comprobar si tenia info en la base de datos (solo id's')
-//        Si no tienes la id, online, si la tienes rescata el objeto
-
-
         new Thread(() -> {
             Uri movieUriWithId = MoviesContract.getMovieUriWithId(id);
 
@@ -135,9 +129,8 @@ public class DetailsActivity extends BaseActivity implements
             Cursor cursor = this.getContentResolver().query(
                     movieUriWithId,
                     projectionColumns,      // Return the ID only
-                    idSelection,
-                    idSelectionArgs,
-                    null);
+                    idSelection, idSelectionArgs,
+                    null);                  // #NoFilter
 
             if (null != cursor && cursor.getCount() > 0) {
                 startProviderRequest(id);
@@ -182,7 +175,6 @@ public class DetailsActivity extends BaseActivity implements
         DialogsUtils.showErrorDialog(this, (dialog, which) -> loadData());
     }
 
-    @SuppressWarnings("all")
     private void displayMovie(boolean offline){
 
         if(offline){
@@ -216,15 +208,15 @@ public class DetailsActivity extends BaseActivity implements
             }
         });
 
-        // Fill interface with formated movie details
+        // Fill interface with formatted movie details
         titleMain.setText(mMovie.getTitle());
         durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
-        durationSecondary.setText(String.format("%d %s", mMovie.getDuration(), getString(R.string.time_minutes)));
-        rateMain.setText(String.format("%.1f - %s", mMovie.getVote_avg(), getString(R.string.tmdb)));
-        rateSecondary.setText(String.format("%d %s", mMovie.getVote_count(), getString(R.string.votes)));
+        durationSecondary.setText(getString(R.string.format_double_string, mMovie.getDuration(), getString(R.string.time_minutes)));
+        rateMain.setText(getString(R.string.format_voteAvg, mMovie.getVote_avg(), getString(R.string.tmdb)));
+        rateSecondary.setText(getString(R.string.format_double_string, mMovie.getVote_count(), getString(R.string.votes)));
         descriptionMain.setText(mMovie.getSynopsis());
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
-        genresMain.setText(TMDBUtils.extraStringFromGenres(mMovie.getGenres()));
+        genresMain.setText(TMDBUtils.getStringFromGenres(mMovie.getGenres()));
     }
 
     // -------------------------- INTERFACE --------------------------
@@ -367,7 +359,6 @@ public class DetailsActivity extends BaseActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
-        Log.e(TAG, "onCreateLoader: ENTRA 1");
         if(loaderId != ID_MOVIE_DETAILS_LOADER)
             throw new RuntimeException("Loader Not Implemented: " + loaderId);
 
@@ -377,13 +368,11 @@ public class DetailsActivity extends BaseActivity implements
                 MoviesContract.getMovieUriWithId(id),
                 MOVIE_DETAILS_PROJECTION,
                 null, null,
-                MoviesEntry.COLUMN_TIMESTAMP + " ASC");
+                MoviesEntry.COLUMN_TIMESTAMP + " DESC");
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.e(TAG, "onCreateLoader: ENTRA 2");
-
         if(data == null || data.getCount() == 0)
             throw new SQLException("onLoadFinished: Problems retrieving favourite from DB");
 
@@ -393,13 +382,37 @@ public class DetailsActivity extends BaseActivity implements
         displayMovie(true);
 
         // Update DB and UI silently
+        startSilentNetworkRequest(mMovie.getId());
+    }
 
+    private void startSilentNetworkRequest(long id){
+        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+            @Override
+            public void onResponse(Call<Movie> call, Response<Movie> response) {
+                mMovie = response.body();
+
+                if (mMovie == null)
+                    return;
+
+                // Update the UI
+                rateMain.setText(getString(R.string.format_voteAvg,
+                        mMovie.getVote_avg(), getString(R.string.tmdb)));
+                rateSecondary.setText(getString(R.string.format_double_string,
+                        mMovie.getVote_count(), getString(R.string.votes)));
+
+                // Save updated data in the DB
+                Uri uri = MoviesContract.getMovieUriWithId(mMovie.getId());
+                ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie);
+                moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values, null, null);
+            }
+
+            @Override
+            public void onFailure(Call<Movie> call, Throwable t) { }
+        });
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.e(TAG, "onCreateLoader: ENTRA 3");
-
         mMovie = null;
     }
 }
