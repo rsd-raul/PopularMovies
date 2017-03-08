@@ -1,11 +1,14 @@
 package com.raul.rsd.android.popularmovies.utils;
 
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.view.DetailsActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -99,6 +102,36 @@ public final class TMDBUtils {
         return extractedMovies;
     }
 
+    public static Movie extractMovieFromCursor(Cursor data){
+        data.moveToFirst();
+
+        Movie movie = new Movie();
+
+        // Extract Movie details
+        movie.setId(data.getInt(DetailsActivity.INDEX_ID));
+        movie.setTitle(data.getString(DetailsActivity.INDEX_TITLE));
+        movie.setVote_avg(data.getDouble(DetailsActivity.INDEX_VOTE_AVERAGE));
+        movie.setVote_count(data.getLong(DetailsActivity.INDEX_VOTE_COUNT));
+        movie.setSynopsis(data.getString(DetailsActivity.INDEX_OVERVIEW));
+        movie.setDuration(data.getInt(DetailsActivity.INDEX_RUNTIME));
+
+        Bitmap poster = BitmapUtils.geBbitmapFromBytes(data.getBlob(DetailsActivity.INDEX_POSTER));
+        movie.setPoster(poster);
+        poster.recycle();
+
+        Bitmap backdrop = BitmapUtils.geBbitmapFromBytes(data.getBlob(DetailsActivity.INDEX_BACKDROP));
+        movie.setBackdrop(backdrop);
+        backdrop.recycle();
+
+        Genre[] genres = extraGenresFromString(data.getString(DetailsActivity.INDEX_GENRES));
+        movie.setGenres(genres);
+
+        Date release_date = DateUtils.getDateFromTMDBSString(data.getString(DetailsActivity.INDEX_RELEASE_DATE));
+        movie.setRelease_date(release_date);
+
+        return movie;
+    }
+
     public static Movie extractSingleMovieFromJson(String movieJson) throws JSONException {
 
         // Build a JSONObject with the response, then check for errors and handle them accordingly
@@ -119,7 +152,7 @@ public final class TMDBUtils {
         extractedMovie.setVote_count(movieObj.getLong(TMDB_VOTES_COUNT));
         extractedMovie.setSynopsis(movieObj.getString(TMDB_SYNOPSIS));
         extractedMovie.setDuration(movieObj.getInt(TMDB_DURATION));
-        Date parsedDate = DateUtils.getDateFromString(movieObj.getString(TMDB_RELEASE_DATE));
+        Date parsedDate = DateUtils.getDateFromTMDBSString(movieObj.getString(TMDB_RELEASE_DATE));
         extractedMovie.setRelease_date(parsedDate);
 
         // Extract the genres and save them in a list that will be ultimately stored on the movie
@@ -138,6 +171,29 @@ public final class TMDBUtils {
 
         // Return the array of extracted movies
         return extractedMovie;
+    }
+
+    public static String extraStringFromGenres(Genre[] genres){
+        String genresStr = "";
+
+        for(int i = 0; i < genres.length; i++){
+            if(i > 0)
+                genresStr += " - ";
+            genresStr += genres[i].getTitle();
+        }
+
+        return genresStr;
+    }
+
+    private static Genre[] extraGenresFromString(String genresStr){
+        String[] genreArrayStr = genresStr.split(" - ");
+        int genreSize = genreArrayStr.length;
+
+        Genre[] genres = new Genre[genreSize];
+        for (int i = 0; i < genreSize; i++)
+            genres[i] = new Genre(genreArrayStr[i]);
+
+        return genres;
     }
 
     // -------------------------- AUXILIARY --------------------------

@@ -32,7 +32,7 @@ public class DateUtils {
      * @return Date obtained from String
      */
     @SuppressWarnings("all")
-    static Date getDateFromString(String date){
+    public static Date getDateFromTMDBSString(String date){
         Date result = null;
         try{
             result = new SimpleDateFormat("yyyy-MM-dd").parse(date);

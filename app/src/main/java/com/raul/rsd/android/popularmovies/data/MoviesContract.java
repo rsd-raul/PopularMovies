@@ -15,6 +15,10 @@ public class MoviesContract {
     // content://com.raul.rsd.android.popularmovies/movie
     public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
+    public static Uri getMovieUriWithId(long id){
+        return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
+    }
+
     // -------------------------- DB TABLES --------------------------
 
     public static final class MoviesEntry implements BaseColumns {
@@ -30,5 +34,6 @@ public class MoviesContract {
         public static final String COLUMN_VOTE_COUNT = "vote_count";
         public static final String COLUMN_RUNTIME = "runtime";
         public static final String COLUMN_OVERVIEW = "overview";
+        public static final String COLUMN_TIMESTAMP = "timestamp";
     }
 }

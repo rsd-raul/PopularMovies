@@ -1,13 +1,19 @@
 package com.raul.rsd.android.popularmovies.view;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,7 +30,7 @@ import android.widget.TextView;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.data.MovieService;
-import com.raul.rsd.android.popularmovies.domain.Genre;
+import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
@@ -42,7 +48,10 @@ import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class DetailsActivity extends BaseActivity{
+import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
+
+public class DetailsActivity extends BaseActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>{
 
     // --------------------------- VALUES ----------------------------
 
@@ -62,6 +71,7 @@ public class DetailsActivity extends BaseActivity{
     @BindView(R.id.iv_movie_poster) ImageView mPosterImageView;
     @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mPosterSpace;
+    @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Inject MovieService movieService;
 
@@ -72,6 +82,9 @@ public class DetailsActivity extends BaseActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         ButterKnife.bind(this);
+
+        mSwipeRefreshLayout.setEnabled(false);
+        mSwipeRefreshLayout.setRefreshing(true);
 
         setupActivity();
     }
@@ -97,35 +110,72 @@ public class DetailsActivity extends BaseActivity{
     }
 
     private void loadData(){
-        Long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
+        long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
 
         // Try to find the movie offline, if we have it, show the info, and refresh data silently
         // FIXME do all this asynchronously
-        mMovie = movieService.findOne(id);
-        if(mMovie != null) {
-            displayMovie(true);
-            // TODO After displaying the movie if we are online, update the info and refresh
+//        Puede ser util mirar lo que hacia sunchine de comprobar si tenia info en la base de datos (solo id's')
+//        Si no tienes la id, online, si la tienes rescata el objeto
 
-        // If the info is not on the DB, query the server
-        } else {
-            NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
-                @Override
-                public void onResponse(Call<Movie> call, Response<Movie> response) {
-                    mMovie = response.body();
 
-                    if (mMovie != null)
-                        displayMovie(false);
-                    else
-                        showErrorMessage();
-                }
+        new Thread(() -> {
+            Uri movieUriWithId = MoviesContract.getMovieUriWithId(id);
 
-                @Override
-                public void onFailure(Call<Movie> call, Throwable t) {
-                    Log.e(TAG, "loadData/onFailure: Failed to fetch movie from Server", t);
+            /*
+             * Since this query is going to be used only as a check to see if we have any
+             * data (rather than to display data), we just need to PROJECT the ID of each
+             * row. In our queries where we display data, we need to PROJECT more columns
+             * to determine what weather details need to be displayed.
+             */
+            String[] projectionColumns = {MoviesEntry._ID};
+            String idSelection = MoviesEntry._ID + "=?";
+            String[] idSelectionArgs = new String[]{String.valueOf(id)};
+
+            /* Here, we perform the query to check to see if we have any weather data */
+            Cursor cursor = this.getContentResolver().query(
+                    movieUriWithId,
+                    projectionColumns,      // Return the ID only
+                    idSelection,
+                    idSelectionArgs,
+                    null);
+
+            if (null != cursor && cursor.getCount() > 0) {
+                startProviderRequest(id);
+                cursor.close();
+            }else
+                startNetworkRequest(id);
+        }).start();
+    }
+
+    private void startProviderRequest(long id){
+        Bundle queryBundle = new Bundle();
+        queryBundle.putLong(Intent.EXTRA_UID, id);
+
+        LoaderManager loaderManager = getSupportLoaderManager();
+        if(loaderManager.getLoader(ID_MOVIE_DETAILS_LOADER) == null)
+            loaderManager.initLoader(ID_MOVIE_DETAILS_LOADER, queryBundle, this) ;
+        else
+            loaderManager.restartLoader(ID_MOVIE_DETAILS_LOADER, queryBundle, this);
+    }
+
+    private void startNetworkRequest(long id){
+        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+            @Override
+            public void onResponse(Call<Movie> call, Response<Movie> response) {
+                mMovie = response.body();
+
+                if (mMovie != null)
+                    displayMovie(false);
+                else
                     showErrorMessage();
-                }
-            });
-        }
+            }
+
+            @Override
+            public void onFailure(Call<Movie> call, Throwable t) {
+                Log.e(TAG, "loadData/onFailure: Failed to fetch movie from Server", t);
+                showErrorMessage();
+            }
+        });
     }
 
     private void showErrorMessage(){
@@ -174,12 +224,7 @@ public class DetailsActivity extends BaseActivity{
         rateSecondary.setText(String.format("%d %s", mMovie.getVote_count(), getString(R.string.votes)));
         descriptionMain.setText(mMovie.getSynopsis());
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
-        Genre[] movieGenres = mMovie.getGenres();
-        for(int i = 0; i < movieGenres.length; i++){
-            if(i > 0)
-                genresMain.append(" - ");
-            genresMain.append(movieGenres[i].getTitle());
-        }
+        genresMain.setText(TMDBUtils.extraStringFromGenres(mMovie.getGenres()));
     }
 
     // -------------------------- INTERFACE --------------------------
@@ -247,10 +292,14 @@ public class DetailsActivity extends BaseActivity{
                 if(!UIUtils.isColorDark(dominantColor))
                     actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
                 actionBar.setDisplayHomeAsUpEnabled(true);
+
+                mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
-            public void onError() { }
+            public void onError() {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
         };
     }
 
@@ -286,5 +335,71 @@ public class DetailsActivity extends BaseActivity{
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    // ------------------------ CURSOR LOADER ------------------------
+
+    private static final int ID_MOVIE_DETAILS_LOADER = 128;
+
+    public static final String[] MOVIE_DETAILS_PROJECTION = {
+                            MoviesEntry._ID,
+                            MoviesEntry.COLUMN_TITLE,
+                            MoviesEntry.COLUMN_POSTER,
+                            MoviesEntry.COLUMN_BACKDROP,
+                            MoviesEntry.COLUMN_GENRES,
+                            MoviesEntry.COLUMN_RELEASE_DATE,
+                            MoviesEntry.COLUMN_VOTE_AVERAGE,
+                            MoviesEntry.COLUMN_VOTE_COUNT,
+                            MoviesEntry.COLUMN_RUNTIME,
+                            MoviesEntry.COLUMN_OVERVIEW};
+
+    public static final int INDEX_ID = 0,
+                            INDEX_TITLE = 1,
+                            INDEX_POSTER = 2,
+                            INDEX_BACKDROP = 3,
+                            INDEX_GENRES = 4,
+                            INDEX_RELEASE_DATE = 5,
+                            INDEX_VOTE_AVERAGE = 6,
+                            INDEX_VOTE_COUNT = 7,
+                            INDEX_RUNTIME = 8,
+                            INDEX_OVERVIEW = 9;
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        Log.e(TAG, "onCreateLoader: ENTRA 1");
+        if(loaderId != ID_MOVIE_DETAILS_LOADER)
+            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+
+        long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
+
+        return new CursorLoader(this,
+                MoviesContract.getMovieUriWithId(id),
+                MOVIE_DETAILS_PROJECTION,
+                null, null,
+                MoviesEntry.COLUMN_TIMESTAMP + " ASC");
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.e(TAG, "onCreateLoader: ENTRA 2");
+
+        if(data == null || data.getCount() == 0)
+            throw new SQLException("onLoadFinished: Problems retrieving favourite from DB");
+
+        mMovie = TMDBUtils.extractMovieFromCursor(data);
+
+        // Adapt the interface
+        displayMovie(true);
+
+        // Update DB and UI silently
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.e(TAG, "onCreateLoader: ENTRA 3");
+
+        mMovie = null;
     }
 }

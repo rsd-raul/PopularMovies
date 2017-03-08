@@ -40,17 +40,41 @@ public final class NetworkUtils {
     // --------------------------- VALUES ----------------------------
 
     public static final String POPULAR = "popular";
+    public static final String VIDEOS = "videos";
+    public static final String REVIEWS = "reviews";
     public static final String TOP_RATED = "top_rated";
 
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
     private static final String BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/";
+    private static final String BASE_YOUTUBE_URL = "https://www.youtube.com/watch";
 
     private static final String API_PARAM = "api_key";
+    private static final String VIDEO_PARAM = "v";
+    private static final String APPEND_PARAM = "append_to_response";
 
     private static String POSTER_SIZE;
     private static String BACKDROP_SIZE;
 
-    // ------------------------ URI - IMAGES -------------------------
+
+
+    // ------------------------ URI BUILDERS -------------------------
+
+
+    //http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
+
+    public static Uri buildFullMovieURI(String id){
+        return Uri.parse(BASE_MOVIE_URL).buildUpon()
+                .appendPath(id)
+                .appendQueryParameter(API_PARAM, BuildConfig.TMDB_API_KEY_V3)
+                .appendQueryParameter(APPEND_PARAM, VIDEOS + "," + REVIEWS)
+                .build();
+    }
+
+    public static Uri buildYoutubeTrailerURI(String videoPath){
+        return Uri.parse(BASE_YOUTUBE_URL).buildUpon()
+                .appendQueryParameter(VIDEO_PARAM, videoPath)
+                .build();
+    }
 
     public static Uri buildMovieBackdropURI(String backdropPath){
         return buildMovieImageURI(backdropPath, true);
