@@ -9,8 +9,10 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.raul.rsd.android.popularmovies.App;
 
@@ -97,8 +99,8 @@ public class MoviesProvider extends ContentProvider {
         switch(sUriMatcher.match(uri)){
             case MOVIE:
                 response = rDB.get().query(MoviesEntry.TABLE_NAME, projection,
-                        selection, selectionArgs,
-                        null, null, sortOrder);
+                                                                        selection, selectionArgs,
+                                                                        null, null, sortOrder);
                 break;
             case MOVIE_WITH_ID:
                 // Retrieve the id, knowing the Uri has 2 paths "/tasks/id" we get the index
@@ -110,8 +112,8 @@ public class MoviesProvider extends ContentProvider {
 
                 // Construct a query as usual, but passing in the selection/args
                 response =  rDB.get().query(MoviesEntry.TABLE_NAME, projection,
-                        idSelection, idSelectionArgs,
-                        null, null, sortOrder);
+                                                                    idSelection, idSelectionArgs,
+                                                                    null, null, sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("query: Not implemented for uri: " + uri);
@@ -130,6 +132,10 @@ public class MoviesProvider extends ContentProvider {
                                                 throws SQLException, UnsupportedOperationException {
         if(context == null)
             deferInit();
+
+        // FIXME remove
+        boolean thread = Looper.myLooper() == Looper.getMainLooper();
+        Log.e("AAAAAAAA", "UI Thread: " + thread);
 
         if(sUriMatcher.match(uri) != MOVIE)
             throw new UnsupportedOperationException("insert: Unknown uri: " + uri);
@@ -176,7 +182,7 @@ public class MoviesProvider extends ContentProvider {
 
         // Notify the change so the resolver can update the database and any associate UI
         if(itemsDeleted < 1)
-            throw new SQLException("delete: No items deleted with uri: " + uri);
+            throw new SQLException("delete: " + itemsDeleted + " items deleted with uri: " + uri);
 
         context.getContentResolver().notifyChange(uri, null);
         return itemsDeleted;

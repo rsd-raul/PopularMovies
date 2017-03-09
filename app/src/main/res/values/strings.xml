@@ -18,6 +18,7 @@
     <string name="no_fetch_content">We have problems getting the info from our servers, try again in now or go back and try again later.</string>
 
     <string name="share_movie_chooser">Select app to share movie</string>
+    <string name="share">Share movie</string>
 
     <!--Content Description -->
     <string name="info_movie_poster">Poster for the movie</string>

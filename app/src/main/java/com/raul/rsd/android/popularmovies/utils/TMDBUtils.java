@@ -66,13 +66,11 @@ public final class TMDBUtils {
         movie.setSynopsis(data.getString(DetailsActivity.INDEX_OVERVIEW));
         movie.setDuration(data.getInt(DetailsActivity.INDEX_RUNTIME));
 
-        Bitmap poster = BitmapUtils.geBbitmapFromBytes(data.getBlob(DetailsActivity.INDEX_POSTER));
+        Bitmap poster = BitmapUtils.getBitmapFromBytes(data.getBlob(DetailsActivity.INDEX_POSTER));
         movie.setPoster(poster);
-        poster.recycle();
 
-        Bitmap backdrop = BitmapUtils.geBbitmapFromBytes(data.getBlob(DetailsActivity.INDEX_BACKDROP));
+        Bitmap backdrop = BitmapUtils.getBitmapFromBytes(data.getBlob(DetailsActivity.INDEX_BACKDROP));
         movie.setBackdrop(backdrop);
-        backdrop.recycle();
 
         Genre[] genres = getGenresFromString(data.getString(DetailsActivity.INDEX_GENRES));
         movie.setGenres(genres);
@@ -86,10 +84,11 @@ public final class TMDBUtils {
     public static ContentValues getContentValuesFromMovie(Movie movie){
         ContentValues values = new ContentValues();
 
+        values.put(MoviesEntry._ID, movie.getId());
         values.put(MoviesEntry.COLUMN_TITLE, movie.getTitle());
         String genresStr = TMDBUtils.getStringFromGenres(movie.getGenres());
         values.put(MoviesEntry.COLUMN_GENRES, genresStr);
-        String dateStr = DateUtils.getStringFromDate(movie.getRelease_date());
+        String dateStr = DateUtils.getTMDBStringFromDate(movie.getRelease_date());
         values.put(MoviesEntry.COLUMN_RELEASE_DATE, dateStr);
         values.put(MoviesEntry.COLUMN_VOTE_AVERAGE, movie.getVote_avg());
         values.put(MoviesEntry.COLUMN_VOTE_COUNT, movie.getVote_count());

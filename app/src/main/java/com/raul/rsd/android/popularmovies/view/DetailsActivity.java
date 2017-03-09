@@ -7,8 +7,11 @@ import android.database.SQLException;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
@@ -19,6 +22,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -27,12 +31,12 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
-
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
+import com.raul.rsd.android.popularmovies.utils.BitmapUtils;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
@@ -45,10 +49,8 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
-
 import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 
 public class DetailsActivity extends BaseActivity implements
@@ -60,7 +62,6 @@ public class DetailsActivity extends BaseActivity implements
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private Movie mMovie;
     @BindView(R.id.tv_title) TextView titleMain;
     @BindView(R.id.tv_rate_main_tmdb) TextView rateMain;
     @BindView(R.id.tv_rate_secondary_tmdb) TextView rateSecondary;
@@ -73,7 +74,10 @@ public class DetailsActivity extends BaseActivity implements
     @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mPosterSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
+    private Movie mMovie;
+    private boolean isFavourite;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -105,6 +109,8 @@ public class DetailsActivity extends BaseActivity implements
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mFloatingActionButton.setOnClickListener(view -> favouriteMovie());
+
         // Retrieve the ID sent and fetch the movie from TMDB
         loadData();
     }
@@ -121,16 +127,16 @@ public class DetailsActivity extends BaseActivity implements
              * row. In our queries where we display data, we need to PROJECT more columns
              * to determine what weather details need to be displayed.
              */
+
             String[] projectionColumns = {MoviesEntry._ID};
-            String idSelection = MoviesEntry._ID + "=?";
-            String[] idSelectionArgs = new String[]{String.valueOf(id)};
+//            String idSelection = MoviesEntry._ID + "=?";
+//            String[] idSelectionArgs = new String[]{String.valueOf(id)};
 
             /* Here, we perform the query to check to see if we have any weather data */
             Cursor cursor = this.getContentResolver().query(
                     movieUriWithId,
                     projectionColumns,      // Return the ID only
-                    idSelection, idSelectionArgs,
-                    null);                  // #NoFilter
+                    null, null, null);                  // #NoFilter
 
             if (null != cursor && cursor.getCount() > 0) {
                 startProviderRequest(id);
@@ -141,6 +147,9 @@ public class DetailsActivity extends BaseActivity implements
     }
 
     private void startProviderRequest(long id){
+        Log.e(TAG, "startProviderRequest: ");
+        changeFavourite(true);
+
         Bundle queryBundle = new Bundle();
         queryBundle.putLong(Intent.EXTRA_UID, id);
 
@@ -152,6 +161,9 @@ public class DetailsActivity extends BaseActivity implements
     }
 
     private void startNetworkRequest(long id){
+        Log.e(TAG, "startNetworkRequest: ");
+        changeFavourite(false);
+
         NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
@@ -179,10 +191,9 @@ public class DetailsActivity extends BaseActivity implements
 
         if(offline){
             mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
-            adaptColorByBackdropCallback(this, titleMain).onSuccess();
-
             mPosterImageView.setImageBitmap(mMovie.getPoster());
 
+            adaptColorByBackdropCallback(this, titleMain).onSuccess();
         }else {
             // Setup backdrop <- First, so Picasso gets a head start.
             Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
@@ -297,8 +308,47 @@ public class DetailsActivity extends BaseActivity implements
 
     // -------------------------- USE CASES --------------------------
 
-    @OnClick(R.id.fab)
-    void shareMovie(){
+    private void changeFavourite(boolean value){
+        isFavourite = value;
+
+        // Only change the image if we are under Lollipop
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            return;
+
+        int imageRes = value ? R.drawable.ic_favorite_filled_24dp : R.drawable.ic_favorite_border_24dp;
+        mFloatingActionButton.setImageResource(imageRes);
+    }
+
+    void favouriteMovie() {
+        if (isFavourite) {
+            Uri movieUriWithId = MoviesContract.getMovieUriWithId(mMovie.getId());
+            moviesHandler.startDelete(MoviesAsyncHandler.DELETE_TOKEN, null, movieUriWithId,
+                                                                                    null, null);
+        } else {
+            new Thread(() -> {
+                ContentValues movie = TMDBUtils.getContentValuesFromMovie(mMovie);
+
+                if(mMovie.getBackdrop() == null) {
+                    Bitmap backdropBitmap = ((BitmapDrawable) mBackdropImageView.getDrawable()).getBitmap();
+                    byte[] backdropBytes = BitmapUtils.getBytesFromBitmap(backdropBitmap);
+                    movie.put(MoviesEntry.COLUMN_BACKDROP, backdropBytes);
+                }
+                if (mMovie.getPoster() == null) {
+                    Log.e(TAG, "favouriteMovie: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+                    Bitmap posterBitmap= ((BitmapDrawable) mPosterImageView.getDrawable()).getBitmap();
+                    byte[] posterBytes = BitmapUtils.getBytesFromBitmap(posterBitmap);
+                    movie.put(MoviesEntry.COLUMN_POSTER, posterBytes);
+                }
+
+                moviesHandler.startInsert(MoviesAsyncHandler.INSERT_TOKEN, null,
+                        MoviesContract.CONTENT_URI, movie);
+            }).start();
+        }
+
+        changeFavourite(!isFavourite);
+    }
+
+    private void shareMovie(){
         // If the movie has not been fetched yet, don't try to share
         if(mMovie == null)
             return;
@@ -325,8 +375,21 @@ public class DetailsActivity extends BaseActivity implements
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.action_share:
+                shareMovie();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    // ---------------------------- MENU -----------------------------
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.details_menu, menu);
+        return true;
     }
 
 
@@ -363,6 +426,8 @@ public class DetailsActivity extends BaseActivity implements
             throw new RuntimeException("Loader Not Implemented: " + loaderId);
 
         long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
+
+        Looper.prepare();
 
         return new CursorLoader(this,
                 MoviesContract.getMovieUriWithId(id),

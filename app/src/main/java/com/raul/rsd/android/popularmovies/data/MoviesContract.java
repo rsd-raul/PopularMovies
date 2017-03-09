@@ -13,7 +13,7 @@ public class MoviesContract {
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     // content://com.raul.rsd.android.popularmovies/movie
-    static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
+    public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
     public static Uri getMovieUriWithId(long id){
         return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();

@@ -4,6 +4,8 @@ package com.raul.rsd.android.popularmovies.data;
 import android.content.AsyncQueryHandler;
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
@@ -57,11 +59,30 @@ public class MoviesAsyncHandler {
 
         @Override
         protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
+            Log.e("AAAAA", "onQueryComplete: ");
             final AsyncQueryListener listener = mListener.get();
             if (listener != null)
                 listener.onQueryComplete(token, cookie, cursor);
             else if (cursor != null)
                 cursor.close();
+        }
+
+        @Override
+        protected void onDeleteComplete(int token, Object cookie, int result) {
+            Log.e("AAAAA", "onDeleteComplete: ");
+            super.onDeleteComplete(token, cookie, result);
+        }
+
+        @Override
+        protected void onInsertComplete(int token, Object cookie, Uri uri) {
+            Log.e("AAAAA", "onInsertComplete: ");
+            super.onInsertComplete(token, cookie, uri);
+        }
+
+        @Override
+        protected void onUpdateComplete(int token, Object cookie, int result) {
+            Log.e("AAAAA", "onUpdateComplete: ");
+            super.onUpdateComplete(token, cookie, result);
         }
     }
 }
