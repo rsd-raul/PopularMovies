@@ -39,7 +39,7 @@
                 android:layout_toEndOf="@id/poster_space"
                 android:layout_marginTop="20dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="@color/colorPrimaryText"/>
+                android:textColor="@color/movie_title_color"/>
 
             <TextView
                 android:id="@+id/tv_genres"

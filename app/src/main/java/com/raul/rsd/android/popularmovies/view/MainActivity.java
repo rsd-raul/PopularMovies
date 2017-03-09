@@ -80,8 +80,8 @@ public class MainActivity extends BaseActivity {
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
 
         // Configure RecyclerView
-        boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        int columnNumber = isPortrait ? 2 : 3; // TODO -> Horizontal + Details = 2
+        boolean isPortrait = !getResources().getBoolean(R.bool.is_landscape);
+        int columnNumber = isPortrait ? 2 : 3;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnNumber);
         mRecyclerView.setLayoutManager(layoutManager);
         mRecyclerView.setAdapter(mMoviesAdapter);

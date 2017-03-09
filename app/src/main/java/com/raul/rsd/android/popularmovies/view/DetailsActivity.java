@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
@@ -45,6 +47,8 @@ import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.net.URL;
+
 import javax.inject.Inject;
 
 import butterknife.BindView;
@@ -71,7 +75,7 @@ public class DetailsActivity extends BaseActivity implements
     @BindView(R.id.tv_release_date_main) TextView releaseDateMain;
     @BindView(R.id.tv_genres) TextView genresMain;
     @BindView(R.id.iv_movie_poster) ImageView mPosterImageView;
-    @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
+    @Nullable @BindView(R.id.iv_movie_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mPosterSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
@@ -120,22 +124,12 @@ public class DetailsActivity extends BaseActivity implements
         new Thread(() -> {
             Uri movieUriWithId = MoviesContract.getMovieUriWithId(id);
 
-            /*
-             * Since this query is going to be used only as a check to see if we have any
-             * data (rather than to display data), we just need to PROJECT the ID of each
-             * row. In our queries where we display data, we need to PROJECT more columns
-             * to determine what weather details need to be displayed.
-             */
-
             String[] projectionColumns = {MoviesEntry._ID};
-//            String idSelection = MoviesEntry._ID + "=?";
-//            String[] idSelectionArgs = new String[]{String.valueOf(id)};
 
-            /* Here, we perform the query to check to see if we have any weather data */
             Cursor cursor = this.getContentResolver().query(
                     movieUriWithId,
                     projectionColumns,      // Return the ID only
-                    null, null, null);                  // #NoFilter
+                    null, null, null);      // #NoFilter
 
             if (null != cursor && cursor.getCount() > 0) {
                 startProviderRequest(id);
@@ -190,19 +184,42 @@ public class DetailsActivity extends BaseActivity implements
     }
 
     private void displayMovie(boolean offline){
+        boolean isLandscape = getResources().getBoolean(R.bool.is_landscape);
 
+        //FIXME CLEAN
         if(offline){
-            mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
+            // If portrait, store image
+            if(mBackdropImageView != null) {
+                mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
+                adaptColorByBackdropCallback(this, titleMain).onSuccess();
+            }
             mPosterImageView.setImageBitmap(mMovie.getPoster());
-
-            adaptColorByBackdropCallback(this, titleMain).onSuccess();
         }else {
-            // Setup backdrop <- First, so Picasso gets a head start.
-            Uri backdropUri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
-            Picasso.with(this)
-                    .load(backdropUri)
-                    .placeholder(R.drawable.placeholder_backdrop)
-                    .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
+            if(mBackdropImageView != null) {
+                // Setup backdrop <- First, so Picasso gets a head start.
+                Uri backdropUri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
+                Picasso.with(this)
+                        .load(backdropUri)
+                        .placeholder(R.drawable.placeholder_backdrop)
+                        .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
+
+                // Customize the Appbar behaviour and react to scroll
+                AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+                appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                    @Override                           // Don't use Lambda -> It's a trap!!
+                    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                        actionBarScrollControl(verticalOffset);
+                    }
+                });
+            }
+
+            //FIXME CLEAN
+            // If landscape, display back button and stop loading icon
+            if(mBackdropImageView == null) {
+                ActionBar actionBar = getSupportActionBar();
+                if (actionBar != null)
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+            }
 
             // Setup poster <- Second, so Picasso gets a head start.
             Uri posterUri = NetworkUtils.buildMoviePosterUri(mMovie.getPoster_path());
@@ -211,15 +228,6 @@ public class DetailsActivity extends BaseActivity implements
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mPosterImageView);
         }
-
-        // Customize the Appbar behaviour and react to scroll
-        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override                           // Don't use Lambda -> It's a trap!!
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                actionBarScrollControl(verticalOffset);
-            }
-        });
 
         // Fill interface with formatted movie details
         titleMain.setText(mMovie.getTitle());
@@ -330,13 +338,28 @@ public class DetailsActivity extends BaseActivity implements
             new Thread(() -> {
                 ContentValues movie = TMDBUtils.getContentValuesFromMovie(mMovie);
 
+                // FIXME CLEAN
                 if(mMovie.getBackdrop() == null) {
-                    Bitmap backdropBitmap = ((BitmapDrawable) mBackdropImageView.getDrawable()).getBitmap();
-                    byte[] backdropBytes = BitmapUtils.getBytesFromBitmap(backdropBitmap);
-                    movie.put(MoviesEntry.COLUMN_BACKDROP, backdropBytes);
+                    Bitmap backdropBitmap = null;
+                    if(mBackdropImageView != null)
+                        backdropBitmap = ((BitmapDrawable) mBackdropImageView.getDrawable())
+                                                                                    .getBitmap();
+                    else {
+                        try {
+                            Uri uri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
+                            URL url = new URL(uri.toString());
+                            backdropBitmap = BitmapFactory.decodeStream(
+                                                            url.openConnection().getInputStream());
+                        }catch (Exception ex){
+                            Log.e(TAG, "favouriteMovie: ", ex);
+                        }
+                    }
+                    if(backdropBitmap != null) {
+                        byte[] backdropBytes = BitmapUtils.getBytesFromBitmap(backdropBitmap);
+                        movie.put(MoviesEntry.COLUMN_BACKDROP, backdropBytes);
+                    }
                 }
                 if (mMovie.getPoster() == null) {
-                    Log.e(TAG, "favouriteMovie: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
                     Bitmap posterBitmap= ((BitmapDrawable) mPosterImageView.getDrawable()).getBitmap();
                     byte[] posterBytes = BitmapUtils.getBytesFromBitmap(posterBitmap);
                     movie.put(MoviesEntry.COLUMN_POSTER, posterBytes);

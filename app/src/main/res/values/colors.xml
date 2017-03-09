@@ -37,4 +37,6 @@
     <color name="background">#95fefefe</color>
     <color name="transparent">#00FEFEFE</color>
     <color name="shadow">#66000000</color>
+
+    <color name="movie_title_color">@color/colorPrimaryText</color>
 </resources>
