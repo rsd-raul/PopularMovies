@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
 import com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
@@ -11,7 +13,7 @@ import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.view.DetailsActivity;
 import java.util.Date;
 
-public final class TMDBUtils {
+public abstract class TMDBUtils {
 
     // -------------------------- USE CASES --------------------------
 
@@ -94,6 +96,32 @@ public final class TMDBUtils {
         values.put(MoviesEntry.COLUMN_VOTE_COUNT, movie.getVote_count());
         values.put(MoviesEntry.COLUMN_RUNTIME, movie.getDuration());
         values.put(MoviesEntry.COLUMN_OVERVIEW, movie.getSynopsis());
+
+        Log.e("AAAAA", "getContentValuesFromMovie: " + values.size());
+        return values;
+    }
+
+    public static ContentValues getContentValuesFromMovie(Movie oldMovie, Movie newMovie){
+        ContentValues values = new ContentValues();
+        values.put(MoviesEntry._ID, oldMovie.getId());
+
+        // Check values, only update if needed
+        if(!oldMovie.getTitle().equals(newMovie.getTitle()))
+            values.put(MoviesEntry.COLUMN_TITLE, newMovie.getTitle());
+        else if(oldMovie.getVote_count() != newMovie.getVote_count())
+            values.put(MoviesEntry.COLUMN_VOTE_COUNT, newMovie.getVote_count());
+        else if(oldMovie.getDuration() != newMovie.getDuration())
+            values.put(MoviesEntry.COLUMN_RUNTIME, newMovie.getDuration());
+        else if(!oldMovie.getSynopsis().equals(newMovie.getSynopsis()))
+            values.put(MoviesEntry.COLUMN_OVERVIEW, newMovie.getSynopsis());
+        else if(oldMovie.getGenres() != newMovie.getGenres()) {
+            String genresStr = TMDBUtils.getStringFromGenres(newMovie.getGenres());
+            values.put(MoviesEntry.COLUMN_GENRES, genresStr);
+        } else if(!oldMovie.getRelease_date().equals(newMovie.getRelease_date())) {
+            String dateStr = DateUtils.getTMDBStringFromDate(newMovie.getRelease_date());
+            values.put(MoviesEntry.COLUMN_RELEASE_DATE, dateStr);
+        } else if(oldMovie.getVote_avg() != newMovie.getVote_avg())
+            values.put(MoviesEntry.COLUMN_VOTE_AVERAGE, newMovie.getVote_avg());
 
         return values;
     }

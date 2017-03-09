@@ -10,7 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class DateUtils {
+public abstract class DateUtils {
 
     private final static String TAG = "DateUtils";
 

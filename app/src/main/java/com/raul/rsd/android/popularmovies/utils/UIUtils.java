@@ -16,7 +16,7 @@ import android.view.WindowManager;
 
 import com.raul.rsd.android.popularmovies.R;
 
-public class UIUtils {
+public abstract class UIUtils {
 
     /**
      * Sets the active sort as a subtitle in the ActionBar.

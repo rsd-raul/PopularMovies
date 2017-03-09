@@ -9,7 +9,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -23,6 +22,8 @@ import javax.inject.Provider;
 import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 
 public class MoviesProvider extends ContentProvider {
+
+    private final String TAG = "MoviesProvider";
 
     // --------------------------- VALUES ----------------------------
 
@@ -133,10 +134,6 @@ public class MoviesProvider extends ContentProvider {
         if(context == null)
             deferInit();
 
-        // FIXME remove
-        boolean thread = Looper.myLooper() == Looper.getMainLooper();
-        Log.e("AAAAAAAA", "UI Thread: " + thread);
-
         if(sUriMatcher.match(uri) != MOVIE)
             throw new UnsupportedOperationException("insert: Unknown uri: " + uri);
 
@@ -152,7 +149,7 @@ public class MoviesProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs)
-                                                throws SQLException, UnsupportedOperationException {
+                                                throws UnsupportedOperationException {
         if(context == null)
             deferInit();
 
@@ -182,7 +179,7 @@ public class MoviesProvider extends ContentProvider {
 
         // Notify the change so the resolver can update the database and any associate UI
         if(itemsDeleted < 1)
-            throw new SQLException("delete: " + itemsDeleted + " items deleted with uri: " + uri);
+            Log.e(TAG, "delete: " + itemsDeleted + " items deleted with uri: " + uri);
 
         context.getContentResolver().notifyChange(uri, null);
         return itemsDeleted;
@@ -190,7 +187,7 @@ public class MoviesProvider extends ContentProvider {
 
     @Override
     public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selArgs)
-                                                throws UnsupportedOperationException, SQLException{
+                                                            throws UnsupportedOperationException{
         if(context == null)
             deferInit();
 
@@ -208,7 +205,7 @@ public class MoviesProvider extends ContentProvider {
 
         // Notify the change so the resolver can update the database and any associate UI
         if(itemsUpdated == 0)
-            throw new SQLException("update: No items updated with uri: " + uri + " and id: " + id);
+            Log.e(TAG, "update: No items updated with uri: " + uri + " and id: " + id);
 
         context.getContentResolver().notifyChange(uri, null);
         return itemsUpdated;

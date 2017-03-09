@@ -35,7 +35,7 @@ import retrofit2.http.Query;
 /**
  * These utilities will be used to communicate with the weather servers.
  */
-public final class NetworkUtils {
+public abstract class NetworkUtils {
 
     // --------------------------- VALUES ----------------------------
 
@@ -44,9 +44,10 @@ public final class NetworkUtils {
     public static final String REVIEWS = "reviews";
     public static final String TOP_RATED = "top_rated";
 
-    private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
     private static final String BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/";
+    private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
     private static final String BASE_YOUTUBE_URL = "https://www.youtube.com/watch";
+    private static final String BASE_THUMBNAIL_URL = "https://img.youtube.com/vi/";
 
     private static final String API_PARAM = "api_key";
     private static final String VIDEO_PARAM = "v";
@@ -54,15 +55,14 @@ public final class NetworkUtils {
 
     private static String POSTER_SIZE;
     private static String BACKDROP_SIZE;
+    private static String THUMBNAIL_SIZE;
 
 
 
     // ------------------------ URI BUILDERS -------------------------
 
-
-    //http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
-
-    public static Uri buildFullMovieURI(String id){
+    // http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
+    public static Uri buildFullMovieUri(String id){
         return Uri.parse(BASE_MOVIE_URL).buildUpon()
                 .appendPath(id)
                 .appendQueryParameter(API_PARAM, BuildConfig.TMDB_API_KEY_V3)
@@ -70,17 +70,26 @@ public final class NetworkUtils {
                 .build();
     }
 
-    public static Uri buildYoutubeTrailerURI(String videoPath){
+    // https://www.youtube.com/watch?v=Zk3yLI0q794
+    public static Uri buildYoutubeTrailerUri(String videoPath){
         return Uri.parse(BASE_YOUTUBE_URL).buildUpon()
                 .appendQueryParameter(VIDEO_PARAM, videoPath)
                 .build();
     }
 
-    public static Uri buildMovieBackdropURI(String backdropPath){
+    // https://img.youtube.com/vi/Zk3yLI0q794/default.jpg
+    public static Uri buildYoutubeThumbnailUri(String videoPath){
+        return Uri.parse(BASE_THUMBNAIL_URL).buildUpon()
+                .appendPath(videoPath)
+                .appendPath(THUMBNAIL_SIZE)
+                .build();
+    }
+
+    public static Uri buildMovieBackdropUri(String backdropPath){
         return buildMovieImageURI(backdropPath, true);
     }
 
-    public static Uri buildMoviePosterURI(String posterPath){
+    public static Uri buildMoviePosterUri(String posterPath){
         return buildMovieImageURI(posterPath, false);
     }
 
@@ -109,23 +118,29 @@ public final class NetworkUtils {
      * @param deviceDPI Current device DPI
      */
     // "w92", "w154", "w185", "w342", "w500", "w780", "w1000", "w1920" or "original"
+    // default.jpg 120x90, mqdefault.jpg 320x180, hqdefault.jpg 480x360
+    // sddefault.jpg 640x480, maxresdefault.jpg 1920x1080 might not exist <- Avoid
     public static void setImagesSizeWithDpi(int deviceDPI){
         switch (deviceDPI){
             case DisplayMetrics.DENSITY_XHIGH:
                 POSTER_SIZE = "w342";
                 BACKDROP_SIZE = "w780";
+                THUMBNAIL_SIZE = "mqdefault.jpg";
                 break;
             case DisplayMetrics.DENSITY_XXHIGH:
                 POSTER_SIZE = "w500";
                 BACKDROP_SIZE = "w1000";
+                THUMBNAIL_SIZE = "mqdefault.jpg";
                 break;
             case DisplayMetrics.DENSITY_XXXHIGH:
                 POSTER_SIZE = "w780";
                 BACKDROP_SIZE = "w1920";
+                THUMBNAIL_SIZE = "hqdefault.jpg";
                 break;
             default:
                 POSTER_SIZE = "w185";
                 BACKDROP_SIZE = "w500";
+                THUMBNAIL_SIZE = "default.jpg";
                 break;
         }
     }
@@ -141,6 +156,11 @@ public final class NetworkUtils {
         //  https://api.themoviedb.org/3/movie/328111?api_key=abc
         @GET("{id}")
         Call<Movie> getMovieById(@Path("id") Long id, @Query(API_PARAM) String api_key);
+
+        //http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
+        @GET("{id}")
+        Call<Movie> getFullMovieById(@Path("id") Long id, @Query(API_PARAM) String api_key,
+                                     @Query(APPEND_PARAM) String videosAndReviews);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BASE_MOVIE_URL)
@@ -159,6 +179,13 @@ public final class NetworkUtils {
     public static void getMovieById(Long id, Callback<Movie> callback){
         NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
         Call<Movie> call = gitHubService.getMovieById(id, BuildConfig.TMDB_API_KEY_V3);
+        call.enqueue(callback);
+    }
+
+    public static void getFullMovieById(Long id, Callback<Movie> callback){
+        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
+        Call<Movie> call = gitHubService.getFullMovieById(id,
+                                                BuildConfig.TMDB_API_KEY_V3, VIDEOS+","+REVIEWS);
         call.enqueue(callback);
     }
 

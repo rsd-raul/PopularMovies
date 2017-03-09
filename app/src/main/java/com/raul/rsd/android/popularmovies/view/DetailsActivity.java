@@ -88,7 +88,6 @@ public class DetailsActivity extends BaseActivity implements
         ButterKnife.bind(this);
 
         mSwipeRefreshLayout.setEnabled(false);
-        mSwipeRefreshLayout.setRefreshing(true);
 
         setupActivity();
     }
@@ -162,9 +161,12 @@ public class DetailsActivity extends BaseActivity implements
 
     private void startNetworkRequest(long id){
         Log.e(TAG, "startNetworkRequest: ");
+
+        mSwipeRefreshLayout.setRefreshing(true);
+
         changeFavourite(false);
 
-        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+        NetworkUtils.getFullMovieById(id, new retrofit2.Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
                 mMovie = response.body();
@@ -196,14 +198,14 @@ public class DetailsActivity extends BaseActivity implements
             adaptColorByBackdropCallback(this, titleMain).onSuccess();
         }else {
             // Setup backdrop <- First, so Picasso gets a head start.
-            Uri backdropUri = NetworkUtils.buildMovieBackdropURI(mMovie.getBackdrop_path());
+            Uri backdropUri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
             Picasso.with(this)
                     .load(backdropUri)
                     .placeholder(R.drawable.placeholder_backdrop)
                     .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
 
             // Setup poster <- Second, so Picasso gets a head start.
-            Uri posterUri = NetworkUtils.buildMoviePosterURI(mMovie.getPoster_path());
+            Uri posterUri = NetworkUtils.buildMoviePosterUri(mMovie.getPoster_path());
             Picasso.with(this)
                     .load(posterUri)
                     .placeholder(R.drawable.placeholder_poster)
@@ -366,6 +368,10 @@ public class DetailsActivity extends BaseActivity implements
             startActivity(shareIntent);
     }
 
+    void launchYoutube(Uri uri){
+        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    }
+
     // --------------------------- DETAILS ---------------------------
 
     // Overriding "back" not to reload the Main Activity as setting parentActivityName would
@@ -454,21 +460,29 @@ public class DetailsActivity extends BaseActivity implements
         NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
-                mMovie = response.body();
+                Log.i(TAG, "startSilentNetworkRequest: response obtained");
+                Movie movie = response.body();
 
-                if (mMovie == null)
+                if (movie == null)
                     return;
 
                 // Update the UI
                 rateMain.setText(getString(R.string.format_voteAvg,
-                        mMovie.getVote_avg(), getString(R.string.tmdb)));
+                        movie.getVote_avg(), getString(R.string.tmdb)));
                 rateSecondary.setText(getString(R.string.format_double_string,
-                        mMovie.getVote_count(), getString(R.string.votes)));
+                        movie.getVote_count(), getString(R.string.votes)));
 
-                // Save updated data in the DB
+                // Save ONLY updated data in the DB
+                ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
+
+                // Update database only if there is something to update
+                if(values.size() > 1)
+                    return;
+
+                Log.i(TAG, "startSilentNetworkRequest: updating Movie");
                 Uri uri = MoviesContract.getMovieUriWithId(mMovie.getId());
-                ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie);
-                moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values, null, null);
+                moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values,
+                        null, null);
             }
 
             @Override
