@@ -12,9 +12,6 @@ public class Genre implements Parcelable{
 
     // ------------------------- CONSTRUCTOR -------------------------
 
-    public Genre() {
-    }
-
     public Genre(String title) {
         id = -1;
         name = title;

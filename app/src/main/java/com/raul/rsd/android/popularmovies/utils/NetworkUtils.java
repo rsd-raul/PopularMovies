@@ -40,9 +40,10 @@ public abstract class NetworkUtils {
     // --------------------------- VALUES ----------------------------
 
     public static final String POPULAR = "popular";
+    public static final String TOP_RATED = "top_rated";
+    public static final String FAVOURITES = "favourites";
     public static final String VIDEOS = "videos";
     public static final String REVIEWS = "reviews";
-    public static final String TOP_RATED = "top_rated";
 
     private static final String BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/";
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";

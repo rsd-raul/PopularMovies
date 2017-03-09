@@ -19,10 +19,7 @@ import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
-import java.util.ArrayList;
-
 import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -111,12 +108,9 @@ public class MainActivity extends BaseActivity {
         NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
             @Override
             public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                ArrayList<MovieLight> responseMovies = response.body().getResults();
+                MovieLight[] movies = response.body().getResults();
 
-                if (responseMovies != null) {
-                    MovieLight[] movies = new MovieLight[responseMovies.size()];
-                    movies = responseMovies.toArray(movies);
-
+                if (movies != null) {
                     mMoviesAdapter.setMoviesData(movies);
                     mRecyclerView.smoothScrollToPosition(0);
                 } else

@@ -21,6 +21,8 @@ public class Movie implements Parcelable{
     private long vote_count;
     private int runtime;               // Popular/TopRated doesn't provide duration
     private String overview;
+    private VideosList videos;
+    private ReviewsList reviews;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -111,6 +113,13 @@ public class Movie implements Parcelable{
     }
     public void setDuration(int duration) {
         this.runtime = duration;
+    }
+
+    public Video[] getVideos() {
+        return videos.getResults();
+    }
+    public Review[] getReviews() {
+        return reviews.getResults();
     }
 
     // ------------------------- PARCELABLE --------------------------

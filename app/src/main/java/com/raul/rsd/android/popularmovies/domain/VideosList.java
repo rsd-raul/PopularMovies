@@ -1,22 +1,17 @@
 package com.raul.rsd.android.popularmovies.domain;
 
-
-import java.util.ArrayList;
-
-public class MoviesList {
+public class VideosList {
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private int total_pages;
-    private MovieLight[] results;
+    private Video[] results;
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
-    public int getTotal_pages() {
-        return total_pages;
-    }
-
-    public MovieLight[] getResults() {
+    public Video[] getResults() {
         return results;
+    }
+    public void setResults(Video[] results) {
+        this.results = results;
     }
 }

@@ -10,11 +10,6 @@ public class MovieLight implements Parcelable{
     private long id;
     private String poster_path;
 
-    // ------------------------- CONSTRUCTOR -------------------------
-
-    public MovieLight() {
-    }
-
     // ---------------------- GETTERS & SETTERS ----------------------
 
     public long getId() {
