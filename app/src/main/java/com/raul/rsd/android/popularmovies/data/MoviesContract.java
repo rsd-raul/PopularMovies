@@ -34,6 +34,7 @@ public class MoviesContract {
         public static final String COLUMN_VOTE_COUNT = "vote_count";
         public static final String COLUMN_RUNTIME = "runtime";
         public static final String COLUMN_OVERVIEW = "overview";
+        public static final String COLUMN_DOMINANT = "dominant_color";
         public static final String COLUMN_TIMESTAMP = "timestamp";
     }
 }

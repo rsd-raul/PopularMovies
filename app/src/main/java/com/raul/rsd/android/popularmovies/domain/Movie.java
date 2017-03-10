@@ -23,6 +23,7 @@ public class Movie implements Parcelable{
     private String overview;
     private VideosList videos;
     private ReviewsList reviews;
+    private int dominantBackdropColor;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -114,6 +115,13 @@ public class Movie implements Parcelable{
     }
     public void setDuration(int duration) {
         this.runtime = duration;
+    }
+
+    public int getDominantBackdropColor() {
+        return dominantBackdropColor;
+    }
+    public void setDominantBackdropColor(int dominantBackdropColor) {
+        this.dominantBackdropColor = dominantBackdropColor;
     }
 
     public Video[] getVideos() {

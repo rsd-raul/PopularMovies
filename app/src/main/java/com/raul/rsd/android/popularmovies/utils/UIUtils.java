@@ -109,23 +109,21 @@ public abstract class UIUtils {
         return dp * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
-    private static int getDeviceWidthPx(){
-        DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        return metrics.widthPixels;
-    }
-
-    public static Bitmap getPreciseBackground(Bitmap source, int marginDp, int sizeDp){
-        int deviceWidthPx = getDeviceWidthPx();
+    public static Bitmap getDpBasedBitmap(Bitmap source, int marginXDp, int marginYDp,
+                                                                int widthDp, int heightDp){
+        int[] valuesDp = {marginXDp, marginYDp, widthDp, heightDp};
+        int deviceWidthPx = Resources.getSystem().getDisplayMetrics().widthPixels;
         int backdropWidthPx = source.getWidth();
         double ratioPx = deviceWidthPx * 1.0 / backdropWidthPx;
 
-        float arrowMarginPx = convertDpToPixel(marginDp);
-        float arrowSizePx = convertDpToPixel(sizeDp);
-        arrowMarginPx *= ratioPx;
-        arrowSizePx *= ratioPx;
+        // Convert DP values to real source based Pixels
+        int[] valuesPx = new int[4];
+        for (int i = 0; i < valuesDp.length; i++) {
+            float valueInPx = convertDpToPixel(valuesDp[i]);
+            valueInPx *= ratioPx;
+            valuesPx[i] = Math.round(valueInPx);
+        }
 
-        int marginPx = Math.round(arrowMarginPx);
-        int sizePx = Math.round(arrowSizePx);
-        return Bitmap.createBitmap(source, marginPx, marginPx, sizePx, sizePx);
+        return Bitmap.createBitmap(source, valuesPx[0], valuesPx[1], valuesPx[2], valuesPx[3]);
     }
 }

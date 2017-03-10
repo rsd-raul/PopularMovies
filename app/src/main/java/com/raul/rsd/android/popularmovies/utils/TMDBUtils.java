@@ -58,7 +58,6 @@ public abstract class TMDBUtils {
     }
 
     public static Movie extractMovieFromCursor(Cursor data){
-        data.moveToFirst();
 
         Movie movie = new Movie(data.getInt(DetailsActivity.INDEX_ID));
 
@@ -68,6 +67,7 @@ public abstract class TMDBUtils {
         movie.setVote_count(data.getLong(DetailsActivity.INDEX_VOTE_COUNT));
         movie.setSynopsis(data.getString(DetailsActivity.INDEX_OVERVIEW));
         movie.setDuration(data.getInt(DetailsActivity.INDEX_RUNTIME));
+        movie.setDominantBackdropColor(data.getInt(DetailsActivity.INDEX_DOMINANT));
 
         Bitmap poster = BitmapUtils.getBitmapFromBytes(data.getBlob(DetailsActivity.INDEX_POSTER));
         movie.setPoster(poster);
@@ -97,8 +97,9 @@ public abstract class TMDBUtils {
         values.put(MoviesEntry.COLUMN_VOTE_COUNT, movie.getVote_count());
         values.put(MoviesEntry.COLUMN_RUNTIME, movie.getDuration());
         values.put(MoviesEntry.COLUMN_OVERVIEW, movie.getSynopsis());
+        values.put(MoviesEntry.COLUMN_DOMINANT, movie.getDominantBackdropColor());
 
-        Log.e("AAAAA", "getContentValuesFromMovie: " + values.size());
+        Log.e("TMDBUtils", "getContentValuesFromMovie: " + values.size());
         return values;
     }
 

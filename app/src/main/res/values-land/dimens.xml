@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="details_space_width">0dp</dimen>
+    <dimen name="details_title_genre_min_height">0dp</dimen>
+    <dimen name="movie_title_margin_top">0dp</dimen>
 </resources>

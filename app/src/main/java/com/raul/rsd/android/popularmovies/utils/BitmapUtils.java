@@ -10,7 +10,7 @@ public abstract class BitmapUtils {
     // convert from bitmap to byte array
     public static byte[] getBytesFromBitmap(Bitmap bitmap) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream); // REVIEW evaluate 80% just to be safe
         return stream.toByteArray();
     }
 

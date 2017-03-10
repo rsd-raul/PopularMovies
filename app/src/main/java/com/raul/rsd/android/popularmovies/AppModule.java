@@ -3,7 +3,6 @@ package com.raul.rsd.android.popularmovies;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;

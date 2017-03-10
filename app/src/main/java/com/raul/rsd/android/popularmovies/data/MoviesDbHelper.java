@@ -32,6 +32,7 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesEntry.COLUMN_VOTE_COUNT   + " REAL, " +
                 MoviesEntry.COLUMN_RUNTIME      + " INTEGER, " +
                 MoviesEntry.COLUMN_OVERVIEW     + " TEXT, " +
+                MoviesEntry.COLUMN_DOMINANT     + " INTEGER, " +
                 MoviesEntry.COLUMN_TIMESTAMP 	+ " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
         ");";
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIES_TABLE);

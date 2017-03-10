@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bbb"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
@@ -9,6 +11,7 @@
     tools:showIn="@layout/activity_details">
 
     <LinearLayout
+        android:id="@+id/aaa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -37,9 +40,9 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@id/poster_space"
                 android:layout_toEndOf="@id/poster_space"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/movie_title_margin_top"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="@color/movie_title_color"/>
+                android:textColor="@color/movie_title_color" />
 
             <TextView
                 android:id="@+id/tv_genres"
