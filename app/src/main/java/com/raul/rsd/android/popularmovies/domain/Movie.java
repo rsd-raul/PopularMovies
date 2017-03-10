@@ -26,7 +26,8 @@ public class Movie implements Parcelable{
 
     // ------------------------- CONSTRUCTOR -------------------------
 
-    public Movie() {
+    public Movie(long id) {
+        this.id = id;
     }
 
     // ---------------------- GETTERS & SETTERS ----------------------

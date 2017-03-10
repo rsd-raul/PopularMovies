@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
@@ -33,12 +34,15 @@ import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.raul.rsd.android.popularmovies.App;
+import com.raul.rsd.android.popularmovies.ErrorReporter;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.data.InsertMovieTask;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
-import com.raul.rsd.android.popularmovies.utils.BitmapUtils;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
@@ -47,9 +51,8 @@ import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.net.URL;
-
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -57,8 +60,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 
-public class DetailsActivity extends BaseActivity implements
-        LoaderManager.LoaderCallbacks<Cursor>{
+public class DetailsActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     // --------------------------- VALUES ----------------------------
 
@@ -80,6 +82,7 @@ public class DetailsActivity extends BaseActivity implements
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
+    @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
     private Movie mMovie;
     private boolean isFavourite;
 
@@ -94,6 +97,16 @@ public class DetailsActivity extends BaseActivity implements
         mSwipeRefreshLayout.setEnabled(false);
 
         setupActivity();
+
+        status = SAFE;
+
+////REVIEW        ****** ONLY FOR DEVELOPMENT ******
+//        // Simple BUG report, retrieves the last error and prompts to send an email
+//        ErrorReporter errorReporter = ErrorReporter.getInstance();
+//        errorReporter.Init(this);
+//        errorReporter.CheckErrorAndSendMail(this);
+////REVIEW        ****** ONLY FOR DEVELOPMENT ******
+
     }
 
     @Override
@@ -115,28 +128,8 @@ public class DetailsActivity extends BaseActivity implements
         mFloatingActionButton.setOnClickListener(view -> favouriteMovie());
 
         // Retrieve the ID sent and fetch the movie from TMDB
-        loadData();
-    }
-
-    private void loadData(){
-        long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
-
-        new Thread(() -> {
-            Uri movieUriWithId = MoviesContract.getMovieUriWithId(id);
-
-            String[] projectionColumns = {MoviesEntry._ID};
-
-            Cursor cursor = this.getContentResolver().query(
-                    movieUriWithId,
-                    projectionColumns,      // Return the ID only
-                    null, null, null);      // #NoFilter
-
-            if (null != cursor && cursor.getCount() > 0) {
-                startProviderRequest(id);
-                cursor.close();
-            }else
-                startNetworkRequest(id);
-        }).start();
+        mMovie = new Movie(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
+        new LoadMovieTask().execute();
     }
 
     private void startProviderRequest(long id){
@@ -180,54 +173,58 @@ public class DetailsActivity extends BaseActivity implements
     }
 
     private void showErrorMessage(){
-        DialogsUtils.showErrorDialog(this, (dialog, which) -> loadData());
+        DialogsUtils.showErrorDialog(this, (dialog, which) -> new LoadMovieTask().execute());
     }
 
-    private void displayMovie(boolean offline){
-        boolean isLandscape = getResources().getBoolean(R.bool.is_landscape);
+    private void displayMovie(boolean isOffline){
+        boolean isPortrait = mBackdropImageView != null;
 
-        //FIXME CLEAN
-        if(offline){
-            // If portrait, store image
-            if(mBackdropImageView != null) {
+        if(isOffline){
+            if(isPortrait) {
+                // Load backdrop and customize toolbar
                 mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
                 adaptColorByBackdropCallback(this, titleMain).onSuccess();
             }
             mPosterImageView.setImageBitmap(mMovie.getPoster());
         }else {
-            if(mBackdropImageView != null) {
+            if(isPortrait) {
                 // Setup backdrop <- First, so Picasso gets a head start.
                 Uri backdropUri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
                 Picasso.with(this)
                         .load(backdropUri)
                         .placeholder(R.drawable.placeholder_backdrop)
                         .into(mBackdropImageView, adaptColorByBackdropCallback(this, titleMain));
+            } else
+                mSwipeRefreshLayout.setRefreshing(false);
 
-                // Customize the Appbar behaviour and react to scroll
-                AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
-                appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-                    @Override                           // Don't use Lambda -> It's a trap!!
-                    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                        actionBarScrollControl(verticalOffset);
-                    }
-                });
-            }
-
-            //FIXME CLEAN
-            // If landscape, display back button and stop loading icon
-            if(mBackdropImageView == null) {
-                ActionBar actionBar = getSupportActionBar();
-                if (actionBar != null)
-                    actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-
-            // Setup poster <- Second, so Picasso gets a head start.
+            // Setup poster
             Uri posterUri = NetworkUtils.buildMoviePosterUri(mMovie.getPoster_path());
             Picasso.with(this)
                     .load(posterUri)
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mPosterImageView);
+
+            // TODO Setup trailers
+
+            // TODO Setup reviews
         }
+
+        // If is landscape
+        ActionBar actionBar = getSupportActionBar();
+        if (!isPortrait && actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        // If is portrait
+        else {
+            // Customize the Appbar behaviour and react to scroll
+            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.app_bar);
+            appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+                @Override                           // Don't use Lambda -> It's a trap!!
+                public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                    actionBarScrollControl(verticalOffset);
+                }
+            });
+        }
+
 
         // Fill interface with formatted movie details
         titleMain.setText(mMovie.getTitle());
@@ -282,6 +279,9 @@ public class DetailsActivity extends BaseActivity implements
         return new Callback() {
             @Override
             public void onSuccess() {
+                if(mBackdropImageView == null)
+                    return;
+
                 // Get the image we just loaded and obtain his dominant color
                 Bitmap backdrop = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
                 int dominantColor = UIUtils.getDominantColor(backdrop, activity);
@@ -305,7 +305,6 @@ public class DetailsActivity extends BaseActivity implements
                 if(!UIUtils.isColorDark(dominantColor))
                     actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
                 actionBar.setDisplayHomeAsUpEnabled(true);
-
                 mSwipeRefreshLayout.setRefreshing(false);
             }
 
@@ -329,45 +328,42 @@ public class DetailsActivity extends BaseActivity implements
         mFloatingActionButton.setImageResource(imageRes);
     }
 
+    public final int SAFE = 1;
+    final int BUSY = -1;
+    public static int status;
+    private Toast mToast;
+
+    private boolean isSafe(){
+        if(status == SAFE)
+            return true;
+        if(mToast == null)
+            mToast = Toast.makeText(this, "Saving Movie offline", Toast.LENGTH_SHORT);
+        else
+            mToast.show();
+        return false;
+    }
+
     void favouriteMovie() {
+        Log.e(TAG, "favouriteMovie: " + status);
+
+        if(!isSafe())
+            return;
+        status = BUSY;
+
         if (isFavourite) {
             Uri movieUriWithId = MoviesContract.getMovieUriWithId(mMovie.getId());
+
+            status = SAFE;
             moviesHandler.startDelete(MoviesAsyncHandler.DELETE_TOKEN, null, movieUriWithId,
                                                                                     null, null);
         } else {
-            new Thread(() -> {
-                ContentValues movie = TMDBUtils.getContentValuesFromMovie(mMovie);
+            // Save the poster and if the layout is portrait, save the backdrop too.
+            mMovie.setPoster(((BitmapDrawable) mPosterImageView.getDrawable()).getBitmap());
+            if(mBackdropImageView != null)
+                mMovie.setBackdrop(((BitmapDrawable) mBackdropImageView.getDrawable()).getBitmap());
 
-                // FIXME CLEAN
-                if(mMovie.getBackdrop() == null) {
-                    Bitmap backdropBitmap = null;
-                    if(mBackdropImageView != null)
-                        backdropBitmap = ((BitmapDrawable) mBackdropImageView.getDrawable())
-                                                                                    .getBitmap();
-                    else {
-                        try {
-                            Uri uri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
-                            URL url = new URL(uri.toString());
-                            backdropBitmap = BitmapFactory.decodeStream(
-                                                            url.openConnection().getInputStream());
-                        }catch (Exception ex){
-                            Log.e(TAG, "favouriteMovie: ", ex);
-                        }
-                    }
-                    if(backdropBitmap != null) {
-                        byte[] backdropBytes = BitmapUtils.getBytesFromBitmap(backdropBitmap);
-                        movie.put(MoviesEntry.COLUMN_BACKDROP, backdropBytes);
-                    }
-                }
-                if (mMovie.getPoster() == null) {
-                    Bitmap posterBitmap= ((BitmapDrawable) mPosterImageView.getDrawable()).getBitmap();
-                    byte[] posterBytes = BitmapUtils.getBytesFromBitmap(posterBitmap);
-                    movie.put(MoviesEntry.COLUMN_POSTER, posterBytes);
-                }
-
-                moviesHandler.startInsert(MoviesAsyncHandler.INSERT_TOKEN, null,
-                        MoviesContract.CONTENT_URI, movie);
-            }).start();
+            status = SAFE;
+            insertMovieTaskProvider.get().execute(mMovie);
         }
 
         changeFavourite(!isFavourite);
@@ -391,8 +387,9 @@ public class DetailsActivity extends BaseActivity implements
             startActivity(shareIntent);
     }
 
-    void launchYoutube(Uri uri){
-        startActivity(new Intent(Intent.ACTION_VIEW, uri));
+    void launchYoutube(String videoPath){
+        Uri videoUri = NetworkUtils.buildYoutubeTrailerUri(videoPath);
+        startActivity(new Intent(Intent.ACTION_VIEW, videoUri));
     }
 
     // --------------------------- DETAILS ---------------------------
@@ -402,7 +399,8 @@ public class DetailsActivity extends BaseActivity implements
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                if(isSafe())
+                    finish();
                 return true;
             case R.id.action_share:
                 shareMovie();
@@ -411,6 +409,11 @@ public class DetailsActivity extends BaseActivity implements
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        if(isSafe())
+            super.onBackPressed();
+    }
 
     // ---------------------------- MENU -----------------------------
 
@@ -456,8 +459,6 @@ public class DetailsActivity extends BaseActivity implements
 
         long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
 
-        Looper.prepare();
-
         return new CursorLoader(this,
                 MoviesContract.getMovieUriWithId(id),
                 MOVIE_DETAILS_PROJECTION,
@@ -467,8 +468,11 @@ public class DetailsActivity extends BaseActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if(data == null || data.getCount() == 0)
-            throw new SQLException("onLoadFinished: Problems retrieving favourite from DB");
+        // REVIEW after startDelete it comes here and fails.... Why?
+        if(data == null || data.getCount() == 0) {
+            Log.e(TAG, "onLoadFinished: Problems retrieving favourite from DB");
+            return;
+        }
 
         mMovie = TMDBUtils.extractMovieFromCursor(data);
 
@@ -509,12 +513,45 @@ public class DetailsActivity extends BaseActivity implements
             }
 
             @Override
-            public void onFailure(Call<Movie> call, Throwable t) { }
+            public void onFailure(Call<Movie> call, Throwable t) {
+                Log.e(TAG, "startSilentNetworkRequest: onFailure: ", t);
+            }
         });
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMovie = null;
+    }
+
+    // ------------------------- ASYNC TASK --------------------------
+
+    private class LoadMovieTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected Boolean doInBackground(Void... nothingToSeeHere) {
+
+            Uri movieUriWithId = MoviesContract.getMovieUriWithId(mMovie.getId());
+            String[] projectionColumns = {MoviesEntry._ID};
+
+            Cursor cursor = DetailsActivity.this.getContentResolver().query(
+                    movieUriWithId,
+                    projectionColumns,      // Return the ID only
+                    null, null, null);      // #NoFilter
+
+            boolean isLocal = cursor != null && cursor.getCount() > 0;
+            if(cursor != null)
+                cursor.close();
+            return isLocal;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isLocal) {
+            if (isLocal)
+                startProviderRequest(mMovie.getId());
+            else
+                startNetworkRequest(mMovie.getId());
+            super.onPostExecute(isLocal);
+        }
     }
 }

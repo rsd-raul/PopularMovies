@@ -46,4 +46,20 @@
         <xliff:g id="double">%1$d</xliff:g> -
         <xliff:g id="string">%2$s</xliff:g>
     </string>
+
+
+<!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
+    <!-- Error report -->
+
+    <string name="error_report_tasked">Error report - PopularMovies</string>
+    <string name="error_report_taken">Error report taken:</string>
+    <string name="error_report_send">Send error report?</string>
+    <string name="error_trace_collected">New Trace collected :</string>
+    <string name="error_collected_on">"Error Report collected on : "</string>
+    <string name="error_information">Information :</string>
+    <string name="error_stack">Stack : \n</string>
+    <string name="error_cause">Cause : \n</string>
+    <string name="error_report_end">****  End of current Report ***</string>
+    <string name="developer_email" translatable="false">achillessoftware@gmail.com</string>
+<!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
 </resources>

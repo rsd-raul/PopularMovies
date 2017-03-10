@@ -129,8 +129,7 @@ public class MoviesProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(@NonNull Uri uri, ContentValues values)
-                                                throws SQLException, UnsupportedOperationException {
+    public Uri insert(@NonNull Uri uri, ContentValues values) throws UnsupportedOperationException {
         if(context == null)
             deferInit();
 
@@ -139,7 +138,7 @@ public class MoviesProvider extends ContentProvider {
 
         long id = wDB.get().insert(MoviesEntry.TABLE_NAME, null, values);
         if(id == -1)
-            throw new SQLException("insert: Failed to insert row into: " + uri);
+            Log.e(TAG, "insert: Failed to insert row into: " + uri);
 
         // Notify the change so the resolver can update the database and any associate UI
         context.getContentResolver().notifyChange(uri, null);

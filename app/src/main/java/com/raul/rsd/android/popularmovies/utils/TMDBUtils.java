@@ -15,6 +15,8 @@ import java.util.Date;
 
 public abstract class TMDBUtils {
 
+    private static final String TAG = "TMDBUtils";
+
     // -------------------------- USE CASES --------------------------
 
     /**
@@ -58,10 +60,9 @@ public abstract class TMDBUtils {
     public static Movie extractMovieFromCursor(Cursor data){
         data.moveToFirst();
 
-        Movie movie = new Movie();
+        Movie movie = new Movie(data.getInt(DetailsActivity.INDEX_ID));
 
         // Extract Movie details
-        movie.setId(data.getInt(DetailsActivity.INDEX_ID));
         movie.setTitle(data.getString(DetailsActivity.INDEX_TITLE));
         movie.setVote_avg(data.getDouble(DetailsActivity.INDEX_VOTE_AVERAGE));
         movie.setVote_count(data.getLong(DetailsActivity.INDEX_VOTE_COUNT));
@@ -103,7 +104,7 @@ public abstract class TMDBUtils {
 
     public static ContentValues getContentValuesFromMovie(Movie oldMovie, Movie newMovie){
         ContentValues values = new ContentValues();
-        values.put(MoviesEntry._ID, oldMovie.getId());
+        values.put(MoviesEntry._ID, newMovie.getId());
 
         // Check values, only update if needed
         if(!oldMovie.getTitle().equals(newMovie.getTitle()))

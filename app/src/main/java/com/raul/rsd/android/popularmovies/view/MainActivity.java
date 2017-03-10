@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import com.github.clans.fab.FloatingActionMenu;
 import com.raul.rsd.android.popularmovies.App;
+import com.raul.rsd.android.popularmovies.ErrorReporter;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
@@ -49,6 +50,14 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+////REVIEW        ****** ONLY FOR DEVELOPMENT ******
+//        // Simple BUG report, retrieves the last error and prompts to send an email
+//        ErrorReporter errorReporter = ErrorReporter.getInstance();
+//        errorReporter.Init(this);
+//        errorReporter.CheckErrorAndSendMail(this);
+////REVIEW        ****** ONLY FOR DEVELOPMENT ******
+
 
         // Start ButterKnife and Dagger 2
         ButterKnife.bind(this);

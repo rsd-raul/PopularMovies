@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.raul.rsd.android.popularmovies.view.DetailsActivity;
+
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;
@@ -50,7 +52,7 @@ public class MoviesAsyncHandler {
             super(cr);
         }
 
-
+        // FIXME Pasar a limpio y borrar
         public void setAsyncQueryListener(AsyncQueryListener listener) {
             mListener = new WeakReference<>(listener);
         }

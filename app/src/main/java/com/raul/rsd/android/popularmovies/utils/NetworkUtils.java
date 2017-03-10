@@ -16,14 +16,18 @@
 package com.raul.rsd.android.popularmovies.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import com.raul.rsd.android.popularmovies.BuildConfig;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
+import java.net.URL;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Retrofit;
@@ -32,10 +36,9 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-/**
- * These utilities will be used to communicate with the weather servers.
- */
 public abstract class NetworkUtils {
+
+    private static final String TAG = "NetworkUtils";
 
     // --------------------------- VALUES ----------------------------
 
@@ -61,15 +64,6 @@ public abstract class NetworkUtils {
 
 
     // ------------------------ URI BUILDERS -------------------------
-
-    // http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
-    public static Uri buildFullMovieUri(String id){
-        return Uri.parse(BASE_MOVIE_URL).buildUpon()
-                .appendPath(id)
-                .appendQueryParameter(API_PARAM, BuildConfig.TMDB_API_KEY_V3)
-                .appendQueryParameter(APPEND_PARAM, VIDEOS + "," + REVIEWS)
-                .build();
-    }
 
     // https://www.youtube.com/watch?v=Zk3yLI0q794
     public static Uri buildYoutubeTrailerUri(String videoPath){
@@ -111,6 +105,17 @@ public abstract class NetworkUtils {
                 .appendPath(size)
                 .appendPath(imagePath.substring(1))
                 .build();
+    }
+
+    public static Bitmap getBackdropFromUri(String backdropPath){
+        Uri uri = NetworkUtils.buildMovieBackdropUri(backdropPath);
+        try {
+            URL url = new URL(uri.toString());
+            return BitmapFactory.decodeStream(url.openConnection().getInputStream());
+        }catch (Exception ex){
+            Log.e(TAG, "getBackdropFromUri: Unable to get bitmap from uri: " + uri, ex);
+            return null;
+        }
     }
 
     /**
