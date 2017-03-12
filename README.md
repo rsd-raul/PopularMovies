@@ -1,6 +1,6 @@
 # PopularMovies
 
-First and Second project for the Google/Udacity scholarship the "Associate Android Developer Fast Track".
+First and Second project for the Google/Udacity scholarship, the "Associate Android Developer Fast Track".
 
 
 ## Features available:
@@ -8,6 +8,7 @@ First and Second project for the Google/Udacity scholarship the "Associate Andro
 * Discover the most popular and most rated movies.
 * Access to details about those movies.
 * Store offline your favourite movies.
+* Access trailers and reviews.
 
 ## Configuration:
 
@@ -28,7 +29,6 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 ## Future:
 
 Features to be implemented:
-* Access trailers and reviews.
 * Search movies by name or genre.
 
 Ext. Libraries to be used:

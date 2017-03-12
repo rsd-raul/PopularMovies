@@ -38,5 +38,12 @@ public abstract class DialogsUtils{
                 .cancelListener(dialogInterface -> activity.finish())
                 .show();
     }
+
+    public static void showReviewDialog(AppCompatActivity activity, String author, String content) {
+        new MaterialDialog.Builder(activity)
+                .title(author)
+                .content(content)
+                .show();
+    }
 }
 

@@ -36,11 +36,13 @@ import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.adapters.ReviewItem;
 import com.raul.rsd.android.popularmovies.adapters.VideoItem;
 import com.raul.rsd.android.popularmovies.data.InsertMovieTask;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
+import com.raul.rsd.android.popularmovies.domain.Review;
 import com.raul.rsd.android.popularmovies.domain.Video;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
@@ -79,6 +81,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
     @BindView(R.id.rv_trailers) RecyclerView mTrailersRV;
+    @BindView(R.id.rv_reviews) RecyclerView mReviewsRV;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
     @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
     private Movie mMovie;
@@ -170,8 +173,9 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         DialogsUtils.showErrorDialog(this, (dialog, which) -> new LoadMovieTask().execute());
     }
 
-    @Inject FastItemAdapter<IItem> fastAdapter;
+    @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
     @Inject Provider<VideoItem> videoItemProvider;
+    @Inject Provider<ReviewItem> reviewItemProvider;
 
     private void displayMovie(boolean isOffline){
         boolean isPortrait = mBackdropImageView != null;
@@ -203,7 +207,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
             setupTrailers(mMovie.getVideos());
 
-            // TODO Setup reviews
+            setupReviews(mMovie.getReviews());
         }
 
         if (isPortrait)
@@ -234,16 +238,38 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         if(visibility == View.GONE)
             return;
 
+        FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
         mTrailersRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-        mTrailersRV.setAdapter(fastAdapter);
+        mTrailersRV.setAdapter(fAdapter);
         for(Video video : videos)
-            fastAdapter.add(videoItemProvider.get().withVideo(video.getName(), video.getKey()));
-        fastAdapter.withOnClickListener((v, adapter, item, position) -> {
-            if(item.getType() == R.id.iv_movie_poster){
-                VideoItem vi = (VideoItem) item;
-                Uri videoUri = NetworkUtils.buildYoutubeTrailerUri(vi.key);
-                startActivity(new Intent(Intent.ACTION_VIEW, videoUri));
-            }
+            fAdapter.add(videoItemProvider.get().withVideo(video.getName(), video.getKey()));
+
+        fAdapter.withOnClickListener((v, adapter, item, position) -> {
+            VideoItem vi = (VideoItem) item;
+            Uri videoUri = NetworkUtils.buildYoutubeTrailerUri(vi.key);
+            startActivity(new Intent(Intent.ACTION_VIEW, videoUri));
+            return true;
+        });
+    }
+
+    private void setupReviews(Review[] reviews){
+        int visibility = View.VISIBLE;
+        if(reviews == null || reviews.length == 0)
+            visibility = View.GONE;
+
+        mReviewsRV.setVisibility(visibility);
+        findViewById(R.id.tv_reviews_header).setVisibility(visibility);
+        if(visibility == View.GONE)
+            return;
+
+        FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
+        mReviewsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mReviewsRV.setAdapter(fAdapter);
+        for(Review review : reviews)
+            fAdapter.add(reviewItemProvider.get().withReview(review.getAuthor(), review.getContent()));
+        fAdapter.withOnClickListener((v, adapter, item, position) -> {
+            ReviewItem ri = (ReviewItem) item;
+            DialogsUtils.showReviewDialog(this, ri.author, ri.content);
             return true;
         });
     }
@@ -514,7 +540,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                 rateSecondary.setText(String.valueOf(movie.getVote_count()));
 
                 setupTrailers(movie.getVideos());
-                // TODO Setup reviews
+                setupReviews(movie.getReviews());
 
                 // Save ONLY updated data in the DB
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
