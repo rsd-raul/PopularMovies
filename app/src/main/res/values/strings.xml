@@ -1,52 +1,4 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!--Names-->
-    <string name="app_name" translatable="false">PopularMovies</string>
-    <string name="none" translatable="false"/>
-    <string name="tmdb" translatable="false">The Movie Database</string>
-
-    <!--Random-->
-    <string name="time_hours">Hours</string>
-    <string name="time_minutes">Minutes</string>
-    <string name="votes">Votes</string>
-    <string name="try_again">Retry</string>
-    <string name="close">Close</string>
-
-    <!--Problems-->
-    <string name="no_network_title">No internet connection</string>
-    <string name="no_network_content">Ups, it seems like you don\'t have Internet right now, since we need that to access our databases, I\'m afraid we can only try again now or go back and try again later.</string>
-    <string name="no_fetch_title">Problems fetching data</string>
-    <string name="no_fetch_content">We have problems getting the info from our servers, try again in now or go back and try again later.</string>
-
-    <string name="share_movie_chooser">Select app to share movie</string>
-    <string name="share">Share movie</string>
-
-    <!--Content Description -->
-    <string name="info_movie_poster">Poster for the movie</string>
-    <string name="info_movie_backdrop">Backdrop for the movie</string>
-    <string name="info_item_icon">Icon representing each item meaning</string>
-
-    <!--FAM-->
-    <string name="popular">Popularity</string>
-    <string name="top_rated">Top rated</string>
-
-    <!--Movie-->
-    <string name="title_to_string">Title:</string>
-    <string name="synopsis_to_string">Synopsis:</string>
-    <string name="vote_avg_to_string">Rating:</string>
-    <string name="release_date_to_string">Release date:</string>
-    <string name="duration_to_string">Runtime:</string>
-
-    <!--Format-->
-    <string name="format_voteAvg">
-        <xliff:g id="vote_avg">%1$.1f</xliff:g> -
-        <xliff:g id="direction">%2$s</xliff:g>
-    </string>
-
-    <string name="format_double_string">
-        <xliff:g id="double">%1$d</xliff:g> -
-        <xliff:g id="string">%2$s</xliff:g>
-    </string>
-
 
 <!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
     <!-- Error report -->
@@ -62,4 +14,62 @@
     <string name="error_report_end">****  End of current Report ***</string>
     <string name="developer_email" translatable="false">achillessoftware@gmail.com</string>
 <!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
+
+    <!--Names-->
+    <string name="app_name" translatable="false">PopularMovies</string>
+    <string name="none" translatable="false"/>
+
+    <!--Random-->
+    <string name="time_hours">Hours</string>
+    <string name="time_minutes">Minutes</string>
+    <string name="votes">Votes</string>
+    <string name="try_again">Retry</string>
+    <string name="close">Close</string>
+
+    <!--Problems-->
+    <string name="no_network_title">No internet connection</string>
+    <string name="no_network_content">Ups, it seems like you don\'t have Internet right now, since we need that to access our databases, I\'m afraid we can only try again now or go back and try again later.</string>
+    <string name="no_fetch_title">Problems fetching data</string>
+    <string name="no_fetch_content">We have problems getting the info from our servers, try again in now or go back and try again later.</string>
+
+    <string name="share_movie_chooser">Select app to share movie</string>
+    <string name="share_movie">Share movie</string>
+    <string name="share">Share</string>
+
+    <!--Content Description -->
+    <string name="info_movie_poster">Poster for the movie</string>
+    <string name="info_movie_backdrop">Backdrop for the movie</string>
+    <string name="info_item_icon">Icon representing each item meaning</string>
+    <string name="info_share_icon">Share the movie</string>
+    <string name="info_icon_person">Number of votes</string>
+
+    <!--FAM-->
+    <string name="popular">Popularity</string>
+    <string name="top_rated">Top rated</string>
+
+    <!--Movie-->
+    <string name="title_to_string">Title:</string>
+    <string name="synopsis_to_string">Synopsis:</string>
+    <string name="vote_avg_to_string">Rating:</string>
+    <string name="release_date_to_string">Release date:</string>
+    <string name="duration_to_string">Runtime:</string>
+    <string name="duration">Runtime</string>
+    <string name="trailers">Trailers</string>
+    <string name="reviews">Reviews</string>
+    <string name="released">Released</string>
+
+    <!--Format-->
+    <string name="format_voteAvg">
+        <xliff:g id="vote_avg">%1$.1f</xliff:g> -
+        <xliff:g id="direction">%2$s</xliff:g>
+    </string>
+
+    <string name="format_double_string">
+        <xliff:g id="double">%1$d</xliff:g> -
+        <xliff:g id="string">%2$s</xliff:g>
+    </string>
+
+    <string name="hour_unit">H</string>
+    <string name="minute_unit">M</string>
+    <string name="overview">Overview</string>
 </resources>

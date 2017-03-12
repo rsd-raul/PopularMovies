@@ -1,7 +1,6 @@
 package com.raul.rsd.android.popularmovies.view;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -21,9 +20,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
@@ -50,6 +47,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Response;
 import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
@@ -67,7 +65,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @BindView(R.id.tv_rate_secondary_tmdb) TextView rateSecondary;
     @BindView(R.id.tv_description_main)  TextView descriptionMain;
     @BindView(R.id.tv_duration_main)  TextView durationMain;
-    @BindView(R.id.tv_duration_secondary) TextView durationSecondary;
     @BindView(R.id.tv_release_date_main) TextView releaseDateMain;
     @BindView(R.id.tv_genres) TextView genresMain;
     @BindView(R.id.iv_movie_poster) ImageView mPosterImageView;
@@ -79,7 +76,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
     private Movie mMovie;
     private boolean isFavourite;
-    private Menu menu;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -210,13 +206,12 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
         // Fill interface with formatted movie details
         titleMain.setText(mMovie.getTitle());
-        durationMain.setText(DateUtils.getDurationFromMinutes(mMovie.getDuration(), this));
-        durationSecondary.setText(getString(R.string.format_double_string, mMovie.getDuration(), getString(R.string.time_minutes)));
-        rateMain.setText(getString(R.string.format_voteAvg, mMovie.getVote_avg(), getString(R.string.tmdb)));
-        rateSecondary.setText(getString(R.string.format_double_string, mMovie.getVote_count(), getString(R.string.votes)));
+        genresMain.setText(TMDBUtils.getStringFromGenres(mMovie.getGenres()));
+        durationMain.setText(UIUtils.getCustomDurationString(this, mMovie.getDuration()));
+        rateMain.setText(String.valueOf(mMovie.getVote_avg()));
+        rateSecondary.setText(String.valueOf(mMovie.getVote_count()));
         descriptionMain.setText(mMovie.getSynopsis());
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
-        genresMain.setText(TMDBUtils.getStringFromGenres(mMovie.getGenres()));
     }
 
     // -------------------------- INTERFACE --------------------------
@@ -281,7 +276,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                 // If the dominant color is light turn the arrow and the share black
                 if(!UIUtils.isColorDark(dominantColor)) {
                     actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
-                    menu.getItem(0).setIcon(R.drawable.ic_share_black_24dp);
                 }
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -319,7 +313,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         // If the dominant color is light turn make sure everything is visible
         if(actionBar != null && !darkColor){
             actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
-            menu.getItem(0).setIcon(R.drawable.ic_share_black_24dp);
             titleMain.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryText));
         }
     }
@@ -373,7 +366,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         changeFavourite(!isFavourite);
     }
 
-    private void shareMovie(){
+    @OnClick(R.id.share_movie)
+    void shareMovie(){
         // If the movie has not been fetched yet, don't try to share
         if(mMovie == null)
             return;
@@ -406,9 +400,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                 if(isSafe())
                     finish();
                 return true;
-            case R.id.action_share:
-                shareMovie();
-                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -418,17 +409,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         if(isSafe())
             super.onBackPressed();
     }
-
-    // ---------------------------- MENU -----------------------------
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        this.menu = menu;
-        getMenuInflater().inflate(R.menu.details_menu, menu);
-        return true;
-    }
-
 
     // ------------------------ CURSOR LOADER ------------------------
 
@@ -500,10 +480,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                     return;
 
                 // Update the UI
-                rateMain.setText(getString(R.string.format_voteAvg,
-                        movie.getVote_avg(), getString(R.string.tmdb)));
-                rateSecondary.setText(getString(R.string.format_double_string,
-                        movie.getVote_count(), getString(R.string.votes)));
+                rateMain.setText(String.valueOf(movie.getVote_avg()));
+                rateSecondary.setText(String.valueOf(movie.getVote_count()));
 
                 // Save ONLY updated data in the DB
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);

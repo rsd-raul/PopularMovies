@@ -22,4 +22,7 @@
     <dimen name="movie_title_margin_top">20dp</dimen>
     <!-- 80 = 16 (margin) + 120(poster) - 72 (padding) + 16 (margin) -->
 
+
+    <dimen name="hour_size">30sp</dimen>
+    <dimen name="minute_size">15sp</dimen>
 </resources>
