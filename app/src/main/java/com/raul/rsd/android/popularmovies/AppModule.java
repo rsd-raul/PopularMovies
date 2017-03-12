@@ -5,6 +5,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.mikepenz.fastadapter.IItem;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler.*;
 import com.raul.rsd.android.popularmovies.data.MoviesDbHelper;
@@ -49,5 +51,10 @@ public class AppModule {
     @Provides
     MoviesAsyncQueryHandler moviesAsyncQueryHandlerProvider(MoviesAsyncHandler mah, ContentResolver cr){
         return mah.getHandler(cr);
+    }
+
+    @Provides
+    FastItemAdapter<IItem> fastItemAdapterProvider(){
+        return new FastItemAdapter<>();
     }
 }

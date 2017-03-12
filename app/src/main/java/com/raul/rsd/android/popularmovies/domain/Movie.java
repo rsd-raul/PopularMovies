@@ -50,9 +50,6 @@ public class Movie implements Parcelable{
     public String getPoster_path() {
         return poster_path;
     }
-    public void setPoster_path(String poster_path) {
-        this.poster_path = poster_path;
-    }
 
     public Bitmap getPoster() {
         return poster;
@@ -63,9 +60,6 @@ public class Movie implements Parcelable{
 
     public String getBackdrop_path() {
         return backdrop_path;
-    }
-    public void setBackdrop_path(String backdrop_path) {
-        this.backdrop_path = backdrop_path;
     }
 
     public Bitmap getBackdrop() {
@@ -125,10 +119,16 @@ public class Movie implements Parcelable{
     }
 
     public Video[] getVideos() {
-        return videos.getResults();
+        if(videos != null)
+            return videos.getResults();
+        else
+            return null;
     }
     public Review[] getReviews() {
-        return reviews.getResults();
+        if(reviews != null)
+            return reviews.getResults();
+        else
+            return null;
     }
 
     // ------------------------- PARCELABLE --------------------------

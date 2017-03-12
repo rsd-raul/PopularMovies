@@ -23,6 +23,7 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 * [FloatingActionButton](https://github.com/Clans/FloatingActionButton)
 * [MaterialDialogs](https://github.com/afollestad/material-dialogs)
 * [Dagger 2](https://google.github.io/dagger/)
+* [FastAdapter]( https://github.com/mikepenz/FastAdapter)
 
 ## Future:
 
@@ -34,4 +35,3 @@ Ext. Libraries to be used:
 * [Realm](https://github.com/realm/realm-java)  // Not allowed
 * [RxJava](https://github.com/ReactiveX/RxJava)
 * [RxAndroid](https://github.com/ReactiveX/RxAndroid)
-* [FastAdapter]( https://github.com/mikepenz/FastAdapter)

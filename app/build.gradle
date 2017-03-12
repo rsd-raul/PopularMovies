@@ -70,4 +70,8 @@ dependencies {
     // Dagger 2 - Google - https://github.com/google/dagger/releases
     compile 'com.google.dagger:dagger:2.10-rc2'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.10-rc2'
+
+    // FastAdapter - Mike Penz - https://github.com/mikepenz/FastAdapter
+    compile('com.mikepenz:fastadapter:2.1.7@aar') { transitive = true }
+    compile 'com.mikepenz:fastadapter-commons:2.1.0@aar'
 }

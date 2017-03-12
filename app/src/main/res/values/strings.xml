@@ -38,6 +38,7 @@
 
     <!--Content Description -->
     <string name="info_movie_poster">Poster for the movie</string>
+    <string name="info_movie_video">Video for the movie</string>
     <string name="info_movie_backdrop">Backdrop for the movie</string>
     <string name="info_item_icon">Icon representing each item meaning</string>
     <string name="info_share_icon">Share the movie</string>

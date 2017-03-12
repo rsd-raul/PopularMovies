@@ -19,6 +19,8 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
@@ -30,12 +32,16 @@ import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.mikepenz.fastadapter.IItem;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.adapters.VideoItem;
 import com.raul.rsd.android.popularmovies.data.InsertMovieTask;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Movie;
+import com.raul.rsd.android.popularmovies.domain.Video;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
@@ -72,6 +78,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @BindView(R.id.poster_space) Space mPosterSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
+    @BindView(R.id.rv_trailers) RecyclerView mTrailersRV;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
     @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
     private Movie mMovie;
@@ -163,6 +170,9 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         DialogsUtils.showErrorDialog(this, (dialog, which) -> new LoadMovieTask().execute());
     }
 
+    @Inject FastItemAdapter<IItem> fastAdapter;
+    @Inject Provider<VideoItem> videoItemProvider;
+
     private void displayMovie(boolean isOffline){
         boolean isPortrait = mBackdropImageView != null;
 
@@ -191,7 +201,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mPosterImageView);
 
-            // TODO Setup trailers
+            setupTrailers(mMovie.getVideos());
 
             // TODO Setup reviews
         }
@@ -213,6 +223,31 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         descriptionMain.setText(mMovie.getSynopsis());
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
     }
+
+    private void setupTrailers(Video[] videos){
+        int visibility = View.VISIBLE;
+        if(videos == null || videos.length == 0)
+            visibility = View.GONE;
+
+        mTrailersRV.setVisibility(visibility);
+        findViewById(R.id.tv_trailers_header).setVisibility(visibility);
+        if(visibility == View.GONE)
+            return;
+
+        mTrailersRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mTrailersRV.setAdapter(fastAdapter);
+        for(Video video : videos)
+            fastAdapter.add(videoItemProvider.get().withVideo(video.getName(), video.getKey()));
+        fastAdapter.withOnClickListener((v, adapter, item, position) -> {
+            if(item.getType() == R.id.iv_movie_poster){
+                VideoItem vi = (VideoItem) item;
+                Uri videoUri = NetworkUtils.buildYoutubeTrailerUri(vi.key);
+                startActivity(new Intent(Intent.ACTION_VIEW, videoUri));
+            }
+            return true;
+        });
+    }
+
 
     // -------------------------- INTERFACE --------------------------
 
@@ -385,11 +420,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             startActivity(shareIntent);
     }
 
-    void launchYoutube(String videoPath){
-        Uri videoUri = NetworkUtils.buildYoutubeTrailerUri(videoPath);
-        startActivity(new Intent(Intent.ACTION_VIEW, videoUri));
-    }
-
     // --------------------------- DETAILS ---------------------------
 
     // Overriding "back" not to reload the Main Activity as setting parentActivityName would
@@ -470,18 +500,21 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     }
 
     private void startSilentNetworkRequest(long id){
-        NetworkUtils.getMovieById(id, new retrofit2.Callback<Movie>() {
+        NetworkUtils.getFullMovieById(id, new retrofit2.Callback<Movie>() {
             @Override
             public void onResponse(Call<Movie> call, Response<Movie> response) {
-                Log.i(TAG, "startSilentNetworkRequest: response obtained");
                 Movie movie = response.body();
-
                 if (movie == null)
                     return;
+
+                Log.i(TAG, "startSilentNetworkRequest: response obtained");
 
                 // Update the UI
                 rateMain.setText(String.valueOf(movie.getVote_avg()));
                 rateSecondary.setText(String.valueOf(movie.getVote_count()));
+
+                setupTrailers(movie.getVideos());
+                // TODO Setup reviews
 
                 // Save ONLY updated data in the DB
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
