@@ -60,10 +60,10 @@ dependencies {
     // FloatingActionButton - Clans - https://github.com/Clans/FloatingActionButton
     compile 'com.github.clans:fab:1.6.4'
 
-    // Material Dialogs -  Afollestad - https://github.com/afollestad/material-dialogs
+    // Material Dialogs -  Aidan Follestad - https://github.com/afollestad/material-dialogs
     compile 'com.afollestad.material-dialogs:commons:0.9.3.0'
 
-    // ButterKnife - JakeWharton - https://github.com/JakeWharton/butterknife
+    // ButterKnife - Jake Wharton - https://github.com/JakeWharton/butterknife
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 
@@ -74,4 +74,7 @@ dependencies {
     // FastAdapter - Mike Penz - https://github.com/mikepenz/FastAdapter
     compile('com.mikepenz:fastadapter:2.1.7@aar') { transitive = true }
     compile 'com.mikepenz:fastadapter-commons:2.1.0@aar'
+
+    // AHBottomNavigation - Aurelien Hubert - https://github.com/aurelhubert/ahbottomnavigation
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.6'
 }

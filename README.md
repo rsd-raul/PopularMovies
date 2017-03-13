@@ -7,8 +7,8 @@ First and Second project for the Google/Udacity scholarship, the "Associate Andr
 
 * Discover the most popular and most rated movies.
 * Access to details about those movies.
-* Store offline your favourite movies.
-* Access trailers and reviews.
+* Store offline your favourite movies. **v2.0**
+* Access trailers and reviews. **v2.0**
 
 ## Configuration:
 
@@ -21,10 +21,12 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 * [ButterKnife](https://github.com/JakeWharton/butterknife)
 * [Retrofit 2](https://github.com/square/retrofit)
 * [Picasso](https://github.com/bumptech/glide)
-* [FloatingActionButton](https://github.com/Clans/FloatingActionButton)
 * [MaterialDialogs](https://github.com/afollestad/material-dialogs)
-* [Dagger 2](https://google.github.io/dagger/)
-* [FastAdapter]( https://github.com/mikepenz/FastAdapter)
+* [Dagger 2](https://google.github.io/dagger/) **v2.0**
+* [FastAdapter](https://github.com/mikepenz/FastAdapter) **v2.0**
+* [BottomNavigation](https://github.com/aurelhubert/ahbottomnavigation) **v2.0**
+* [FloatingActionButton](https://github.com/Clans/FloatingActionButton) **v1.0**
+ 
 
 ## Future:
 

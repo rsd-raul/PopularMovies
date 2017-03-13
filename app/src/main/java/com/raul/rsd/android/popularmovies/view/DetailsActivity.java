@@ -84,10 +84,18 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @BindView(R.id.rv_reviews) RecyclerView mReviewsRV;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
     @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
+    @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
+    @Inject Provider<VideoItem> videoItemProvider;
+    @Inject Provider<ReviewItem> reviewItemProvider;
     private Movie mMovie;
     private boolean isFavourite;
 
     // ------------------------- CONSTRUCTOR -------------------------
+
+    @Override
+    protected void inject(App.AppComponent component) {
+        component.inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +107,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
         setupActivity();
 
-        status = SAFE;
-
 ////REVIEW        ****** ONLY FOR DEVELOPMENT ******
 //        // Simple BUG report, retrieves the last error and prompts to send an email
 //        ErrorReporter errorReporter = ErrorReporter.getInstance();
@@ -109,10 +115,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 ////REVIEW        ****** ONLY FOR DEVELOPMENT ******
     }
 
-    @Override
-    protected void inject(App.AppComponent component) {
-        component.inject(this);
-    }
+
 
     private void setupActivity(){
         // Notify the user if there is no internet, offer to retry or to close the app
@@ -131,6 +134,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         mMovie = new Movie(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
         new LoadMovieTask().execute();
     }
+
+
 
     private void startProviderRequest(){
         Log.e(TAG, "startProviderRequest: ");
@@ -172,10 +177,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     private void showErrorMessage(){
         DialogsUtils.showErrorDialog(this, (dialog, which) -> new LoadMovieTask().execute());
     }
-
-    @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
-    @Inject Provider<VideoItem> videoItemProvider;
-    @Inject Provider<ReviewItem> reviewItemProvider;
 
     private void displayMovie(boolean isOffline){
         boolean isPortrait = mBackdropImageView != null;
@@ -253,18 +254,24 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     }
 
     private void setupReviews(Review[] reviews){
-        int visibility = View.VISIBLE;
-        if(reviews == null || reviews.length == 0)
-            visibility = View.GONE;
-
-        mReviewsRV.setVisibility(visibility);
-        findViewById(R.id.tv_reviews_header).setVisibility(visibility);
-        if(visibility == View.GONE)
-            return;
+//        int visibility = View.VISIBLE;
+//        if(reviews == null || reviews.length == 0)
+//            visibility = View.GONE;
+//
+//        mReviewsRV.setVisibility(visibility);
+//        findViewById(R.id.tv_reviews_header).setVisibility(visibility);
+//        if(visibility == View.GONE)
+//            return;
 
         FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
         mReviewsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mReviewsRV.setAdapter(fAdapter);
+
+        if(reviews == null || reviews.length == 0) {
+            fAdapter.add(reviewItemProvider.get().withReview("", getString(R.string.no_reviews)));
+            return;
+        }
+
         for(Review review : reviews)
             fAdapter.add(reviewItemProvider.get().withReview(review.getAuthor(), review.getContent()));
         fAdapter.withOnClickListener((v, adapter, item, position) -> {
@@ -380,26 +387,43 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
     // -------------------------- USE CASES --------------------------
 
-    private void changeFavourite(boolean value){
-        isFavourite = value;
-        int imageRes = value ? R.drawable.ic_favorite_filled_24dp : R.drawable.ic_favorite_border_24dp;
-        mFloatingActionButton.setImageResource(imageRes);
+    private void startSilentNetworkRequest(long id){
+        NetworkUtils.getFullMovieById(id, new retrofit2.Callback<Movie>() {
+            @Override
+            public void onResponse(Call<Movie> call, Response<Movie> response) {
+                Movie movie = response.body();
+                if (movie == null)
+                    return;
+
+                Log.i(TAG, "startSilentNetworkRequest: response obtained");
+
+                // Update the UI
+                rateMain.setText(String.valueOf(movie.getVote_avg()));
+                rateSecondary.setText(String.valueOf(movie.getVote_count()));
+
+                setupTrailers(movie.getVideos());
+                setupReviews(movie.getReviews());
+
+                // Save ONLY updated data in the DB
+                ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
+
+                // Update database only if there is something to update
+                if(values.size() > 1)
+                    return;
+
+                Log.i(TAG, "startSilentNetworkRequest: updating Movie");
+                Uri uri = MoviesContract.getMovieUriWithId(mMovie.getId());
+                moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values,
+                        null, null);
+            }
+
+            @Override
+            public void onFailure(Call<Movie> call, Throwable t) {
+                Log.e(TAG, "startSilentNetworkRequest: onFailure: ", t);
+            }
+        });
     }
 
-    public final int SAFE = 1;
-    final int BUSY = -1;
-    public static int status;
-    private Toast mToast;
-
-    private boolean isSafe(){
-        if(status == SAFE)
-            return true;
-        if(mToast == null)
-            mToast = Toast.makeText(this, "Saving Movie offline", Toast.LENGTH_SHORT);
-        else
-            mToast.show();
-        return false;
-    }
 
     void favouriteMovie() {
         Log.e(TAG, "favouriteMovie: " + status);
@@ -423,8 +447,13 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             status = SAFE;
             insertMovieTaskProvider.get().execute(mMovie);
         }
-
         changeFavourite(!isFavourite);
+    }
+
+    private void changeFavourite(boolean value){
+        isFavourite = value;
+        int imageRes = value ? R.drawable.ic_favorite_filled_24dp : R.drawable.ic_favorite_border_24dp;
+        mFloatingActionButton.setImageResource(imageRes);
     }
 
     @OnClick(R.id.share_movie)
@@ -444,6 +473,22 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         // Avoid ActivityNotFoundException
         if(shareIntent.resolveActivity(getPackageManager()) != null)
             startActivity(shareIntent);
+    }
+
+    // -------------------------- AUXILIARY --------------------------
+
+    final int SAFE = 1, BUSY = -1;
+    private int status = SAFE;
+    private Toast mToast;
+
+    private boolean isSafe(){
+        if(status == SAFE)
+            return true;
+        if(mToast == null)
+            mToast = Toast.makeText(this, "Saving Movie offline", Toast.LENGTH_SHORT);
+        else
+            mToast.show();
+        return false;
     }
 
     // --------------------------- DETAILS ---------------------------
@@ -523,43 +568,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
         // Update DB and UI silently
         startSilentNetworkRequest(mMovie.getId());
-    }
-
-    private void startSilentNetworkRequest(long id){
-        NetworkUtils.getFullMovieById(id, new retrofit2.Callback<Movie>() {
-            @Override
-            public void onResponse(Call<Movie> call, Response<Movie> response) {
-                Movie movie = response.body();
-                if (movie == null)
-                    return;
-
-                Log.i(TAG, "startSilentNetworkRequest: response obtained");
-
-                // Update the UI
-                rateMain.setText(String.valueOf(movie.getVote_avg()));
-                rateSecondary.setText(String.valueOf(movie.getVote_count()));
-
-                setupTrailers(movie.getVideos());
-                setupReviews(movie.getReviews());
-
-                // Save ONLY updated data in the DB
-                ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
-
-                // Update database only if there is something to update
-                if(values.size() > 1)
-                    return;
-
-                Log.i(TAG, "startSilentNetworkRequest: updating Movie");
-                Uri uri = MoviesContract.getMovieUriWithId(mMovie.getId());
-                moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values,
-                                                                                        null, null);
-            }
-
-            @Override
-            public void onFailure(Call<Movie> call, Throwable t) {
-                Log.e(TAG, "startSilentNetworkRequest: onFailure: ", t);
-            }
-        });
     }
 
     @Override

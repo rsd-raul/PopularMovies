@@ -39,13 +39,17 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
     @Override
     public void onBindViewHolder(MoviesAdapterViewHolder viewHolder, int position) {
         ImageView moviePoster = viewHolder.mMoviePoster;
-        String poster_path = mMovies[position].getPoster_path();
-        Uri posterUri = NetworkUtils.buildMoviePosterUri(poster_path);
 
-        Picasso.with(moviePoster.getContext())
-                .load(posterUri)
-                .placeholder(R.drawable.placeholder_poster)
-                .into(moviePoster);
+        String poster_path = mMovies[position].getPoster_path();
+
+        if(poster_path != null) {
+            Uri posterUri = NetworkUtils.buildMoviePosterUri(poster_path);
+            Picasso.with(moviePoster.getContext())
+                    .load(posterUri)
+                    .placeholder(R.drawable.placeholder_poster)
+                    .into(moviePoster);
+        } else
+            moviePoster.setImageBitmap(mMovies[position].getPoster());
     }
 
     @Override

@@ -5,7 +5,6 @@ import android.provider.BaseColumns;
 
 public class MoviesContract {
 
-    // ------------------------- PARCELABLE --------------------------
     // ----------------------------- URI -----------------------------
 
     static final String AUTHORITY = "com.raul.rsd.android.popularmovies";

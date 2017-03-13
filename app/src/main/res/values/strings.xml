@@ -47,6 +47,7 @@
     <!--FAM-->
     <string name="popular">Popularity</string>
     <string name="top_rated">Top rated</string>
+    <string name="favourites">Favourites</string>
 
     <!--Movie-->
     <string name="title_to_string">Title:</string>
@@ -73,4 +74,5 @@
     <string name="hour_unit">H</string>
     <string name="minute_unit">M</string>
     <string name="overview">Overview</string>
+    <string name="no_reviews">NO REVIEWS YET</string>
 </resources>

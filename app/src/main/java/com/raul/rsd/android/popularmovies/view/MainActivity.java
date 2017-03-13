@@ -1,34 +1,35 @@
 package com.raul.rsd.android.popularmovies.view;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
-import android.content.res.Configuration;
-import android.support.v4.content.ContextCompat;
+import android.database.Cursor;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import com.github.clans.fab.FloatingActionMenu;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.raul.rsd.android.popularmovies.App;
-import com.raul.rsd.android.popularmovies.ErrorReporter;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
+import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
+import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     // --------------------------- VALUES ----------------------------
 
@@ -39,8 +40,7 @@ public class MainActivity extends BaseActivity {
 
     @BindView(R.id.rv_movies) RecyclerView mRecyclerView;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
-    @BindView(R.id.menuFAB) FloatingActionMenu mFAM;
-
+    @BindView(R.id.bottom_navigation) AHBottomNavigation bottomNavigation;
     @Inject MoviesAdapter mMoviesAdapter;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
 
@@ -50,6 +50,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
 ////REVIEW        ****** ONLY FOR DEVELOPMENT ******
 //        // Simple BUG report, retrieves the last error and prompts to send an email
@@ -57,10 +58,6 @@ public class MainActivity extends BaseActivity {
 //        errorReporter.Init(this);
 //        errorReporter.CheckErrorAndSendMail(this);
 ////REVIEW        ****** ONLY FOR DEVELOPMENT ******
-
-
-        // Start ButterKnife and Dagger 2
-        ButterKnife.bind(this);
 
         // If we have the data already saved, restore those
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
@@ -97,10 +94,15 @@ public class MainActivity extends BaseActivity {
         mRecyclerView.setHasFixedSize(true);
 
         // Configure Swipe Refresh
-        mSwipeRefresh.setOnRefreshListener(this::loadData);
+        mSwipeRefresh.setOnRefreshListener(() -> {
+            if(mActiveSort.equals(NetworkUtils.FAVOURITES))
+                loadFavourites();
+            else
+                loadData();
+        });
 
-        // Configure FAM
-        configureMenu();
+        // Configure Bottom Navigation Bar
+        configureBottomNavigationBar();
 
         // Load data in the RecyclerView with the default sorting
         if(movies == null)
@@ -141,52 +143,63 @@ public class MainActivity extends BaseActivity {
         DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
     }
 
-    // ------------------------ FAM and FABs -------------------------
+    // ---------------------- BOTTOM NAVIGATION ----------------------
 
-    private void configureMenu(){
+    private void configureBottomNavigationBar(){
 
-        // Change the background depending on the fabMenu Status
-        mFAM.setIconAnimated(false);
-        mFAM.setOnMenuToggleListener(new FloatingActionMenu.OnMenuToggleListener() {
-            int fromColor = ContextCompat.getColor(getApplicationContext(), R.color.transparent);
-            int toColor = ContextCompat.getColor(getApplicationContext(), R.color.background);
+        // Create and add items
+        bottomNavigation.addItem(new AHBottomNavigationItem(
+                R.string.popular, R.drawable.ic_popular_24dp, R.color.colorAccent));
+        bottomNavigation.addItem(new AHBottomNavigationItem(
+                R.string.top_rated, R.drawable.ic_rate_24dp, R.color.amberDark));
+        bottomNavigation.addItem(new AHBottomNavigationItem(
+                R.string.favourites, R.drawable.ic_favorite_border_24dp, R.color.redDark));
 
-            // Creation of animator to transition between the transparent color and the other one
-            final ObjectAnimator backgroundColorAnimator = ObjectAnimator.ofObject(mFAM,
-                    "backgroundColor", new ArgbEvaluator(), fromColor, toColor).setDuration(100);
+        // Display color under navigation bar (API 21+)
+        bottomNavigation.setTranslucentNavigationEnabled(true);
 
-            @Override
-            public void onMenuToggle(boolean opened) {
-                int famIcon;
-                if (opened) {
-                    backgroundColorAnimator.start();
-                    famIcon = R.drawable.ic_close_24dp;
-                }else {
-                    backgroundColorAnimator.reverse();
-                    famIcon = R.drawable.ic_filter_24dp;
-                }
-                mFAM.getMenuIconView().setImageResource(famIcon);
+        // Manage titles
+        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
+
+        // Use colored navigation with circle reveal effect
+        bottomNavigation.setColored(true);
+
+        // Set current item programmatically
+        bottomNavigation.setCurrentItem(0);
+
+        // Set listeners
+        bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
+            switch (position){
+                case 0:
+                    mActiveSort = NetworkUtils.POPULAR;
+                    loadData();
+                    break;
+                case 1:
+                    mActiveSort = NetworkUtils.TOP_RATED;
+                    loadData();
+                    break;
+                case 2:
+                    mActiveSort = NetworkUtils.FAVOURITES;
+                    loadFavourites();
+                    break;
             }
+            return true;
         });
-
-        // On click outside close the menu
-        mFAM.setClosedOnTouchOutside(true);
     }
 
-    @OnClick(R.id.topRatedFAB)
-    void changeFilterToTopRated(){
-        mFAM.close(false);
-        mActiveSort = NetworkUtils.TOP_RATED;
-        loadData();
+    public void loadFavourites(){
+        mSwipeRefresh.setRefreshing(true);
+
+        LoaderManager loaderManager = getSupportLoaderManager();
+        if(loaderManager.getLoader(ID_MOVIE_FAVOURITES_LOADER) == null)
+            loaderManager.initLoader(ID_MOVIE_FAVOURITES_LOADER, null, this) ;
+        else
+            loaderManager.restartLoader(ID_MOVIE_FAVOURITES_LOADER, null, this);
+
+        UIUtils.setSubtitle(this, mActiveSort);
     }
 
-    @OnClick(R.id.popularFAB)
-    void changeFilterToPopular(){
-        mFAM.close(false);
-        mActiveSort = NetworkUtils.POPULAR;
-        loadData();
-    }
-
+    // --------------------------- STATES ----------------------------
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -198,4 +211,47 @@ public class MainActivity extends BaseActivity {
 //    protected void onRestoreInstanceState(Bundle savedInstanceState) {
 //        super.onRestoreInstanceState(savedInstanceState);
 //    }
+
+    // ------------------------ CURSOR LOADER ------------------------
+
+    private static final int ID_MOVIE_FAVOURITES_LOADER = 14;
+
+    public static final String[] MOVIE_DETAILS_PROJECTION = {
+                            MoviesContract.MoviesEntry._ID,
+                            MoviesContract.MoviesEntry.COLUMN_POSTER,};
+
+    public static final int INDEX_ID = 0,
+                            INDEX_POSTER = 1;
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        if(loaderId != ID_MOVIE_FAVOURITES_LOADER)
+            throw new RuntimeException("Loader Not Implemented: " + loaderId);
+
+        return new CursorLoader(this, MoviesContract.CONTENT_URI, MOVIE_DETAILS_PROJECTION,
+                null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // REVIEW after startDelete it comes here and fails.... Why?
+        if(data == null || data.getCount() == 0) {
+            Log.e(TAG, "onLoadFinished: Problems retrieving favourite from DB");
+            return;
+        }
+
+        data.moveToFirst();
+        MovieLight[] movies = TMDBUtils.extractLightMoviesFromCursor(data);
+        data.close();
+
+        // Adapt the interface
+        mMoviesAdapter.setMoviesData(movies);
+        mRecyclerView.smoothScrollToPosition(0);
+        mSwipeRefresh.setRefreshing(false);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMoviesAdapter.setMoviesData(null);
+    }
 }

@@ -10,7 +10,10 @@ import com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.view.DetailsActivity;
+import com.raul.rsd.android.popularmovies.view.MainActivity;
+
 import java.util.Date;
 
 public abstract class TMDBUtils {
@@ -84,6 +87,26 @@ public abstract class TMDBUtils {
         return movie;
     }
 
+    public static MovieLight[] extractLightMoviesFromCursor(Cursor data){
+        MovieLight[] movies = new MovieLight[data.getCount()];
+
+        for (int i = 0; i < movies.length; i++) {
+            int id = data.getInt(MainActivity.INDEX_ID);
+            Bitmap poster = BitmapUtils.getBitmapFromBytes(data.getBlob(MainActivity.INDEX_POSTER));
+            movies[i] = new MovieLight(id, poster);
+
+            data.moveToNext();
+        }
+
+        return movies;
+    }
+
+    /**
+     * Populate ContentValues with the info we save into the DB, ignoring what we don't.
+     *
+     * @param movie The movie we will extract the data from.
+     * @return A DB ready ContentValue based on the Movie
+     */
     public static ContentValues getContentValuesFromMovie(Movie movie){
         ContentValues values = new ContentValues();
 
@@ -103,6 +126,13 @@ public abstract class TMDBUtils {
         return values;
     }
 
+    /**
+     * Compare the movies received and only save the attributes that are different between them.
+     *
+     * @param oldMovie The movie currently stored on the DB
+     * @param newMovie The movie retrieved from TMDB
+     * @return Only the values that have changed and the ID
+     */
     public static ContentValues getContentValuesFromMovie(Movie oldMovie, Movie newMovie){
         ContentValues values = new ContentValues();
         values.put(MoviesEntry._ID, newMovie.getId());

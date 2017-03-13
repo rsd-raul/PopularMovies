@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.domain;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -9,6 +10,14 @@ public class MovieLight implements Parcelable{
 
     private long id;
     private String poster_path;
+    private Bitmap poster;
+
+    // ------------------------- CONSTRUCTOR -------------------------
+
+    public MovieLight(long id, Bitmap poster) {
+        this.id = id;
+        this.poster = poster;
+    }
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
@@ -24,6 +33,13 @@ public class MovieLight implements Parcelable{
     }
     public void setPoster_path(String poster_path) {
         this.poster_path = poster_path;
+    }
+
+    public Bitmap getPoster() {
+        return poster;
+    }
+    public void setPoster(Bitmap poster) {
+        this.poster = poster;
     }
 
     // ------------------------- PARCELABLE --------------------------
