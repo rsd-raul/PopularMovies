@@ -57,10 +57,7 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 
-    // FloatingActionButton - Clans - https://github.com/Clans/FloatingActionButton
-    compile 'com.github.clans:fab:1.6.4'
-
-    // Material Dialogs -  Aidan Follestad - https://github.com/afollestad/material-dialogs
+    // MaterialDialogs -  Aidan Follestad - https://github.com/afollestad/material-dialogs
     compile 'com.afollestad.material-dialogs:commons:0.9.3.0'
 
     // ButterKnife - Jake Wharton - https://github.com/JakeWharton/butterknife
@@ -76,5 +73,8 @@ dependencies {
     compile 'com.mikepenz:fastadapter-commons:2.1.0@aar'
 
     // AHBottomNavigation - Aurelien Hubert - https://github.com/aurelhubert/ahbottomnavigation
-    compile 'com.aurelhubert:ahbottomnavigation:2.0.6'
+    compile 'com.aurelhubert:ahbottomnavigation:2.0.6'\
+
+    // SearchView - lapism - https://github.com/lapism/SearchView
+    compile 'com.lapism:searchview:4.0'
 }

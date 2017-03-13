@@ -44,7 +44,7 @@
     <string name="info_share_icon">Share the movie</string>
     <string name="info_icon_person">Number of votes</string>
 
-    <!--FAM-->
+    <!--Bottom Action Bar-->
     <string name="popular">Popularity</string>
     <string name="top_rated">Top rated</string>
     <string name="favourites">Favourites</string>
@@ -74,5 +74,9 @@
     <string name="hour_unit">H</string>
     <string name="minute_unit">M</string>
     <string name="overview">Overview</string>
-    <string name="no_reviews">NO REVIEWS YET</string>
+    <string name="no_reviews">NO REVIEWS FOUND</string>
+
+    <string name="search">Search&#8230;</string>
+    <string name="movies">Movie</string>
+    <string name="actors">Actor</string>
 </resources>

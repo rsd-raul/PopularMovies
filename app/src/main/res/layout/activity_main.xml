@@ -12,7 +12,7 @@
 
         <android.support.v7.widget.Toolbar style="@style/toolbar"
             android:id="@+id/toolbar"
-            app:layout_scrollFlags="scroll|enterAlways" />
+            app:layout_scrollFlags="scroll|enterAlways|snap"/>
 
     </android.support.design.widget.AppBarLayout>
 
@@ -30,6 +30,12 @@
             android:padding="@dimen/main_rv_padding"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <com.lapism.searchview.SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.lapism.searchview.SearchBehavior" />
 
     <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
         android:id="@+id/bottom_navigation"

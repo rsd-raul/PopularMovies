@@ -118,12 +118,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
 
     private void setupActivity(){
-        // Notify the user if there is no internet, offer to retry or to close the app
-        if(!NetworkUtils.isNetworkAvailable(this)){
-            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity());
-            return;
-        }
-
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -150,6 +144,11 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
     private void startNetworkRequest(){
         Log.e(TAG, "startNetworkRequest: ");
+
+        // Notify the user if there is no internet, offer to retry or to close the app
+        if(!NetworkUtils.isNetworkAvailable(DetailsActivity.this))
+            DialogsUtils.showErrorDialog(DetailsActivity.this, (dialog, which) -> startNetworkRequest());
+
 
         mSwipeRefreshLayout.setRefreshing(true);
 
@@ -600,8 +599,10 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         protected void onPostExecute(Boolean isLocal) {
             if (isLocal)
                 startProviderRequest();
-            else
+            else{
                 startNetworkRequest();
+        }
+
             super.onPostExecute(isLocal);
         }
     }

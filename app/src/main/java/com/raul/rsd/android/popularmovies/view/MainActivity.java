@@ -1,6 +1,7 @@
 package com.raul.rsd.android.popularmovies.view;
 
 import android.database.Cursor;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -10,8 +11,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.lapism.searchview.SearchAdapter;
+import com.lapism.searchview.SearchFilter;
+import com.lapism.searchview.SearchItem;
+import com.lapism.searchview.SearchView;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
@@ -22,6 +28,8 @@ import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,11 +48,17 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     @BindView(R.id.rv_movies) RecyclerView mRecyclerView;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
-    @BindView(R.id.bottom_navigation) AHBottomNavigation bottomNavigation;
+    @BindView(R.id.bottom_navigation) AHBottomNavigation mBottomNavigation;
+    @BindView(R.id.searchView) SearchView mSearchView;
     @Inject MoviesAdapter mMoviesAdapter;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
 
     // ------------------------- CONSTRUCTOR -------------------------
+
+    @Override
+    protected void inject(App.AppComponent component) {
+        component.inject(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +81,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     }
 
     @Override
-    protected void inject(App.AppComponent component) {
-        component.inject(this);
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        configureSearchView();
     }
 
     private void setupActivity(MovieLight[] movies) {
@@ -79,8 +95,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         }
 
         // Set ActionBar
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(mToolbar);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
 
         // Get references and values
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
@@ -148,27 +163,27 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     private void configureBottomNavigationBar(){
 
         // Create and add items
-        bottomNavigation.addItem(new AHBottomNavigationItem(
+        mBottomNavigation.addItem(new AHBottomNavigationItem(
                 R.string.popular, R.drawable.ic_popular_24dp, R.color.colorAccent));
-        bottomNavigation.addItem(new AHBottomNavigationItem(
+        mBottomNavigation.addItem(new AHBottomNavigationItem(
                 R.string.top_rated, R.drawable.ic_rate_24dp, R.color.amberDark));
-        bottomNavigation.addItem(new AHBottomNavigationItem(
+        mBottomNavigation.addItem(new AHBottomNavigationItem(
                 R.string.favourites, R.drawable.ic_favorite_border_24dp, R.color.redDark));
 
         // Display color under navigation bar (API 21+)
-        bottomNavigation.setTranslucentNavigationEnabled(true);
+        mBottomNavigation.setTranslucentNavigationEnabled(true);
 
         // Manage titles
-        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
+        mBottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
 
         // Use colored navigation with circle reveal effect
-        bottomNavigation.setColored(true);
+        mBottomNavigation.setColored(true);
 
         // Set current item programmatically
-        bottomNavigation.setCurrentItem(0);
+        mBottomNavigation.setCurrentItem(0);
 
         // Set listeners
-        bottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
+        mBottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
             switch (position){
                 case 0:
                     mActiveSort = NetworkUtils.POPULAR;
@@ -197,6 +212,91 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             loaderManager.restartLoader(ID_MOVIE_FAVOURITES_LOADER, null, this);
 
         UIUtils.setSubtitle(this, mActiveSort);
+    }
+
+    // ------------------------- SEARCH VIEW -------------------------
+
+//    SearchHistoryTable mHistoryDatabase;  // TODO Research
+//    mHistoryDatabase = new SearchHistoryTable(this);
+//    mHistoryDatabase.setHistorySize(10);
+
+    private void configureSearchView() {
+        if (mSearchView == null)
+            return;
+
+        configureSearchViewBehaviour();
+
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Toast.makeText(MainActivity.this, "onQueryTextSubmit", Toast.LENGTH_SHORT).show();
+//                    getData(query, 0);
+//                    mSearchView.close(false);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                Toast.makeText(MainActivity.this, "onQueryTextChange", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+
+
+        mSearchView.setVoiceText("Set permission on Android 6.0+ !");
+        mSearchView.setOnVoiceClickListener(() -> {
+            Toast.makeText(MainActivity.this, "onVoiceClick", Toast.LENGTH_SHORT).show();
+            // permission
+        });
+
+
+        List<SearchItem> suggestionsList = new ArrayList<>();
+        suggestionsList.add(new SearchItem("search1"));
+        suggestionsList.add(new SearchItem("search2"));
+
+        SearchAdapter searchAdapter = new SearchAdapter(this, suggestionsList);
+        searchAdapter.addOnItemClickListener((view, position) -> {
+            Toast.makeText(MainActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
+//          TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
+//          String query = textView.getText().toString();
+//          getData(query, position);
+//          mSearchView.close(false);
+        });
+        mSearchView.setAdapter(searchAdapter);
+
+        /*suggestionsList.add(new SearchItem("search12"));
+        suggestionsList.add(new SearchItem("search22"));
+        suggestionsList.add(new SearchItem("search32"));
+        searchAdapter.notifyDataSetChanged();*/
+    }
+
+    private void configureSearchViewBehaviour() {
+        mSearchView.setHint(R.string.search);
+        mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
+        mSearchView.setOnMenuClickListener(() -> mSearchView.open(true));
+
+        // Define filters
+        List<SearchFilter> filters = new ArrayList<>();
+        filters.add(new SearchFilter(getString(R.string.movies), true));
+        filters.add(new SearchFilter(getString(R.string.actors), false));
+        mSearchView.setFilters(filters);
+        //use mSearchView.getFiltersStates() to consider filter when performing search
+
+        mSearchView.setOnOpenCloseListener(new SearchView.OnOpenCloseListener() {
+            @Override
+            public boolean onOpen() {
+                mBottomNavigation.hideBottomNavigation(false);
+                mSearchView.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+                return true;
+            }
+            @Override
+            public boolean onClose() {
+                mBottomNavigation.restoreBottomNavigation(true);
+                mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
+                return true;
+            }
+        });
     }
 
     // --------------------------- STATES ----------------------------
