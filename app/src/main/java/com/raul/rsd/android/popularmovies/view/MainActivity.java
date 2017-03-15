@@ -1,5 +1,6 @@
 package com.raul.rsd.android.popularmovies.view;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -11,11 +12,13 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.lapism.searchview.SearchAdapter;
 import com.lapism.searchview.SearchFilter;
+import com.lapism.searchview.SearchHistoryTable;
 import com.lapism.searchview.SearchItem;
 import com.lapism.searchview.SearchView;
 import com.raul.rsd.android.popularmovies.App;
@@ -27,7 +30,6 @@ import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
-import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -109,12 +111,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         mRecyclerView.setHasFixedSize(true);
 
         // Configure Swipe Refresh
-        mSwipeRefresh.setOnRefreshListener(() -> {
-            if(mActiveSort.equals(NetworkUtils.FAVOURITES))
-                loadFavourites();
-            else
-                loadData();
-        });
+        mSwipeRefresh.setOnRefreshListener(this::loadData);
 
         // Configure Bottom Navigation Bar
         configureBottomNavigationBar();
@@ -131,31 +128,70 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     public void loadData(){
         mSwipeRefresh.setRefreshing(true);
 
-        NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
-            @Override
-            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                MovieLight[] movies = response.body().getResults();
+        // If Favourites, start the CursorLoader
+        if(mActiveSort.equals(NetworkUtils.FAVOURITES)){
+            LoaderManager loaderManager = getSupportLoaderManager();
+            if(loaderManager.getLoader(ID_MOVIE_FAVOURITES_LOADER) == null)
+                loaderManager.initLoader(ID_MOVIE_FAVOURITES_LOADER, null, this) ;
+            else
+                loaderManager.restartLoader(ID_MOVIE_FAVOURITES_LOADER, null, this);
 
-                if (movies != null) {
-                    mMoviesAdapter.setMoviesData(movies);
-                    mRecyclerView.smoothScrollToPosition(0);
-                } else
+        // If Top rated or Popular, start network request
+        }else
+            NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
+                @Override
+                public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+
+                    MovieLight[] movies = response.body().getResults();
+
+                    if (movies != null) {
+                        mMoviesAdapter.setMoviesData(movies);
+                        mRecyclerView.smoothScrollToPosition(0);
+                    } else
+                        showErrorMessage();
+
+                    mSwipeRefresh.setRefreshing(false);
+                }
+
+                @Override
+                public void onFailure(Call<MoviesList> call, Throwable t) {
+                    Log.e(TAG, "loadData/onFailure: Failed to fetch movies from Server", t);
                     showErrorMessage();
-
-                mSwipeRefresh.setRefreshing(false);
-            }
-
-            @Override
-            public void onFailure(Call<MoviesList> call, Throwable t) {
-                Log.e(TAG, "loadData/onFailure: Failed to fetch movies from Server", t);
-                showErrorMessage();
-            }
-        });
-        UIUtils.setSubtitle(this, mActiveSort);
+                }
+            });
     }
 
     private void showErrorMessage(){
         DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
+    }
+
+    // --------------------------- STATES ----------------------------
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArray(MOVIES_KEY, mMoviesAdapter.getMoviesData());
+    }
+
+//    @Override // TODO handle restore
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//        Toast.makeText(this, "hello", Toast.LENGTH_SHORT).show();
+//    }
+
+    // -------------------------- AUXILIARY --------------------------
+
+    boolean mNoScroll = false;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // If coming back to Favourites most likely from Details reload but do not scroll to top
+        if(mActiveSort.equals(NetworkUtils.FAVOURITES)) {
+            loadData();
+            mNoScroll = true;
+        }
     }
 
     // ---------------------- BOTTOM NAVIGATION ----------------------
@@ -187,62 +223,47 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             switch (position){
                 case 0:
                     mActiveSort = NetworkUtils.POPULAR;
-                    loadData();
                     break;
                 case 1:
                     mActiveSort = NetworkUtils.TOP_RATED;
-                    loadData();
                     break;
                 case 2:
                     mActiveSort = NetworkUtils.FAVOURITES;
-                    loadFavourites();
                     break;
             }
+            loadData();
             return true;
         });
     }
 
-    public void loadFavourites(){
-        mSwipeRefresh.setRefreshing(true);
-
-        LoaderManager loaderManager = getSupportLoaderManager();
-        if(loaderManager.getLoader(ID_MOVIE_FAVOURITES_LOADER) == null)
-            loaderManager.initLoader(ID_MOVIE_FAVOURITES_LOADER, null, this) ;
-        else
-            loaderManager.restartLoader(ID_MOVIE_FAVOURITES_LOADER, null, this);
-
-        UIUtils.setSubtitle(this, mActiveSort);
-    }
-
     // ------------------------- SEARCH VIEW -------------------------
 
-//    SearchHistoryTable mHistoryDatabase;  // TODO Research
-//    mHistoryDatabase = new SearchHistoryTable(this);
-//    mHistoryDatabase.setHistorySize(10);
+    private SearchAdapter mSearchAdapter;
+    private MovieLight[] mMoviesFound;
+//    mHistoryDatabase.clearDatabase();     // TODO allow option on Settings
 
     private void configureSearchView() {
         if (mSearchView == null)
             return;
-
         configureSearchViewBehaviour();
 
+        SearchHistoryTable mHistoryDatabase = new SearchHistoryTable(this);
+        mHistoryDatabase.setHistorySize(5);
 
+        // Find data
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(MainActivity.this, "onQueryTextSubmit", Toast.LENGTH_SHORT).show();
-//                    getData(query, 0);
-//                    mSearchView.close(false);
+                findData(query);
                 return true;
             }
 
             @Override
-            public boolean onQueryTextChange(String newText) {
-                Toast.makeText(MainActivity.this, "onQueryTextChange", Toast.LENGTH_SHORT).show();
+            public boolean onQueryTextChange(String query) {
+                findData(query);
                 return false;
             }
         });
-
 
         mSearchView.setVoiceText("Set permission on Android 6.0+ !");
         mSearchView.setOnVoiceClickListener(() -> {
@@ -250,29 +271,34 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             // permission
         });
 
+        mSearchAdapter = new SearchAdapter(this);
+        mSearchAdapter.addOnItemClickListener((view, position) -> {
+            // Get the query and add it to the DB
+            TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
+            String query = movieTitle.getText().toString();
+            mHistoryDatabase.addItem(new SearchItem(query));
 
-        List<SearchItem> suggestionsList = new ArrayList<>();
-        suggestionsList.add(new SearchItem("search1"));
-        suggestionsList.add(new SearchItem("search2"));
+            // If the item touched it's a past search, repeat that search
+            if(mMoviesFound == null) {
+                mSearchView.setQuery(query, true);
+                // TODO better yet, load the first result after a network request
+                return;
+            }
 
-        SearchAdapter searchAdapter = new SearchAdapter(this, suggestionsList);
-        searchAdapter.addOnItemClickListener((view, position) -> {
-            Toast.makeText(MainActivity.this, "onItemClick", Toast.LENGTH_SHORT).show();
-//          TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
-//          String query = textView.getText().toString();
-//          getData(query, position);
-//          mSearchView.close(false);
+            // If the item is a movie found through search, go to details
+            MovieLight movie = mMoviesFound[position];
+            mMoviesFound = null;
+            mSearchView.close(false);
+            Intent intentDetailsActivity = new Intent(this, DetailsActivity.class);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, movie.getId());
+            startActivity(intentDetailsActivity);
         });
-        mSearchView.setAdapter(searchAdapter);
-
-        /*suggestionsList.add(new SearchItem("search12"));
-        suggestionsList.add(new SearchItem("search22"));
-        suggestionsList.add(new SearchItem("search32"));
-        searchAdapter.notifyDataSetChanged();*/
+        mSearchView.setAdapter(mSearchAdapter);
     }
 
     private void configureSearchViewBehaviour() {
         mSearchView.setHint(R.string.search);
+        mSearchView.setShouldClearOnClose(true);
         mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
         mSearchView.setOnMenuClickListener(() -> mSearchView.open(true));
 
@@ -294,23 +320,42 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             public boolean onClose() {
                 mBottomNavigation.restoreBottomNavigation(true);
                 mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
+                mMoviesFound = null;
                 return true;
             }
         });
     }
 
-    // --------------------------- STATES ----------------------------
+    private void findData(String query){
+        if(query == null || query.equals(""))
+            return;
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putParcelableArray(MOVIES_KEY, mMoviesAdapter.getMoviesData());
+        mSearchView.showProgress();
+
+        // TODO Use filters
+
+
+        // TODO cancel request if not finished and there is a new one
+        NetworkUtils.findMovieByName(query, 1, new Callback<MoviesList>() {
+            @Override
+            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                if(response == null || response.body() == null)
+                    return;
+
+                mMoviesFound = response.body().getResults();
+
+                List<SearchItem> suggestionsList = new ArrayList<>();
+                for(MovieLight movie : mMoviesFound)
+                    suggestionsList.add(new SearchItem(movie.getTitle()));
+                mSearchAdapter.setData(suggestionsList);
+
+                mSearchView.hideProgress();
+            }
+
+            @Override
+            public void onFailure(Call<MoviesList> call, Throwable t) { }
+        });
     }
-
-//    @Override // TODO handle restore
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//    }
 
     // ------------------------ CURSOR LOADER ------------------------
 
@@ -335,7 +380,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         // REVIEW after startDelete it comes here and fails.... Why?
-        if(data == null || data.getCount() == 0) {
+        if(data == null) {
             Log.e(TAG, "onLoadFinished: Problems retrieving favourite from DB");
             return;
         }
@@ -346,8 +391,15 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         // Adapt the interface
         mMoviesAdapter.setMoviesData(movies);
-        mRecyclerView.smoothScrollToPosition(0);
         mSwipeRefresh.setRefreshing(false);
+
+        if(mNoScroll) {
+            mNoScroll = false;
+            return;
+        }
+
+        mNoScroll = false;
+        mRecyclerView.smoothScrollToPosition(0);
     }
 
     @Override

@@ -190,20 +190,20 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         }else {
             if(isPortrait) {
                 // Setup backdrop <- First, so Picasso gets a head start.
-                Uri backdropUri = NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path());
-                Picasso.with(this)
-                        .load(backdropUri)
-                        .placeholder(R.drawable.placeholder_backdrop)
-                        .into(mBackdropImageView, adaptColorByBackdropCallback(this));
+                if(mMovie.getBackdrop_path() != null)
+                    Picasso.with(this)
+                            .load(NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path()))
+                            .placeholder(R.drawable.placeholder_backdrop)
+                            .into(mBackdropImageView, adaptColorByBackdropCallback(this));
             } else
                 mSwipeRefreshLayout.setRefreshing(false);
 
             // Setup poster
-            Uri posterUri = NetworkUtils.buildMoviePosterUri(mMovie.getPoster_path());
-            Picasso.with(this)
-                    .load(posterUri)
-                    .placeholder(R.drawable.placeholder_poster)
-                    .into(mPosterImageView);
+            if(mMovie.getPoster_path() != null)
+                Picasso.with(this)
+                        .load(NetworkUtils.buildMoviePosterUri(mMovie.getPoster_path()))
+                        .placeholder(R.drawable.placeholder_poster)
+                        .into(mPosterImageView);
 
             setupTrailers(mMovie.getVideos());
 

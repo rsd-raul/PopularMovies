@@ -48,7 +48,7 @@ public abstract class NetworkUtils {
     public static final String VIDEOS = "videos";
     public static final String REVIEWS = "reviews";
 
-    private static final String BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/";
+    private static final String BASE_TMDB_URL = "https://api.themoviedb.org/3/";
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
     private static final String BASE_YOUTUBE_URL = "https://www.youtube.com/watch";
     private static final String BASE_THUMBNAIL_URL = "https://img.youtube.com/vi/";
@@ -56,6 +56,8 @@ public abstract class NetworkUtils {
     private static final String API_PARAM = "api_key";
     private static final String VIDEO_PARAM = "v";
     private static final String APPEND_PARAM = "append_to_response";
+    private static final String QUERY_PARAM = "query";
+    private static final String PAGE_PARAM = "page";
 
     private static String POSTER_SIZE;
     private static String BACKDROP_SIZE;
@@ -156,42 +158,49 @@ public abstract class NetworkUtils {
     interface TMDBService {
 
         //  https://api.themoviedb.org/3/movie/popular?api_key=abc
-        @GET("{filter}")
-        Call<MoviesList> getMoviesByFilter(@Path("filter") String filter, @Query(API_PARAM) String api_key);
+        @GET("movie/{filter}")
+        Call<MoviesList> getMoviesByFilter(@Path("filter") String filter,
+                                           @Query(API_PARAM) String api_key);
 
-        //  https://api.themoviedb.org/3/movie/328111?api_key=abc
-        @GET("{id}")
-        Call<Movie> getMovieById(@Path("id") Long id, @Query(API_PARAM) String api_key);
-
-        //http://api.themoviedb.org/3/movie/131634?api_key=e55ce7ce121152b0af378ca4988146e0&append_to_response=videos,reviews
-        @GET("{id}")
-        Call<Movie> getFullMovieById(@Path("id") Long id, @Query(API_PARAM) String api_key,
+        //http://api.themoviedb.org/3/movie/131634?api_key=<<api_key>>&append_to_response=videos,reviews
+        @GET("movie/{id}")
+        Call<Movie> getFullMovieById(@Path("id") Long id,
+                                     @Query(API_PARAM) String api_key,
                                      @Query(APPEND_PARAM) String videosAndReviews);
 
+        //https://api.themoviedb.org/3/search/movie?api_key=<<api_key>>&query=test&page=1
+        @GET("search/movie")
+        Call<MoviesList> findMovieByName(@Query(API_PARAM) String api_key,
+                                         @Query(QUERY_PARAM) String query,
+                                         @Query(PAGE_PARAM) int page);
+
+
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_MOVIE_URL)
+                .baseUrl(BASE_TMDB_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 
     // --------------------------- NETWORK ---------------------------
 
-    public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
+    public static void findMovieByName(String query, int page, Callback<MoviesList> callback){
         NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<MoviesList> call = gitHubService.getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3);
+        Call<MoviesList> call = gitHubService.findMovieByName(BuildConfig.TMDB_API_KEY_V3, query, page);
         call.enqueue(callback);
     }
 
-    public static void getMovieById(Long id, Callback<Movie> callback){
+
+    public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
         NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<Movie> call = gitHubService.getMovieById(id, BuildConfig.TMDB_API_KEY_V3);
+        Call<MoviesList> call = gitHubService.getMoviesByFilter(filter,
+                                                                    BuildConfig.TMDB_API_KEY_V3);
         call.enqueue(callback);
     }
 
     public static void getFullMovieById(Long id, Callback<Movie> callback){
         NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<Movie> call = gitHubService.getFullMovieById(id,
-                                                BuildConfig.TMDB_API_KEY_V3, VIDEOS+","+REVIEWS);
+        Call<Movie> call = gitHubService.getFullMovieById(id, BuildConfig.TMDB_API_KEY_V3,
+                                                                                VIDEOS+","+REVIEWS);
         call.enqueue(callback);
     }
 

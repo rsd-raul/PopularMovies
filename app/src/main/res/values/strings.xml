@@ -16,7 +16,7 @@
 <!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
 
     <!--Names-->
-    <string name="app_name" translatable="false">PopularMovies</string>
+    <string name="app_name" translatable="false">Go Movies</string>
     <string name="none" translatable="false"/>
 
     <!--Random-->

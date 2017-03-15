@@ -9,6 +9,7 @@ public class MovieLight implements Parcelable{
     // ------------------------- ATTRIBUTES --------------------------
 
     private long id;
+    private String title;
     private String poster_path;
     private Bitmap poster;
 
@@ -26,6 +27,13 @@ public class MovieLight implements Parcelable{
     }
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPoster_path() {
