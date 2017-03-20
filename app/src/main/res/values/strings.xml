@@ -60,6 +60,14 @@
     <string name="reviews">Reviews</string>
     <string name="released">Released</string>
 
+    <!--Actor-->
+
+    <string name="place_of_birth">Place of Birth</string>
+    <string name="biography">Biography</string>
+    <string name="death_day">Died</string>
+    <string name="birthday">Born</string>
+
+
     <!--Format-->
     <string name="format_voteAvg">
         <xliff:g id="vote_avg">%1$.1f</xliff:g> -
@@ -71,18 +79,25 @@
         <xliff:g id="string">%2$s</xliff:g>
     </string>
 
+    <string name="format_string_string">
+        <xliff:g id="string">%1$s</xliff:g>:
+        <xliff:g id="string">%2$s</xliff:g>
+    </string>
+
     <string name="hour_unit">H</string>
     <string name="minute_unit">M</string>
     <string name="overview">Overview</string>
-    <string name="no_reviews">NO REVIEWS FOUND</string>
 
     <string name="search">Search&#8230;</string>
     <string name="movie">Movie</string>
+    <string name="movies">Movies</string>
     <string name="actors">Actor</string>
     <string name="select_filter">Select either Movie or Actor</string>
-    <string name="no_description">NO DESCRIPTION FOUND</string>
     <string name="read_more">Read More</string>
-    <string name="place_of_birth">Place of Birth</string>
-    <string name="movies">Movies</string>
-    <string name="biography">Biography</string>
+
+
+    <!--Placeholders-->
+    <string name="no_reviews">NO REVIEWS FOUND</string>
+    <string name="no_description">NO DESCRIPTION FOUND</string>
+    <string name="years">Years</string>
 </resources>

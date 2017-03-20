@@ -50,6 +50,7 @@ public abstract class NetworkUtils {
     private static final String VIDEOS = "videos";
     private static final String REVIEWS = "reviews";
     private static final String MOVIE_CREDITS = "movie_credits";
+    private static final String IMAGES = "images";
 
     private static final String BASE_TMDB_URL = "https://api.themoviedb.org/3/";
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
@@ -230,7 +231,7 @@ public abstract class NetworkUtils {
     }
 
     public static void getFullActorById(Long id, Callback<Actor> callback){
-        getTMDBService().getFullActorById(id, BuildConfig.TMDB_API_KEY_V3, MOVIE_CREDITS)
+        getTMDBService().getFullActorById(id, BuildConfig.TMDB_API_KEY_V3, MOVIE_CREDITS+","+IMAGES)
                                                                                 .enqueue(callback);
     }
 

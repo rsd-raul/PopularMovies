@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -53,8 +54,11 @@ public class ActorActivity extends BaseActivity {
     @BindView(R.id.tv_birth_death_date) TextView birthDeathMain;
     @BindView(R.id.tv_biography_main) TextView biographyMain;
     @BindView(R.id.tv_place_birth_main) TextView placeBirthMain;
+    @BindView(R.id.tv_years_main) TextView yearsMain;
+    @BindView(R.id.tv_movies_count_main) TextView movieCountMain;
     @BindView(R.id.rv_movies) RecyclerView mMoviesRV;
     @BindView(R.id.iv_actor_profile) ImageView mProfileImageView;
+    @BindView(R.id.iv_actor_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
@@ -80,6 +84,9 @@ public class ActorActivity extends BaseActivity {
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setDisplayHomeAsUpEnabled(true);
 
         biographyMain.setOnClickListener(view -> {
             if(biographyMain.getText().length() > 0)
@@ -137,6 +144,7 @@ public class ActorActivity extends BaseActivity {
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mProfileImageView);
 
+
         setupMovies(mActor.getMovies());
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
@@ -148,12 +156,28 @@ public class ActorActivity extends BaseActivity {
         // Fill interface with formatted movie details
         nameMain.setText(mActor.getName());
 
-        // TODO calculate age and show
-        String deathDay = mActor.getDeathday();
-        boolean noDeathDay = deathDay == null;    // TODO deathDay not working
-        birthDeathMain.setText(DateUtils.getStringFromDate(mActor.getBirthday()));
         biographyMain.setText(mActor.getBiography());
         placeBirthMain.setText(mActor.getPlace_of_birth());
+
+        // Handle Age and Years
+        birthDeathMain.setText(getString(R.string.format_string_string,
+                                        getString(R.string.birthday),
+                                        DateUtils.getStringFromDate(mActor.getBirthday())));
+
+        Date endDate = new Date();
+        String deathDay = mActor.getDeathday();
+        if(deathDay.length()==10) {
+            endDate = DateUtils.getDateFromTMDBSString(deathDay);
+            birthDeathMain.append("\n" + getString(R.string.format_string_string,
+                    getString(R.string.death_day),
+                    DateUtils.getStringFromDate(endDate)));
+        }
+
+        int age = DateUtils.calculateYearsBetweenDates(mActor.getBirthday(), endDate);
+        yearsMain.setText(String.valueOf(age));
+
+        int movies = mActor.getMovies() != null ? mActor.getMovies().length : 0;
+        movieCountMain.setText(String.valueOf(movies));
     }
 
     @OnClick(R.id.tv_read_more)
@@ -192,8 +216,8 @@ public class ActorActivity extends BaseActivity {
 
     // -------------------------- USE CASES --------------------------
 
-    @OnClick(R.id.fab)
-    void shareMovie(){
+    @OnClick(R.id.share_actor)
+    void shareActor(){
         // If the movie has not been fetched yet, don't try to share
         if(mActor == null)
             return;

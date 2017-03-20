@@ -73,4 +73,20 @@ public abstract class DateUtils {
 
         return duration;
     }
+
+    public static int calculateYearsBetweenDates(Date startDate, Date endDate) {
+        int startDay = startDate.getDate(), endDay = endDate.getDate();
+        int startMonth = startDate.getMonth(), endMonth = endDate.getMonth();
+        int startYear = startDate.getYear(), endYear = endDate.getYear();
+
+        int result = endYear - startYear;
+        Log.e(TAG, "calculateYearsBetweenDates: " + result);
+        if (startMonth > endMonth)
+            result--;
+        else if (startMonth == endMonth && startDay > endDay)
+            result--;
+
+        Log.e(TAG, "calculateYearsBetweenDates: " + result);
+        return result;
+    }
 }

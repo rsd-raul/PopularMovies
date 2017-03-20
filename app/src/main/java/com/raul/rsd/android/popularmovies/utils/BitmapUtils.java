@@ -15,7 +15,7 @@ public abstract class BitmapUtils {
     }
 
     // convert from byte array to bitmap
-    public static Bitmap getBitmapFromBytes(byte[] image) {
+    static Bitmap getBitmapFromBytes(byte[] image) {
         return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 }
