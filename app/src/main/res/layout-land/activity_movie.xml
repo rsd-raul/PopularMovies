@@ -19,13 +19,13 @@
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.DetailsActivity">
+        tools:context=".view.MovieActivity">
 
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            tools:context="com.raul.rsd.android.popularmovies.view.DetailsActivity">
+            tools:context="com.raul.rsd.android.popularmovies.view.MovieActivity">
 
             <android.support.design.widget.AppBarLayout
                 android:id="@+id/app_bar"
@@ -44,7 +44,7 @@
 
             </android.support.design.widget.AppBarLayout>
 
-            <include android:id="@+id/content_details" layout="@layout/content_details" />
+            <include android:id="@+id/content_details" layout="@layout/content_movie" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/fab"

@@ -1,14 +1,12 @@
 package com.raul.rsd.android.popularmovies.domain;
 
-
-import java.util.ArrayList;
-
 public class MoviesList {
 
     // ------------------------- ATTRIBUTES --------------------------
 
     private int total_pages;
     private MovieLight[] results;
+    private MovieLight[] cast;
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
@@ -18,5 +16,8 @@ public class MoviesList {
 
     public MovieLight[] getResults() {
         return results;
+    }
+    public MovieLight[] getCast() {
+        return cast;
     }
 }

@@ -18,7 +18,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -60,11 +59,11 @@ import retrofit2.Call;
 import retrofit2.Response;
 import static com.raul.rsd.android.popularmovies.data.MoviesContract.*;
 
-public class DetailsActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class MovieActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     // --------------------------- VALUES ----------------------------
 
-    private static final String TAG = "DetailsActivity";
+    private static final String TAG = "MovieActivity";
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -100,19 +99,12 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_details);
+        setContentView(R.layout.activity_movie);
         ButterKnife.bind(this);
 
         mSwipeRefreshLayout.setEnabled(false);
 
         setupActivity();
-
-////REVIEW        ****** ONLY FOR DEVELOPMENT ******
-//        // Simple BUG report, retrieves the last error and prompts to send an email
-//        ErrorReporter errorReporter = ErrorReporter.getInstance();
-//        errorReporter.Init(this);
-//        errorReporter.CheckErrorAndSendMail(this);
-////REVIEW        ****** ONLY FOR DEVELOPMENT ******
     }
 
 
@@ -146,8 +138,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         Log.e(TAG, "startNetworkRequest: ");
 
         // Notify the user if there is no internet, offer to retry or to close the app
-        if(!NetworkUtils.isNetworkAvailable(DetailsActivity.this))
-            DialogsUtils.showErrorDialog(DetailsActivity.this, (dialog, which) -> startNetworkRequest());
+        if(!NetworkUtils.isNetworkAvailable(MovieActivity.this))
+            DialogsUtils.showErrorDialog(MovieActivity.this, (dialog, which) -> startNetworkRequest());
 
 
         mSwipeRefreshLayout.setRefreshing(true);
@@ -184,7 +176,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             if(isPortrait) {
                 // Load backdrop and customize toolbar
                 mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
-                adaptColorByBackdropCallback(this).onSuccess();
+                mAdaptColorByBackdropCallback.onSuccess();
             }
             mPosterImageView.setImageBitmap(mMovie.getPoster());
         }else {
@@ -194,7 +186,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                     Picasso.with(this)
                             .load(NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path()))
                             .placeholder(R.drawable.placeholder_backdrop)
-                            .into(mBackdropImageView, adaptColorByBackdropCallback(this));
+                            .into(mBackdropImageView, mAdaptColorByBackdropCallback);
             } else
                 mSwipeRefreshLayout.setRefreshing(false);
 
@@ -213,10 +205,10 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         if (isPortrait)
             // Customize the Appbar behaviour and react to scroll
             ((AppBarLayout) findViewById(R.id.app_bar)).addOnOffsetChangedListener(
-                    (appBarLayout1, verticalOffset) -> actionBarScrollControl(verticalOffset));
+                    (appBarLayout1, verticalOffset) -> UIUtils.actionBarScrollControl(
+                                verticalOffset, mPosterImageView, mPosterSpace));
         else
             adaptInterfaceWithBackdropColor(mMovie.getDominantBackdropColor());
-
 
         // Fill interface with formatted movie details
         titleMain.setText(mMovie.getTitle());
@@ -224,7 +216,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
         durationMain.setText(UIUtils.getCustomDurationString(this, mMovie.getDuration()));
         rateMain.setText(String.valueOf(mMovie.getVote_avg()));
         rateSecondary.setText(String.valueOf(mMovie.getVote_count()));
-        descriptionMain.setText(mMovie.getSynopsis());
+        String desc = mMovie.getSynopsis();
+        descriptionMain.setText(desc == null ? getString(R.string.no_description) : desc);
         releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
     }
 
@@ -234,7 +227,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             visibility = View.GONE;
 
         mTrailersRV.setVisibility(visibility);
-        findViewById(R.id.tv_trailers_header).setVisibility(visibility);
+        findViewById(R.id.tv_movies_header).setVisibility(visibility);
         if(visibility == View.GONE)
             return;
 
@@ -275,7 +268,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             fAdapter.add(reviewItemProvider.get().withReview(review.getAuthor(), review.getContent()));
         fAdapter.withOnClickListener((v, adapter, item, position) -> {
             ReviewItem ri = (ReviewItem) item;
-            DialogsUtils.showReviewDialog(this, ri.author, ri.content);
+            DialogsUtils.showBasicDialog(this, ri.author, ri.content);
             return true;
         });
     }
@@ -283,57 +276,22 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
 
     // -------------------------- INTERFACE --------------------------
 
-    private void actionBarScrollControl(int verticalOffset){
-        int visibility = mPosterImageView.getVisibility();
-        float fromXY = 0f, toXY = 0f;
-        boolean react = false;
-
-        // Estimate when to hide the movie poster so it doesn't collide with the ActionBar
-        if(verticalOffset > -150 && visibility != View.VISIBLE) {
-            visibility = View.VISIBLE;
-            toXY = 1f;
-            react = true;
-        }if(verticalOffset <= -150 && visibility != View.INVISIBLE){
-            visibility = View.INVISIBLE;
-            fromXY = 1f;
-            react = true;
-        }
-
-        // If the image state is the desired already -> Do nothing
-        if(!react)
-            return;
-
-        // Hide or show the Poster
-        mPosterImageView.setVisibility(visibility);
-
-        // Animate that change
-        ScaleAnimation expandAnimation = new ScaleAnimation(fromXY, toXY, fromXY, toXY,
-                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        expandAnimation.setDuration(100);
-        expandAnimation.setInterpolator(new AccelerateInterpolator());
-        mPosterImageView.startAnimation(expandAnimation);
-
-        // Modify the title and genre margin based on the poster
-        if(visibility == View.INVISIBLE)
-            visibility = View.GONE;
-        mPosterSpace.setVisibility(visibility);
-    }
-
-    private Callback adaptColorByBackdropCallback (AppCompatActivity activity){
-        return new Callback() {
+    private Callback mAdaptColorByBackdropCallback = new Callback() {
             @Override
             public void onSuccess() {
-                if(mBackdropImageView == null)
+                if(mBackdropImageView == null) {
+                    onError();
                     return;
+                }
 
                 // Get the image we just loaded and obtain his dominant color
                 Bitmap backdrop = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
-                mMovie.setDominantBackdropColor(UIUtils.getDominantColor(backdrop, activity));
+                mMovie.setDominantBackdropColor(UIUtils.getDominantColor(backdrop, MovieActivity.this));
                 adaptInterfaceWithBackdropColor(mMovie.getDominantBackdropColor());
 
                 // Get the subsection of the backdrop under the back arrow and its dominant color
                 Bitmap backButtonSection = UIUtils.getDpBasedBitmap(backdrop, 16, 16, 24, 24);
-                int dominantColor = UIUtils.getDominantColor(backButtonSection, activity);
+                int dominantColor = UIUtils.getDominantColor(backButtonSection, MovieActivity.this);
 
                 // Check the actionbar presence
                 ActionBar actionBar = getSupportActionBar();
@@ -341,9 +299,8 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
                     return;
 
                 // If the dominant color is light turn the arrow and the share black
-                if(!UIUtils.isColorDark(dominantColor)) {
+                if(!UIUtils.isColorDark(dominantColor))
                     actionBar.setHomeAsUpIndicator(R.drawable.ic_back_black_24dp);
-                }
                 actionBar.setDisplayHomeAsUpEnabled(true);
                 mSwipeRefreshLayout.setRefreshing(false);
             }
@@ -351,9 +308,12 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             @Override
             public void onError() {
                 mSwipeRefreshLayout.setRefreshing(false);
+                Log.e(TAG, "adaptColorByBackdropCallback: onError: " +
+                                            "No backdrop found for the movie: " + mMovie.getId());
+                if(mBackdropImageView != null)
+                    mBackdropImageView.setImageResource(R.drawable.placeholder_backdrop);
             }
         };
-    }
 
     private void adaptInterfaceWithBackdropColor(int dominantColor){
         ActionBar actionBar = getSupportActionBar();
@@ -422,7 +382,6 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             }
         });
     }
-
 
     void favouriteMovie() {
         Log.e(TAG, "favouriteMovie: " + status);
@@ -584,7 +543,7 @@ public class DetailsActivity extends BaseActivity implements LoaderManager.Loade
             Uri movieUriWithId = MoviesContract.getMovieUriWithId(mMovie.getId());
             String[] projectionColumns = {MoviesEntry._ID};
 
-            Cursor cursor = DetailsActivity.this.getContentResolver().query(
+            Cursor cursor = MovieActivity.this.getContentResolver().query(
                     movieUriWithId,
                     projectionColumns,      // Return the ID only
                     null, null, null);      // #NoFilter

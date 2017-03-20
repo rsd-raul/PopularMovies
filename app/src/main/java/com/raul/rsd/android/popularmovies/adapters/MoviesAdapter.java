@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
-import com.raul.rsd.android.popularmovies.view.DetailsActivity;
+import com.raul.rsd.android.popularmovies.view.MovieActivity;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
@@ -96,7 +96,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
             long selectedMovieId = mMovies[adapterPosition].getId();
             Context context = v.getContext();
 
-            Intent intentDetailsActivity = new Intent(context, DetailsActivity.class);
+            Intent intentDetailsActivity = new Intent(context, MovieActivity.class);
             intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
             context.startActivity(intentDetailsActivity);
         }

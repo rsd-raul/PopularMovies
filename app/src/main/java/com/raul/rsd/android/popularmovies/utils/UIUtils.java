@@ -15,8 +15,14 @@ import android.text.TextUtils;
 import android.text.style.AbsoluteSizeSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
+import android.widget.ImageView;
+import android.widget.Space;
 
 import com.raul.rsd.android.popularmovies.R;
 
@@ -52,6 +58,42 @@ public abstract class UIUtils {
             finalText = TextUtils.concat(finalText, span);
         }
         return finalText;
+    }
+
+    public static void actionBarScrollControl(int verticalOffset, ImageView iv, Space sp){
+        int visibility = iv.getVisibility();
+        float fromXY = 0f, toXY = 0f;
+        boolean react = false;
+
+        // Estimate when to hide the movie poster so it doesn't collide with the ActionBar
+        if(verticalOffset > -150 && visibility != View.VISIBLE) {
+            visibility = View.VISIBLE;
+            toXY = 1f;
+            react = true;
+        }if(verticalOffset <= -150 && visibility != View.INVISIBLE){
+            visibility = View.INVISIBLE;
+            fromXY = 1f;
+            react = true;
+        }
+
+        // If the image state is the desired already -> Do nothing
+        if(!react)
+            return;
+
+        // Hide or show the Poster
+        iv.setVisibility(visibility);
+
+        // Animate that change
+        ScaleAnimation expandAnimation = new ScaleAnimation(fromXY, toXY, fromXY, toXY,
+                Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        expandAnimation.setDuration(100);
+        expandAnimation.setInterpolator(new AccelerateInterpolator());
+        iv.startAnimation(expandAnimation);
+
+        // Modify the title and genre margin based on the poster
+        if(visibility == View.INVISIBLE)
+            visibility = View.GONE;
+        sp.setVisibility(visibility);
     }
 
     /**

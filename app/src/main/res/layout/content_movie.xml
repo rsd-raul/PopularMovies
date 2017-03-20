@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.raul.rsd.android.popularmovies.view.DetailsActivity"
-    tools:showIn="@layout/activity_details">
+    tools:context="com.raul.rsd.android.popularmovies.view.MovieActivity"
+    tools:showIn="@layout/activity_movie">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
@@ -202,7 +202,7 @@
             android:text="@string/released"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@color/colorAccent"
-            app:layout_constraintLeft_toLeftOf="@+id/tv_trailers_header"
+            app:layout_constraintLeft_toLeftOf="@+id/tv_movies_header"
             android:layout_marginLeft="0dp"
             android:layout_marginStart="0dp"
             android:layout_marginTop="16dp"
@@ -236,7 +236,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tv_trailers_header" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_movies_header" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_reviews"
@@ -251,7 +251,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_reviews_header" />
 
         <TextView
-            android:id="@+id/tv_trailers_header"
+            android:id="@+id/tv_movies_header"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/trailers"
@@ -274,7 +274,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:layout_marginLeft="0dp"
             android:layout_marginStart="0dp"
-            app:layout_constraintLeft_toLeftOf="@+id/tv_trailers_header" />
+            app:layout_constraintLeft_toLeftOf="@+id/tv_movies_header" />
 
     </android.support.constraint.ConstraintLayout>
 

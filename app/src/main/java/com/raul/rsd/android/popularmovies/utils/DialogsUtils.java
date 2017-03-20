@@ -39,9 +39,9 @@ public abstract class DialogsUtils{
                 .show();
     }
 
-    public static void showReviewDialog(AppCompatActivity activity, String author, String content) {
+    public static void showBasicDialog(AppCompatActivity activity, String title, String content) {
         new MaterialDialog.Builder(activity)
-                .title(author)
+                .title(title)
                 .content(content)
                 .show();
     }

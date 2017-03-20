@@ -77,6 +77,12 @@
     <string name="no_reviews">NO REVIEWS FOUND</string>
 
     <string name="search">Search&#8230;</string>
-    <string name="movies">Movie</string>
+    <string name="movie">Movie</string>
     <string name="actors">Actor</string>
+    <string name="select_filter">Select either Movie or Actor</string>
+    <string name="no_description">NO DESCRIPTION FOUND</string>
+    <string name="read_more">Read More</string>
+    <string name="place_of_birth">Place of Birth</string>
+    <string name="movies">Movies</string>
+    <string name="biography">Biography</string>
 </resources>

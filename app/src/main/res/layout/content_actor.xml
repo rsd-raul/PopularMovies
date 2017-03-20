@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.raul.rsd.android.popularmovies.view.ActorActivity"
+    tools:showIn="@layout/activity_actor">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/rl_title_genre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:minHeight="@dimen/details_title_genre_min_height"
+            android:padding="@dimen/activity_horizontal_margin"
+            android:paddingEnd="@dimen/details_title_genre_right_padding"
+            android:paddingLeft="@dimen/details_title_genre_left_padding"
+            android:paddingRight="@dimen/details_title_genre_right_padding"
+            android:paddingStart="@dimen/details_title_genre_left_padding"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Space
+                android:id="@+id/poster_space"
+                android:layout_width="@dimen/details_space_width"
+                android:layout_height="1dp" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/movie_title_margin_top"
+                android:layout_toEndOf="@id/poster_space"
+                android:layout_toRightOf="@id/poster_space"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/tv_birth_death_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_name"
+                android:layout_marginTop="@dimen/details_tv_secondary_margin_top"
+                android:layout_toEndOf="@id/poster_space"
+                android:layout_toRightOf="@id/poster_space"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:textColor="@color/colorSecondaryText" />
+
+        </RelativeLayout>
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/biography"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rl_title_genre" />
+
+        <TextView
+            android:id="@+id/tv_biography_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginStart="0dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="8dp"
+            android:maxLines="5"
+            android:ellipsize="end"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintLeft_toLeftOf="@+id/textView"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintHorizontal_bias="0.0" />
+
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/place_of_birth"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_movies_header"
+        app:layout_constraintTop_toBottomOf="@+id/rv_movies" />
+
+    <TextView
+        android:id="@+id/tv_read_more"
+        android:layout_width="wrap_content"
+        android:layout_height="16dp"
+        android:layout_marginRight="0dp"
+        android:layout_marginEnd="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/read_more"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorAccent"
+        android:textSize="14sp"
+        app:layout_constraintRight_toRightOf="@+id/tv_biography_main"
+        app:layout_constraintTop_toBottomOf="@+id/tv_biography_main" />
+
+    <TextView
+            android:id="@+id/tv_place_birth_main"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="@+id/textView4"
+            app:layout_constraintRight_toRightOf="@+id/tv_biography_main"
+            app:layout_constraintTop_toBottomOf="@+id/textView4"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_movies"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_movies_header" />
+
+    <TextView
+        android:id="@+id/tv_movies_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="0dp"
+        android:text="@string/movies"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorAccent"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_biography_main"
+        app:layout_constraintTop_toBottomOf="@+id/tv_read_more" />
+
+</android.support.constraint.ConstraintLayout>
+
+</android.support.v4.widget.NestedScrollView>

@@ -25,6 +25,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import com.raul.rsd.android.popularmovies.BuildConfig;
+import com.raul.rsd.android.popularmovies.domain.Actor;
+import com.raul.rsd.android.popularmovies.domain.ActorList;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import java.net.URL;
@@ -45,8 +47,9 @@ public abstract class NetworkUtils {
     public static final String POPULAR = "popular";
     public static final String TOP_RATED = "top_rated";
     public static final String FAVOURITES = "favourites";
-    public static final String VIDEOS = "videos";
-    public static final String REVIEWS = "reviews";
+    private static final String VIDEOS = "videos";
+    private static final String REVIEWS = "reviews";
+    private static final String MOVIE_CREDITS = "movie_credits";
 
     private static final String BASE_TMDB_URL = "https://api.themoviedb.org/3/";
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
@@ -64,7 +67,6 @@ public abstract class NetworkUtils {
     private static String THUMBNAIL_SIZE;
 
 
-
     // ------------------------ URI BUILDERS -------------------------
 
     // https://www.youtube.com/watch?v=Zk3yLI0q794
@@ -79,6 +81,14 @@ public abstract class NetworkUtils {
         return Uri.parse(BASE_THUMBNAIL_URL).buildUpon()
                 .appendPath(videoPath)
                 .appendPath(THUMBNAIL_SIZE)
+                .build();
+    }
+
+    // https://image.tmdb.org/t/p/w500/fW37Gbk5PJZuXvyZwtcr0cMwPKY.jpg
+    public static Uri buildActorProfileUri(String profilePath){
+        return Uri.parse(BASE_IMAGE_URL).buildUpon()
+                .appendPath(POSTER_SIZE)
+                .appendPath(profilePath.substring(1))
                 .build();
     }
 
@@ -168,11 +178,24 @@ public abstract class NetworkUtils {
                                      @Query(API_PARAM) String api_key,
                                      @Query(APPEND_PARAM) String videosAndReviews);
 
-        //https://api.themoviedb.org/3/search/movie?api_key=<<api_key>>&query=test&page=1
+        //https://api.themoviedb.org/3/search/movie?api_key=<<api_key>>&query=passengers&page=1
         @GET("search/movie")
         Call<MoviesList> findMovieByName(@Query(API_PARAM) String api_key,
                                          @Query(QUERY_PARAM) String query,
                                          @Query(PAGE_PARAM) int page);
+
+
+        //https://api.themoviedb.org/3/search/person?api_key=<<api_key>>&query=nicolas%20cage&page=1
+        @GET("search/person")
+        Call<ActorList> findActorByName(@Query(API_PARAM) String api_key,
+                                         @Query(QUERY_PARAM) String query,
+                                         @Query(PAGE_PARAM) int page);
+
+        //http://api.themoviedb.org/3/person/2963?api_key=<<api_key>>&append_to_response=movie_credits
+        @GET("person/{id}")
+        Call<Actor> getFullActorById(@Path("id") Long id,
+                                     @Query(API_PARAM) String api_key,
+                                     @Query(APPEND_PARAM) String movieCredits);
 
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -181,28 +204,37 @@ public abstract class NetworkUtils {
                 .build();
     }
 
-    // --------------------------- NETWORK ---------------------------
-
-    public static void findMovieByName(String query, int page, Callback<MoviesList> callback){
-        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<MoviesList> call = gitHubService.findMovieByName(BuildConfig.TMDB_API_KEY_V3, query, page);
-        call.enqueue(callback);
+    private static NetworkUtils.TMDBService getTMDBService(){
+        return NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
     }
 
+    // --------------------------- NETWORK ---------------------------
+
+    public static void findActorByName(String query, int page, Callback<ActorList> callback){
+        getTMDBService().findActorByName(BuildConfig.TMDB_API_KEY_V3, query, page)
+                                                                                .enqueue(callback);
+    }
+
+    public static void findMovieByName(String query, int page, Callback<MoviesList> callback){
+        getTMDBService().findMovieByName(BuildConfig.TMDB_API_KEY_V3, query, page)
+                                                                                .enqueue(callback);
+    }
 
     public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
-        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<MoviesList> call = gitHubService.getMoviesByFilter(filter,
-                                                                    BuildConfig.TMDB_API_KEY_V3);
-        call.enqueue(callback);
+        getTMDBService().getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3).enqueue(callback);
     }
 
     public static void getFullMovieById(Long id, Callback<Movie> callback){
-        NetworkUtils.TMDBService gitHubService =  NetworkUtils.TMDBService.retrofit.create(NetworkUtils.TMDBService.class);
-        Call<Movie> call = gitHubService.getFullMovieById(id, BuildConfig.TMDB_API_KEY_V3,
-                                                                                VIDEOS+","+REVIEWS);
-        call.enqueue(callback);
+        getTMDBService().getFullMovieById(id, BuildConfig.TMDB_API_KEY_V3, VIDEOS+","+REVIEWS)
+                                                                                .enqueue(callback);
     }
+
+    public static void getFullActorById(Long id, Callback<Actor> callback){
+        getTMDBService().getFullActorById(id, BuildConfig.TMDB_API_KEY_V3, MOVIE_CREDITS)
+                                                                                .enqueue(callback);
+    }
+
+    // -------------------------- AUXILIARY --------------------------
 
     /**
      * Check whether the device is connected to the internet or not

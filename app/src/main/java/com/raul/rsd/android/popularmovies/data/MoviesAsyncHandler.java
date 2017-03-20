@@ -7,8 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.raul.rsd.android.popularmovies.view.DetailsActivity;
-
 import java.lang.ref.WeakReference;
 
 import javax.inject.Inject;

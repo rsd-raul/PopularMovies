@@ -12,19 +12,19 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.lapism.searchview.SearchAdapter;
 import com.lapism.searchview.SearchFilter;
-import com.lapism.searchview.SearchHistoryTable;
 import com.lapism.searchview.SearchItem;
 import com.lapism.searchview.SearchView;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
+import com.raul.rsd.android.popularmovies.domain.Actor;
+import com.raul.rsd.android.popularmovies.domain.ActorList;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
@@ -240,15 +240,13 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     private SearchAdapter mSearchAdapter;
     private MovieLight[] mMoviesFound;
+    private Actor[] mActorsFound;
 //    mHistoryDatabase.clearDatabase();     // TODO allow option on Settings
 
     private void configureSearchView() {
         if (mSearchView == null)
             return;
         configureSearchViewBehaviour();
-
-        SearchHistoryTable mHistoryDatabase = new SearchHistoryTable(this);
-        mHistoryDatabase.setHistorySize(5);
 
         // Find data
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -260,7 +258,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
             @Override
             public boolean onQueryTextChange(String query) {
-                findData(query);
+                int filtersLength = getActiveFilters().length();
+                if(filtersLength < 1 || filtersLength > 5)
+                    Toast.makeText(MainActivity.this, R.string.select_filter, Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
@@ -271,43 +271,62 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             // permission
         });
 
-        mSearchAdapter = new SearchAdapter(this);
+
         mSearchAdapter.addOnItemClickListener((view, position) -> {
             // Get the query and add it to the DB
-            TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
-            String query = movieTitle.getText().toString();
-            mHistoryDatabase.addItem(new SearchItem(query));
+//            TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
+//            String query = movieTitle.getText().toString();
 
-            // If the item touched it's a past search, repeat that search
-            if(mMoviesFound == null) {
-                mSearchView.setQuery(query, true);
-                // TODO better yet, load the first result after a network request
+            Class itemClass;
+            long itemId;
+            if(mMoviesFound != null){
+                Log.e(TAG, "configureSearchView: CLICKING MOVIE");
+
+                MovieLight movie = mMoviesFound[position];
+                mMoviesFound = null;
+                mSearchView.close(false);
+
+                itemClass = MovieActivity.class;
+                itemId = movie.getId();
+
+            } else if(mActorsFound != null){
+                Log.e(TAG, "configureSearchView: CLICKING ACTOR");
+
+                Actor actor = mActorsFound[position];
+                mActorsFound = null;
+                mSearchView.close(false);
+
+                itemClass = ActorActivity.class;
+                itemId = actor.getId();
+
+            } else {
+                Log.e(TAG, "configureSearchView: BAD FILTER");
+
+                Toast.makeText(this, R.string.select_filter, Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            // If the item is a movie found through search, go to details
-            MovieLight movie = mMoviesFound[position];
-            mMoviesFound = null;
-            mSearchView.close(false);
-            Intent intentDetailsActivity = new Intent(this, DetailsActivity.class);
-            intentDetailsActivity.putExtra(Intent.EXTRA_UID, movie.getId());
+            Intent intentDetailsActivity = new Intent(this, itemClass);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, itemId);
             startActivity(intentDetailsActivity);
         });
         mSearchView.setAdapter(mSearchAdapter);
     }
 
+
+
+
     private void configureSearchViewBehaviour() {
+        mSearchAdapter = new SearchAdapter(this);
         mSearchView.setHint(R.string.search);
         mSearchView.setShouldClearOnClose(true);
         mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
         mSearchView.setOnMenuClickListener(() -> mSearchView.open(true));
-
         // Define filters
         List<SearchFilter> filters = new ArrayList<>();
-        filters.add(new SearchFilter(getString(R.string.movies), true));
+        filters.add(new SearchFilter(getString(R.string.movie), true));
         filters.add(new SearchFilter(getString(R.string.actors), false));
         mSearchView.setFilters(filters);
-        //use mSearchView.getFiltersStates() to consider filter when performing search
 
         mSearchView.setOnOpenCloseListener(new SearchView.OnOpenCloseListener() {
             @Override
@@ -321,40 +340,86 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 mBottomNavigation.restoreBottomNavigation(true);
                 mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
                 mMoviesFound = null;
+                mActorsFound = null;
                 return true;
             }
         });
+    }
+
+    /**
+     * Process the enabled filters on the SearchView, concatenate the active filters.
+     *
+     * @return A string of concatenated filters
+     */
+    private String getActiveFilters(){
+        List<Boolean> filters = mSearchView.getFiltersStates();
+        String active = "";
+        if(filters.get(0)) active += "movie";
+        if(filters.get(1)) active += "actor";
+        return active;
     }
 
     private void findData(String query){
         if(query == null || query.equals(""))
             return;
 
+        mMoviesFound = null;
+        mActorsFound = null;
+
         mSearchView.showProgress();
 
-        // TODO Use filters
+        switch (getActiveFilters()){
+            case "movie":
+                NetworkUtils.findMovieByName(query, 1, new Callback<MoviesList>() {
+                    @Override
+                    public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+                        if(response == null || response.body() == null)
+                            return;
 
+                        mMoviesFound = response.body().getResults();
 
-        // TODO cancel request if not finished and there is a new one
-        NetworkUtils.findMovieByName(query, 1, new Callback<MoviesList>() {
-            @Override
-            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-                if(response == null || response.body() == null)
-                    return;
+                        List<SearchItem> suggestionsList = new ArrayList<>();
+                        for(MovieLight movie : mMoviesFound)
+                            suggestionsList.add(new SearchItem(movie.getTitle()));
+//                        mSearchAdapter.setSuggestionsList(suggestionsList);
+                        mSearchAdapter.setData(suggestionsList);
 
-                mMoviesFound = response.body().getResults();
+                        mSearchView.hideProgress();
+                    }
 
-                List<SearchItem> suggestionsList = new ArrayList<>();
-                for(MovieLight movie : mMoviesFound)
-                    suggestionsList.add(new SearchItem(movie.getTitle()));
-                mSearchAdapter.setData(suggestionsList);
+                    @Override
+                    public void onFailure(Call<MoviesList> call, Throwable t) { }
+                });
+                break;
 
+            case "actor":
+                NetworkUtils.findActorByName(query, 1, new Callback<ActorList>() {
+                    @Override
+                    public void onResponse(Call<ActorList> call, Response<ActorList> response) {
+                        if(response == null || response.body() == null)
+                            return;
+
+                        mActorsFound = response.body().getResults();
+
+                        List<SearchItem> suggestionsList = new ArrayList<>();
+                        for(Actor actor : mActorsFound)
+                            suggestionsList.add(new SearchItem(actor.getName()));
+                        mSearchAdapter.setData(suggestionsList);
+
+                        mSearchView.hideProgress();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ActorList> call, Throwable t) { }
+                });
+                break;
+
+            default:
                 mSearchView.hideProgress();
-            }
-
-            @Override
-            public void onFailure(Call<MoviesList> call, Throwable t) { }
-        });
+                Toast.makeText(this, R.string.select_filter, Toast.LENGTH_SHORT).show();
+                break;
+        }
+        // TODO cancel request if not finished and there is a new one
     }
 
     // ------------------------ CURSOR LOADER ------------------------
@@ -363,7 +428,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     public static final String[] MOVIE_DETAILS_PROJECTION = {
                             MoviesContract.MoviesEntry._ID,
-                            MoviesContract.MoviesEntry.COLUMN_POSTER,};
+                            MoviesContract.MoviesEntry.COLUMN_POSTER};
 
     public static final int INDEX_ID = 0,
                             INDEX_POSTER = 1;

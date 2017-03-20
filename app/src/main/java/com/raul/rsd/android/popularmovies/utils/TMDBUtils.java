@@ -7,11 +7,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.raul.rsd.android.popularmovies.data.MoviesContract.*;
+import com.raul.rsd.android.popularmovies.domain.Actor;
 import com.raul.rsd.android.popularmovies.domain.Genre;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
-import com.raul.rsd.android.popularmovies.view.DetailsActivity;
+import com.raul.rsd.android.popularmovies.view.MovieActivity;
 import com.raul.rsd.android.popularmovies.view.MainActivity;
 
 import java.util.Date;
@@ -60,28 +61,43 @@ public abstract class TMDBUtils {
         return builder.toString();
     }
 
+    // REVIEW complete
+    public static String toStringActor(Actor actor, AppCompatActivity activity){
+        // Using builder to facilitate handling of different types of data
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(activity.getString(R.string.title_to_string))
+                .append(' ')
+                .append(actor.getName())
+                .append('\n');
+
+        return builder.toString();
+    }
+
+
+
     public static Movie extractMovieFromCursor(Cursor data){
 
-        Movie movie = new Movie(data.getInt(DetailsActivity.INDEX_ID));
+        Movie movie = new Movie(data.getInt(MovieActivity.INDEX_ID));
 
         // Extract Movie details
-        movie.setTitle(data.getString(DetailsActivity.INDEX_TITLE));
-        movie.setVote_avg(data.getDouble(DetailsActivity.INDEX_VOTE_AVERAGE));
-        movie.setVote_count(data.getLong(DetailsActivity.INDEX_VOTE_COUNT));
-        movie.setSynopsis(data.getString(DetailsActivity.INDEX_OVERVIEW));
-        movie.setDuration(data.getInt(DetailsActivity.INDEX_RUNTIME));
-        movie.setDominantBackdropColor(data.getInt(DetailsActivity.INDEX_DOMINANT));
+        movie.setTitle(data.getString(MovieActivity.INDEX_TITLE));
+        movie.setVote_avg(data.getDouble(MovieActivity.INDEX_VOTE_AVERAGE));
+        movie.setVote_count(data.getLong(MovieActivity.INDEX_VOTE_COUNT));
+        movie.setSynopsis(data.getString(MovieActivity.INDEX_OVERVIEW));
+        movie.setDuration(data.getInt(MovieActivity.INDEX_RUNTIME));
+        movie.setDominantBackdropColor(data.getInt(MovieActivity.INDEX_DOMINANT));
 
-        Bitmap poster = BitmapUtils.getBitmapFromBytes(data.getBlob(DetailsActivity.INDEX_POSTER));
+        Bitmap poster = BitmapUtils.getBitmapFromBytes(data.getBlob(MovieActivity.INDEX_POSTER));
         movie.setPoster(poster);
 
-        Bitmap backdrop = BitmapUtils.getBitmapFromBytes(data.getBlob(DetailsActivity.INDEX_BACKDROP));
+        Bitmap backdrop = BitmapUtils.getBitmapFromBytes(data.getBlob(MovieActivity.INDEX_BACKDROP));
         movie.setBackdrop(backdrop);
 
-        Genre[] genres = getGenresFromString(data.getString(DetailsActivity.INDEX_GENRES));
+        Genre[] genres = getGenresFromString(data.getString(MovieActivity.INDEX_GENRES));
         movie.setGenres(genres);
 
-        Date release_date = DateUtils.getDateFromTMDBSString(data.getString(DetailsActivity.INDEX_RELEASE_DATE));
+        Date release_date = DateUtils.getDateFromTMDBSString(data.getString(MovieActivity.INDEX_RELEASE_DATE));
         movie.setRelease_date(release_date);
 
         return movie;

@@ -3,7 +3,8 @@ package com.raul.rsd.android.popularmovies;
 import android.app.Application;
 
 import com.raul.rsd.android.popularmovies.data.MoviesProvider;
-import com.raul.rsd.android.popularmovies.view.DetailsActivity;
+import com.raul.rsd.android.popularmovies.view.ActorActivity;
+import com.raul.rsd.android.popularmovies.view.MovieActivity;
 import com.raul.rsd.android.popularmovies.view.MainActivity;
 import javax.inject.Singleton;
 import dagger.Component;
@@ -21,7 +22,8 @@ public class App extends Application {
     public interface AppComponent {
         void inject(App application);
         void inject(MainActivity mainActivity);
-        void inject(DetailsActivity detailsActivity);
+        void inject(MovieActivity movieActivity);
+        void inject(ActorActivity actorActivity);
         void inject(MoviesProvider moviesProvider);
     }
 
