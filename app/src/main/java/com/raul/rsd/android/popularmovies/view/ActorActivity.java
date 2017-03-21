@@ -53,6 +53,7 @@ public class ActorActivity extends BaseActivity {
     @BindView(R.id.tv_name) TextView nameMain;
     @BindView(R.id.tv_birth_death_date) TextView birthDeathMain;
     @BindView(R.id.tv_biography_main) TextView biographyMain;
+    @BindView(R.id.tv_read_more) TextView readMoreButton;
     @BindView(R.id.tv_place_birth_main) TextView placeBirthMain;
     @BindView(R.id.tv_years_main) TextView yearsMain;
     @BindView(R.id.tv_movies_count_main) TextView movieCountMain;
@@ -90,7 +91,7 @@ public class ActorActivity extends BaseActivity {
 
         biographyMain.setOnClickListener(view -> {
             if(biographyMain.getText().length() > 0)
-                dialogBiography();
+                DialogsUtils.showBasicDialog(this, getString(R.string.biography), mActor.getBiography());
             });
 
         // Retrieve the ID sent and fetch the actor from TMDB
@@ -144,6 +145,7 @@ public class ActorActivity extends BaseActivity {
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mProfileImageView);
 
+        // Setup backdrop
         if(mActor.getMovies().length > 0)
             Picasso.with(this)
                     .load(NetworkUtils.buildMovieBackdropUri(mActor.getMovies()[0].getPoster_path()))
@@ -152,44 +154,67 @@ public class ActorActivity extends BaseActivity {
         else
             mBackdropImageView.setImageResource(R.drawable.header_background_default);
 
-        setupMovies(mActor.getMovies());
 
+
+        // If is portrait, hide/show the profile picture on scroll
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
             // Customize the Appbar behaviour and react to scroll
             ((AppBarLayout) findViewById(R.id.app_bar))
                 .addOnOffsetChangedListener( (appBarLayout1, verticalOffset) ->
                     UIUtils.actionBarScrollControl(verticalOffset, mProfileImageView, mSpace));
 
-        // Fill interface with formatted movie details
+        String notAvailable = getString(R.string.not_available);
+
+
         nameMain.setText(mActor.getName());
 
-        biographyMain.setText(mActor.getBiography());
-        placeBirthMain.setText(mActor.getPlace_of_birth());
+        // Biography
+        String biography = mActor.getBiography();
+        if(biography.length() == 0) {
+            biography = notAvailable;
+            readMoreButton.setVisibility(View.GONE);
+        } else
+            readMoreButton.setOnClickListener(view -> DialogsUtils.showBasicDialog(this,
+                    getString(R.string.biography), mActor.getBiography()));
+        biographyMain.setText(biography);
 
-        // Handle Age and Years
+        // Place of birth
+        String place = mActor.getPlace_of_birth();
+        placeBirthMain.setText(place );
+
+        // Birthday
+        Date birthDate = mActor.getBirthday();
+        String birthDateStr;
+        if(birthDate != null)
+            birthDateStr = DateUtils.getStringFromDate(mActor.getBirthday());
+        else
+            birthDateStr = notAvailable;
         birthDeathMain.setText(getString(R.string.format_string_string,
-                                        getString(R.string.birthday),
-                                        DateUtils.getStringFromDate(mActor.getBirthday())));
-
+                                                    getString(R.string.birthday), birthDateStr));
+        // Death day
         Date endDate = new Date();
         String deathDay = mActor.getDeathday();
-        if(deathDay.length()==10) {
+        if(deathDay != null && deathDay.length()==10) {
             endDate = DateUtils.getDateFromTMDBSString(deathDay);
             birthDeathMain.append("\n" + getString(R.string.format_string_string,
                     getString(R.string.death_day),
                     DateUtils.getStringFromDate(endDate)));
         }
 
-        int age = DateUtils.calculateYearsBetweenDates(mActor.getBirthday(), endDate);
-        yearsMain.setText(String.valueOf(age));
+        // Age
+        String ageStr;
+        if(birthDate != null)
+            ageStr = String.valueOf(DateUtils.calculateYearsBetweenDates(birthDate, endDate));
+        else
+            ageStr = getString(R.string.not_available_short);
+        yearsMain.setText(ageStr);
 
-        int movies = mActor.getMovies() != null ? mActor.getMovies().length : 0;
+        // Movies
+        MovieLight[] moviesList = mActor.getMovies();
+        int movies = moviesList != null ? moviesList.length : 0;
         movieCountMain.setText(String.valueOf(movies));
-    }
 
-    @OnClick(R.id.tv_read_more)
-    void dialogBiography(){
-        DialogsUtils.showBasicDialog(this, getString(R.string.biography), mActor.getBiography());
+        setupMovies(moviesList);
     }
 
     private void setupMovies(MovieLight[] movies){

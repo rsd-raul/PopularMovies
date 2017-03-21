@@ -10,12 +10,17 @@
 
     <ImageView
         android:id="@+id/iv_actor_profile"
-        android:layout_width="140dp"
+        android:layout_width="130dp"
         android:layout_height="wrap_content"
-        android:padding="4dp"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:contentDescription="@string/info_movie_poster"/>
+    <TextView
+        android:id="@+id/tv_actor_name"
+        android:layout_width="140dp"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="@color/colorPrimaryText"/>
 
     <TextView
         android:id="@+id/tv_actor_character"

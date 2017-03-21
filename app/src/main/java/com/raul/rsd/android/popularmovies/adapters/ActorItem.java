@@ -17,7 +17,7 @@ import javax.inject.Inject;
 
 public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
     public long id;
-    private String profile_path, character;
+    private String profile_path, name, character;
     private Context context;
 
     @Inject
@@ -25,9 +25,10 @@ public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
         this.context = context;
     }
 
-    public ActorItem withActor(long id, String profile_path, String character){
+    public ActorItem withActor(long id, String profile_path, String name, String character){
         this.id = id;
         this.profile_path = profile_path;
+        this.name = name;
         this.character = character;
         return this;
     }
@@ -42,6 +43,7 @@ public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
     public void bindView(ViewHolder viewHolder, List<Object> payloads) {
         super.bindView(viewHolder, payloads);
 
+        viewHolder.name.setText(name);
         viewHolder.character.setText(character);
         Picasso.with(context)
                 .load(NetworkUtils.buildActorProfileUri(profile_path))
@@ -51,11 +53,13 @@ public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView profile;
+        private TextView name;
         private TextView character;
 
         public ViewHolder(View view) {
             super(view);
             this.profile = (ImageView) view.findViewById(R.id.iv_actor_profile);
+            this.name = (TextView) view.findViewById(R.id.tv_actor_name);
             this.character = (TextView) view.findViewById(R.id.tv_actor_character);
         }
     }

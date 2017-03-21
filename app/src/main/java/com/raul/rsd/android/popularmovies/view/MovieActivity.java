@@ -281,7 +281,10 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
 //        }
 
         for(Actor actor : actors)
-            fAdapter.add(actorItemProvider.get().withActor(actor.getId(), actor.getProfile_path(), actor.getCharacter()));
+            if(actor.getProfile_path() != null && actor.getProfile_path().length() > 4)
+                fAdapter.add(actorItemProvider.get()
+                        .withActor(actor.getId(), actor.getProfile_path(), actor.getName(),
+                                                                            actor.getCharacter()));
 
         fAdapter.withOnClickListener((v, adapter, item, position) -> {
             ActorItem ai = (ActorItem) item;

@@ -86,6 +86,7 @@
 
     <string name="hour_unit">H</string>
     <string name="minute_unit">M</string>
+    <string name="years">Years</string>
     <string name="overview">Overview</string>
 
     <string name="search">Search&#8230;</string>
@@ -99,5 +100,6 @@
     <!--Placeholders-->
     <string name="no_reviews">NO REVIEWS FOUND</string>
     <string name="no_description">NO DESCRIPTION FOUND</string>
-    <string name="years">Years</string>
+    <string name="not_available">Not available</string>
+    <string name="not_available_short">N/A</string>
 </resources>
