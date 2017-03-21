@@ -50,7 +50,7 @@ public abstract class NetworkUtils {
     private static final String VIDEOS = "videos";
     private static final String REVIEWS = "reviews";
     private static final String MOVIE_CREDITS = "movie_credits";
-    private static final String IMAGES = "images";
+    private static final String CREDITS = "credits";
 
     private static final String BASE_TMDB_URL = "https://api.themoviedb.org/3/";
     private static final String BASE_IMAGE_URL = "https://image.tmdb.org/t/p/";
@@ -87,6 +87,7 @@ public abstract class NetworkUtils {
 
     // https://image.tmdb.org/t/p/w500/fW37Gbk5PJZuXvyZwtcr0cMwPKY.jpg
     public static Uri buildActorProfileUri(String profilePath){
+        // FIXME if profile_path is null -> PROBLEMS
         return Uri.parse(BASE_IMAGE_URL).buildUpon()
                 .appendPath(POSTER_SIZE)
                 .appendPath(profilePath.substring(1))
@@ -226,12 +227,12 @@ public abstract class NetworkUtils {
     }
 
     public static void getFullMovieById(Long id, Callback<Movie> callback){
-        getTMDBService().getFullMovieById(id, BuildConfig.TMDB_API_KEY_V3, VIDEOS+","+REVIEWS)
+        getTMDBService().getFullMovieById(id, BuildConfig.TMDB_API_KEY_V3, VIDEOS+","+REVIEWS+","+CREDITS)
                                                                                 .enqueue(callback);
     }
 
     public static void getFullActorById(Long id, Callback<Actor> callback){
-        getTMDBService().getFullActorById(id, BuildConfig.TMDB_API_KEY_V3, MOVIE_CREDITS+","+IMAGES)
+        getTMDBService().getFullActorById(id, BuildConfig.TMDB_API_KEY_V3, MOVIE_CREDITS)
                                                                                 .enqueue(callback);
     }
 

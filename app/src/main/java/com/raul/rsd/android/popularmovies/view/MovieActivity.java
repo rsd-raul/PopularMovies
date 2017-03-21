@@ -24,9 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -35,11 +32,13 @@ import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
+import com.raul.rsd.android.popularmovies.adapters.ActorItem;
 import com.raul.rsd.android.popularmovies.adapters.ReviewItem;
 import com.raul.rsd.android.popularmovies.adapters.VideoItem;
 import com.raul.rsd.android.popularmovies.data.InsertMovieTask;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
+import com.raul.rsd.android.popularmovies.domain.Actor;
 import com.raul.rsd.android.popularmovies.domain.Movie;
 import com.raul.rsd.android.popularmovies.domain.Review;
 import com.raul.rsd.android.popularmovies.domain.Video;
@@ -81,11 +80,13 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     @BindView(R.id.fab) FloatingActionButton mFloatingActionButton;
     @BindView(R.id.rv_trailers) RecyclerView mTrailersRV;
     @BindView(R.id.rv_reviews) RecyclerView mReviewsRV;
+    @BindView(R.id.rv_actors) RecyclerView mActorsRV;
     @Inject MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
     @Inject Provider<InsertMovieTask> insertMovieTaskProvider;
     @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
     @Inject Provider<VideoItem> videoItemProvider;
     @Inject Provider<ReviewItem> reviewItemProvider;
+    @Inject Provider<ActorItem> actorItemProvider;
     private Movie mMovie;
     private boolean isFavourite;
 
@@ -200,6 +201,8 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
             setupTrailers(mMovie.getVideos());
 
             setupReviews(mMovie.getReviews());
+
+            setupCast(mMovie.getCast());
         }
 
         if (isPortrait)
@@ -246,14 +249,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     private void setupReviews(Review[] reviews){
-//        int visibility = View.VISIBLE;
-//        if(reviews == null || reviews.length == 0)
-//            visibility = View.GONE;
-//
-//        mReviewsRV.setVisibility(visibility);
-//        findViewById(R.id.tv_reviews_header).setVisibility(visibility);
-//        if(visibility == View.GONE)
-//            return;
 
         FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
         mReviewsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
@@ -273,6 +268,29 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         });
     }
 
+    private void setupCast(Actor[] actors){
+
+        FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
+        mActorsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        mActorsRV.setAdapter(fAdapter);
+
+        // TODO Do something similar
+//        if(actors == null || actors.length == 0) {
+//            fAdapter.add(reviewItemProvider.get().withReview("", getString(R.string.no_reviews)));
+//            return;
+//        }
+
+        for(Actor actor : actors)
+            fAdapter.add(actorItemProvider.get().withActor(actor.getId(), actor.getProfile_path(), actor.getCharacter()));
+
+        fAdapter.withOnClickListener((v, adapter, item, position) -> {
+            ActorItem ai = (ActorItem) item;
+            Intent intentDetailsActivity = new Intent(this, ActorActivity.class);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, ai.id);
+            startActivity(intentDetailsActivity);
+            return true;
+        });
+    }
 
     // -------------------------- INTERFACE --------------------------
 
@@ -283,6 +301,8 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                     onError();
                     return;
                 }
+
+                status = SAFE;
 
                 // Get the image we just loaded and obtain his dominant color
                 Bitmap backdrop = ((BitmapDrawable)mBackdropImageView.getDrawable()).getBitmap();
@@ -362,6 +382,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
 
                 setupTrailers(movie.getVideos());
                 setupReviews(movie.getReviews());
+                setupCast(movie.getCast());
 
                 // Save ONLY updated data in the DB
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
@@ -436,7 +457,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     // -------------------------- AUXILIARY --------------------------
 
     final int SAFE = 1, BUSY = -1;
-    private int status = SAFE;
+    private int status = BUSY;
     private Toast mToast;
 
     private boolean isSafe(){

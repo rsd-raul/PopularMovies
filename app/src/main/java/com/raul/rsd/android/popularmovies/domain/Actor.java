@@ -12,6 +12,7 @@ public class Actor {
     private String deathday;
     private MoviesList movie_credits;
     private String profile_path;
+    private String character;
 
     public Actor(long id) {
         this.id = id;
@@ -70,5 +71,12 @@ public class Actor {
     }
     public void setProfile_path(String profile_path) {
         this.profile_path = profile_path;
+    }
+
+    public String getCharacter() {
+        return character;
+    }
+    public void setCharacter(String character) {
+        this.character = character;
     }
 }

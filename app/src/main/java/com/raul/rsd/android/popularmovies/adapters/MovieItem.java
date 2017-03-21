@@ -29,11 +29,12 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> {
 
     public MovieItem withMovie(long id, String poster_path){
         this.poster_path = poster_path;
+        this.id = id;
         return this;
     }
 
     @Override
-    public int getLayoutRes() { return R.layout.movie_poster_item; }
+    public int getLayoutRes() { return R.layout.actor_movie_item; }
 
     // -------------------------- AUXILIARY --------------------------
 

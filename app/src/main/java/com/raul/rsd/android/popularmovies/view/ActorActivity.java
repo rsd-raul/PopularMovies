@@ -144,6 +144,13 @@ public class ActorActivity extends BaseActivity {
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mProfileImageView);
 
+        if(mActor.getMovies().length > 0)
+            Picasso.with(this)
+                    .load(NetworkUtils.buildMovieBackdropUri(mActor.getMovies()[0].getPoster_path()))
+                    .placeholder(R.drawable.placeholder_poster)
+                    .into(mBackdropImageView);
+        else
+            mBackdropImageView.setImageResource(R.drawable.header_background_default);
 
         setupMovies(mActor.getMovies());
 

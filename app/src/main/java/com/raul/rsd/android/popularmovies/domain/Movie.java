@@ -23,6 +23,7 @@ public class Movie implements Parcelable{
     private String overview;
     private VideosList videos;
     private ReviewsList reviews;
+    private ActorList credits;
     private int dominantBackdropColor;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -119,16 +120,13 @@ public class Movie implements Parcelable{
     }
 
     public Video[] getVideos() {
-        if(videos != null)
-            return videos.getResults();
-        else
-            return null;
+        return videos != null ? videos.getResults() : null;
     }
     public Review[] getReviews() {
-        if(reviews != null)
-            return reviews.getResults();
-        else
-            return null;
+        return reviews != null ? reviews.getResults() : null;
+    }
+    public Actor[] getCast() {
+        return credits != null ? credits.getCast() : null;
     }
 
     // ------------------------- PARCELABLE --------------------------

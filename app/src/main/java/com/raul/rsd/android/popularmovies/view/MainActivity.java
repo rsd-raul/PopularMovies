@@ -273,10 +273,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
 
         mSearchAdapter.addOnItemClickListener((view, position) -> {
-            // Get the query and add it to the DB
-//            TextView movieTitle = (TextView) view.findViewById(R.id.textView_item_text);
-//            String query = movieTitle.getText().toString();
-
             Class itemClass;
             long itemId;
             if(mMoviesFound != null){
@@ -312,9 +308,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         });
         mSearchView.setAdapter(mSearchAdapter);
     }
-
-
-
 
     private void configureSearchViewBehaviour() {
         mSearchAdapter = new SearchAdapter(this);
@@ -381,7 +374,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                         List<SearchItem> suggestionsList = new ArrayList<>();
                         for(MovieLight movie : mMoviesFound)
                             suggestionsList.add(new SearchItem(movie.getTitle()));
-//                        mSearchAdapter.setSuggestionsList(suggestionsList);
                         mSearchAdapter.setData(suggestionsList);
 
                         mSearchView.hideProgress();
@@ -439,7 +431,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             throw new RuntimeException("Loader Not Implemented: " + loaderId);
 
         return new CursorLoader(this, MoviesContract.CONTENT_URI, MOVIE_DETAILS_PROJECTION,
-                null, null, null);
+                null, null, MoviesContract.MoviesEntry.COLUMN_TIMESTAMP + " DESC");
     }
 
     @Override

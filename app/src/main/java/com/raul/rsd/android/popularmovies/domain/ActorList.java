@@ -5,13 +5,14 @@ public class ActorList {
     // ------------------------- ATTRIBUTES --------------------------
 
     private Actor[] results;
+    private Actor[] cast;
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
     public Actor[] getResults() {
         return results;
     }
-    public void setResults(Actor[] results) {
-        this.results = results;
+    public Actor[] getCast() {
+        return cast;
     }
 }
