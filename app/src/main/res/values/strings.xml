@@ -38,6 +38,7 @@
 
     <!--Content Description -->
     <string name="info_movie_poster">Poster for the movie</string>
+    <string name="info_actor_profile">Profile picture of the actor</string>
     <string name="info_movie_video">Video for the movie</string>
     <string name="info_movie_backdrop">Backdrop for the movie</string>
     <string name="info_item_icon">Icon representing each item meaning</string>
@@ -102,4 +103,7 @@
     <string name="no_description">NO DESCRIPTION FOUND</string>
     <string name="not_available">Not available</string>
     <string name="not_available_short">N/A</string>
+    <string name="cast">Cast</string>
+    <string name="saving_offline">Saving Movie offline</string>
+    <string name="no_videos">NO VIDEOS FOUND</string>
 </resources>

@@ -1,5 +1,7 @@
 package com.raul.rsd.android.popularmovies.domain;
 
+import com.raul.rsd.android.popularmovies.utils.DateUtils;
+
 import java.util.Date;
 
 public class Actor {
@@ -7,7 +9,7 @@ public class Actor {
     private long id;
     private String name;
     private String biography;
-    private Date birthday;
+    private String birthday;
     private String place_of_birth;
     private String deathday;
     private MoviesList movie_credits;
@@ -40,10 +42,14 @@ public class Actor {
     }
 
     public Date getBirthday() {
-        return birthday;
+        if(birthday == null || birthday.length() != 10)
+            return null;
+        return DateUtils.getDateFromTMDBSString(birthday);
     }
     public void setBirthday(Date birthday) {
-        this.birthday = birthday;
+        if(birthday == null)
+            return;
+        this.birthday = DateUtils.getTMDBStringFromDate(birthday);
     }
 
     public String getDeathday() {

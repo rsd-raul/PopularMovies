@@ -23,7 +23,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.Space;
 import android.widget.TextView;
@@ -142,7 +141,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         if(!NetworkUtils.isNetworkAvailable(MovieActivity.this))
             DialogsUtils.showErrorDialog(MovieActivity.this, (dialog, which) -> startNetworkRequest());
 
-
         mSwipeRefreshLayout.setRefreshing(true);
 
         changeFavourite(false);
@@ -174,10 +172,14 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         boolean isPortrait = mBackdropImageView != null;
 
         if(isOffline){
+            status = SAFE;
             if(isPortrait) {
                 // Load backdrop and customize toolbar
-                mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
-                mAdaptColorByBackdropCallback.onSuccess();
+                if(mMovie.getBackdrop() != null) {
+                    mBackdropImageView.setImageBitmap(mMovie.getBackdrop());
+                    mAdaptColorByBackdropCallback.onSuccess();
+                } else
+                    adaptInterfaceWithoutBackdrop();
             }
             mPosterImageView.setImageBitmap(mMovie.getPoster());
         }else {
@@ -188,8 +190,12 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                             .load(NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path()))
                             .placeholder(R.drawable.placeholder_backdrop)
                             .into(mBackdropImageView, mAdaptColorByBackdropCallback);
-            } else
+                else
+                    adaptInterfaceWithoutBackdrop();
+            } else {
                 mSwipeRefreshLayout.setRefreshing(false);
+                status = SAFE;
+            }
 
             // Setup poster
             if(mMovie.getPoster_path() != null)
@@ -225,18 +231,15 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     private void setupTrailers(Video[] videos){
-        int visibility = View.VISIBLE;
-        if(videos == null || videos.length == 0)
-            visibility = View.GONE;
-
-        mTrailersRV.setVisibility(visibility);
-        findViewById(R.id.tv_movies_header).setVisibility(visibility);
-        if(visibility == View.GONE)
-            return;
-
         FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
         mTrailersRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mTrailersRV.setAdapter(fAdapter);
+
+        if(videos == null || videos.length == 0) {
+            fAdapter.add(videoItemProvider.get().withVideo(getString(R.string.no_videos), null));
+            return;
+        }
+
         for(Video video : videos)
             fAdapter.add(videoItemProvider.get().withVideo(video.getName(), video.getKey()));
 
@@ -338,6 +341,15 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
             }
         };
 
+    private void adaptInterfaceWithoutBackdrop(){
+        if(mBackdropImageView != null)
+            mBackdropImageView.setImageResource(R.drawable.placeholder_backdrop);
+        int color = ContextCompat.getColor(this, R.color.indigoDark);
+        adaptInterfaceWithBackdropColor(color);
+        mSwipeRefreshLayout.setRefreshing(false);
+        status = SAFE;
+    }
+
     private void adaptInterfaceWithBackdropColor(int dominantColor){
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
@@ -351,8 +363,10 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         findViewById(R.id.rl_title_genre).setBackgroundColor(dominantColor);
 
         boolean darkColor = UIUtils.isColorDark(dominantColor);
-        if(darkColor)
+        if(darkColor){
             titleMain.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryTextLight));
+            genresMain.setTextColor(ContextCompat.getColor(this, R.color.colorPrimaryTextLight));
+        }
 
         //If landscape continue
         if(mBackdropImageView != null)
@@ -387,7 +401,11 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                 setupReviews(movie.getReviews());
                 setupCast(movie.getCast());
 
+                if(mMovie == null)
+                    return;
+
                 // Save ONLY updated data in the DB
+                // FIXME handle edge cases -> Description == null, etc
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
 
                 // Update database only if there is something to update
@@ -467,7 +485,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         if(status == SAFE)
             return true;
         if(mToast == null)
-            mToast = Toast.makeText(this, "Saving Movie offline", Toast.LENGTH_SHORT);
+            mToast = Toast.makeText(this, R.string.saving_offline, Toast.LENGTH_SHORT);
         else
             mToast.show();
         return false;
@@ -582,10 +600,8 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         protected void onPostExecute(Boolean isLocal) {
             if (isLocal)
                 startProviderRequest();
-            else{
+            else
                 startNetworkRequest();
-        }
-
             super.onPostExecute(isLocal);
         }
     }

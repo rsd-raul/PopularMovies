@@ -9,31 +9,42 @@
     android:fitsSystemWindows="true">
 
     <ImageView
-        android:id="@+id/iv_movie_poster"
+        android:id="@+id/iv_actor_profile"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:src="@drawable/placeholder_poster"
-        android:contentDescription="@string/info_movie_poster"
-        android:adjustViewBounds="true" />
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/info_actor_profile"
+        android:src="@drawable/placeholder_poster"/>
 
     <android.support.v4.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.MovieActivity">
+        tools:context=".view.ActorActivity">
 
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"
-            tools:context="com.raul.rsd.android.popularmovies.view.MovieActivity" >
+            tools:context="com.raul.rsd.android.popularmovies.view.ActorActivity">
 
             <android.support.design.widget.AppBarLayout
                 android:id="@+id/app_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fitsSystemWindows="true"
-                android:theme="@style/AppTheme.AppBarOverlay" >
+                android:theme="@style/AppTheme.AppBarOverlay">
+
+                <android.support.design.widget.CollapsingToolbarLayout
+                    android:id="@+id/toolbar_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fitsSystemWindows="true"
+                    app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
+                    app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title">
 
                     <android.support.v7.widget.Toolbar
                         android:id="@+id/toolbar"
@@ -42,18 +53,11 @@
                         app:layout_collapseMode="pin"
                         app:popupTheme="@style/AppTheme.PopupOverlay" />
 
+                </android.support.design.widget.CollapsingToolbarLayout>
+
             </android.support.design.widget.AppBarLayout>
 
-            <include android:id="@+id/content_details" layout="@layout/content_movie" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/fab_margin"
-                app:layout_anchor="@id/content_details"
-                app:layout_anchorGravity="bottom|end"
-                android:src="@drawable/asl_trimclip_heart" />
+            <include layout="@layout/content_actor" />
 
         </android.support.design.widget.CoordinatorLayout>
     </android.support.v4.widget.SwipeRefreshLayout>

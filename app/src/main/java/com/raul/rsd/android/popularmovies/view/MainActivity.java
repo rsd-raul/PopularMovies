@@ -2,15 +2,18 @@ package com.raul.rsd.android.popularmovies.view;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.speech.RecognizerIntent;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -98,6 +101,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         // Set ActionBar
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null)
+            actionBar.setTitle(R.string.none);
 
         // Get references and values
         NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
@@ -265,10 +271,11 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             }
         });
 
-        mSearchView.setVoiceText("Set permission on Android 6.0+ !");
+        mSearchView.setVoiceText("Say a movie or actor name");
         mSearchView.setOnVoiceClickListener(() -> {
             Toast.makeText(MainActivity.this, "onVoiceClick", Toast.LENGTH_SHORT).show();
-            // permission
+            mSearchView.open(false);
+            mSearchView.hideKeyboard();
         });
 
 
@@ -412,6 +419,19 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 break;
         }
         // TODO cancel request if not finished and there is a new one
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SearchView.SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+            if (results != null && results.size() > 0) {
+                String searchWrd = results.get(0);
+                if (!TextUtils.isEmpty(searchWrd) && mSearchView != null)
+                    mSearchView.setQuery(searchWrd, true);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     // ------------------------ CURSOR LOADER ------------------------

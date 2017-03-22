@@ -48,10 +48,11 @@ public class VideoItem extends AbstractItem<VideoItem, VideoItem.ViewHolder> {
         super.bindView(viewHolder, payloads);
 
         viewHolder.name.setText(name);
-        Picasso.with(context)
-                .load(NetworkUtils.buildYoutubeThumbnailUri(key))
-                .placeholder(R.drawable.placeholder_backdrop)
-                .into(viewHolder.video);
+        if(key != null)
+            Picasso.with(context)
+                    .load(NetworkUtils.buildYoutubeThumbnailUri(key))
+                    .placeholder(R.drawable.placeholder_backdrop)
+                    .into(viewHolder.video);
     }
 
     // ------------------------- VIEW HOLDER -------------------------

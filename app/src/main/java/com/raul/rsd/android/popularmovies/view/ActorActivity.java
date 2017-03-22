@@ -3,6 +3,7 @@ package com.raul.rsd.android.popularmovies.view;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -32,6 +33,7 @@ import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Picasso;
 
 import java.util.Date;
+import java.util.Random;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -59,7 +61,7 @@ public class ActorActivity extends BaseActivity {
     @BindView(R.id.tv_movies_count_main) TextView movieCountMain;
     @BindView(R.id.rv_movies) RecyclerView mMoviesRV;
     @BindView(R.id.iv_actor_profile) ImageView mProfileImageView;
-    @BindView(R.id.iv_actor_backdrop) ImageView mBackdropImageView;
+    @Nullable @BindView(R.id.iv_actor_backdrop) ImageView mBackdropImageView;
     @BindView(R.id.poster_space) Space mSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
@@ -139,20 +141,32 @@ public class ActorActivity extends BaseActivity {
         Log.e(TAG, "displayActor: " + mActor.getDeathday());
 
         // Setup poster
-        if(mActor.getProfile_path() != null)
+        if (mActor.getProfile_path() != null)
             Picasso.with(this)
                     .load(NetworkUtils.buildActorProfileUri(mActor.getProfile_path()))
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mProfileImageView);
 
-        // Setup backdrop
-        if(mActor.getMovies().length > 0)
-            Picasso.with(this)
-                    .load(NetworkUtils.buildMovieBackdropUri(mActor.getMovies()[0].getPoster_path()))
-                    .placeholder(R.drawable.placeholder_poster)
-                    .into(mBackdropImageView);
-        else
-            mBackdropImageView.setImageResource(R.drawable.header_background_default);
+        if (mBackdropImageView != null) {
+            // Setup backdrop
+            int moviesLength = mActor.getMovies().length;
+            if (moviesLength > 0) {
+
+                // Make sure the movie has a valid poster before loading it
+                String path;
+                do{
+                    int i = new Random().nextInt(moviesLength);
+                    path = mActor.getMovies()[i].getPoster_path();
+                } while (path == null || path.length() < 5);
+
+                Picasso.with(this)
+                        .load(NetworkUtils.buildMovieBackdropUri(path))
+                        .placeholder(R.drawable.placeholder_poster)
+                        .into(mBackdropImageView);
+            } else
+                mBackdropImageView.setImageResource(R.drawable.header_background_default);
+        }
+
 
 
 
@@ -165,12 +179,12 @@ public class ActorActivity extends BaseActivity {
 
         String notAvailable = getString(R.string.not_available);
 
-
+        // Name
         nameMain.setText(mActor.getName());
 
         // Biography
         String biography = mActor.getBiography();
-        if(biography.length() == 0) {
+        if(biography == null || biography.length() == 0) {
             biography = notAvailable;
             readMoreButton.setVisibility(View.GONE);
         } else
@@ -180,7 +194,7 @@ public class ActorActivity extends BaseActivity {
 
         // Place of birth
         String place = mActor.getPlace_of_birth();
-        placeBirthMain.setText(place );
+        placeBirthMain.setText(place == null || place.length() == 0 ? notAvailable : place);
 
         // Birthday
         Date birthDate = mActor.getBirthday();

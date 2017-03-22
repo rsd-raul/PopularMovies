@@ -25,6 +25,8 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/iv_movie_video" />
+        app:layout_constraintTop_toBottomOf="@+id/iv_movie_video"
+        android:maxLines="1"
+        android:ellipsize="end"/>
 
 </android.support.constraint.ConstraintLayout>
