@@ -10,6 +10,7 @@ public class MovieLight implements Parcelable{
 
     private long id;
     private String title;
+    private String character;
     private String poster_path;
     private Bitmap poster;
 
@@ -34,6 +35,13 @@ public class MovieLight implements Parcelable{
     }
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getCharacter() {
+        return character;
+    }
+    public void setCharacter(String character) {
+        this.character = character;
     }
 
     public String getPoster_path() {

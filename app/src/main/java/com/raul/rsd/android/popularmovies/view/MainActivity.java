@@ -71,13 +71,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-////REVIEW        ****** ONLY FOR DEVELOPMENT ******
-//        // Simple BUG report, retrieves the last error and prompts to send an email
-//        ErrorReporter errorReporter = ErrorReporter.getInstance();
-//        errorReporter.Init(this);
-//        errorReporter.CheckErrorAndSendMail(this);
-////REVIEW        ****** ONLY FOR DEVELOPMENT ******
-
         // If we have the data already saved, restore those
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
             setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
@@ -247,7 +240,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     private SearchAdapter mSearchAdapter;
     private MovieLight[] mMoviesFound;
     private Actor[] mActorsFound;
-//    mHistoryDatabase.clearDatabase();     // TODO allow option on Settings
+    private Toast wrongFilter = null;
 
     private void configureSearchView() {
         if (mSearchView == null)
@@ -265,8 +258,11 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             @Override
             public boolean onQueryTextChange(String query) {
                 int filtersLength = getActiveFilters().length();
-                if(filtersLength < 1 || filtersLength > 5)
-                    Toast.makeText(MainActivity.this, R.string.select_filter, Toast.LENGTH_SHORT).show();
+                if(filtersLength < 1 || filtersLength > 5) {
+                    if (wrongFilter == null)
+                        wrongFilter = Toast.makeText(MainActivity.this, R.string.select_filter, Toast.LENGTH_SHORT);
+                    wrongFilter.show();
+                }
                 return false;
             }
         });
@@ -418,7 +414,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 Toast.makeText(this, R.string.select_filter, Toast.LENGTH_SHORT).show();
                 break;
         }
-        // TODO cancel request if not finished and there is a new one
     }
 
     @Override
@@ -456,7 +451,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // REVIEW after startDelete it comes here and fails.... Why?
         if(data == null) {
             Log.e(TAG, "onLoadFinished: Problems retrieving favourite from DB");
             return;

@@ -87,7 +87,6 @@ public abstract class NetworkUtils {
 
     // https://image.tmdb.org/t/p/w500/fW37Gbk5PJZuXvyZwtcr0cMwPKY.jpg
     public static Uri buildActorProfileUri(String profilePath){
-        // FIXME if profile_path is null -> PROBLEMS
         return Uri.parse(BASE_IMAGE_URL).buildUpon()
                 .appendPath(POSTER_SIZE)
                 .appendPath(profilePath.substring(1))
@@ -169,7 +168,7 @@ public abstract class NetworkUtils {
 
     interface TMDBService {
 
-        //  https://api.themoviedb.org/3/movie/popular?api_key=abc
+        //https://api.themoviedb.org/3/movie/popular?api_key=abc
         @GET("movie/{filter}")
         Call<MoviesList> getMoviesByFilter(@Path("filter") String filter,
                                            @Query(API_PARAM) String api_key);

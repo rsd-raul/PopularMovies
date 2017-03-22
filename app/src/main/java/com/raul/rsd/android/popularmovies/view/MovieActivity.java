@@ -185,9 +185,10 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         }else {
             if(isPortrait) {
                 // Setup backdrop <- First, so Picasso gets a head start.
-                if(mMovie.getBackdrop_path() != null)
+                String backdrop_path = mMovie.getBackdrop_path();
+                if(backdrop_path != null && backdrop_path.length() > 5)
                     Picasso.with(this)
-                            .load(NetworkUtils.buildMovieBackdropUri(mMovie.getBackdrop_path()))
+                            .load(NetworkUtils.buildMovieBackdropUri(backdrop_path))
                             .placeholder(R.drawable.placeholder_backdrop)
                             .into(mBackdropImageView, mAdaptColorByBackdropCallback);
                 else
@@ -344,8 +345,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     private void adaptInterfaceWithoutBackdrop(){
         if(mBackdropImageView != null)
             mBackdropImageView.setImageResource(R.drawable.placeholder_backdrop);
-        int color = ContextCompat.getColor(this, R.color.indigoDark);
-        adaptInterfaceWithBackdropColor(color);
+        adaptInterfaceWithBackdropColor(ContextCompat.getColor(this, R.color.indigoDark));
         mSwipeRefreshLayout.setRefreshing(false);
         status = SAFE;
     }
@@ -405,7 +405,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                     return;
 
                 // Save ONLY updated data in the DB
-                // FIXME handle edge cases -> Description == null, etc
                 ContentValues values = TMDBUtils.getContentValuesFromMovie(mMovie, movie);
 
                 // Update database only if there is something to update
@@ -441,7 +440,10 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         } else {
             // Save the poster and if the layout is portrait, save the backdrop too.
             mMovie.setPoster(((BitmapDrawable) mPosterImageView.getDrawable()).getBitmap());
-            if(mBackdropImageView != null)
+
+            // If we are in Portrait and the original movie had a backdrop, save that backdrop
+            String backdropPath = mMovie.getBackdrop_path();
+            if(mBackdropImageView != null && backdropPath != null && backdropPath.length() > 5)
                 mMovie.setBackdrop(((BitmapDrawable) mBackdropImageView.getDrawable()).getBitmap());
 
             status = SAFE;
@@ -553,7 +555,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        // REVIEW after startDelete it comes here and fails.... Why?
         if(data == null || data.getCount() == 0) {
             Log.e(TAG, "onLoadFinished: Problems retrieving favourite from DB");
             return;

@@ -1,20 +1,5 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-<!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
-    <!-- Error report -->
-
-    <string name="error_report_tasked">Error report - PopularMovies</string>
-    <string name="error_report_taken">Error report taken:</string>
-    <string name="error_report_send">Send error report?</string>
-    <string name="error_trace_collected">New Trace collected :</string>
-    <string name="error_collected_on">"Error Report collected on : "</string>
-    <string name="error_information">Information :</string>
-    <string name="error_stack">Stack : \n</string>
-    <string name="error_cause">Cause : \n</string>
-    <string name="error_report_end">****  End of current Report ***</string>
-    <string name="developer_email" translatable="false">achillessoftware@gmail.com</string>
-<!--REVIEW        ****** ONLY FOR DEVELOPMENT ******-->
-
     <!--Names-->
     <string name="app_name" translatable="false">Go Movies</string>
     <string name="none" translatable="false"/>

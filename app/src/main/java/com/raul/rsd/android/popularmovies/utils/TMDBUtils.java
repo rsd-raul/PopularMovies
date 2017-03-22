@@ -61,7 +61,7 @@ public abstract class TMDBUtils {
         return builder.toString();
     }
 
-    // REVIEW complete
+    // FIXME complete
     public static String toStringActor(Actor actor, AppCompatActivity activity){
         // Using builder to facilitate handling of different types of data
         StringBuilder builder = new StringBuilder();
@@ -156,19 +156,19 @@ public abstract class TMDBUtils {
         // Check values, only update if needed
         if(!oldMovie.getTitle().equals(newMovie.getTitle()))
             values.put(MoviesEntry.COLUMN_TITLE, newMovie.getTitle());
-        else if(oldMovie.getVote_count() != newMovie.getVote_count())
+        else if( oldMovie.getVote_count() != newMovie.getVote_count())
             values.put(MoviesEntry.COLUMN_VOTE_COUNT, newMovie.getVote_count());
-        else if(oldMovie.getDuration() != newMovie.getDuration())
+        else if( oldMovie.getDuration() != newMovie.getDuration())
             values.put(MoviesEntry.COLUMN_RUNTIME, newMovie.getDuration());
-        else if(!oldMovie.getSynopsis().equals(newMovie.getSynopsis()))
+        else if( oldMovie.getSynopsis() != null && !oldMovie.getSynopsis().equals(newMovie.getSynopsis()))
             values.put(MoviesEntry.COLUMN_OVERVIEW, newMovie.getSynopsis());
-        else if(oldMovie.getGenres() != newMovie.getGenres()) {
+        else if( oldMovie.getGenres() != null && oldMovie.getGenres() != newMovie.getGenres()) {
             String genresStr = TMDBUtils.getStringFromGenres(newMovie.getGenres());
             values.put(MoviesEntry.COLUMN_GENRES, genresStr);
-        } else if(!oldMovie.getRelease_date().equals(newMovie.getRelease_date())) {
+        } else if( oldMovie.getRelease_date() != null && !oldMovie.getRelease_date().equals(newMovie.getRelease_date())) {
             String dateStr = DateUtils.getTMDBStringFromDate(newMovie.getRelease_date());
             values.put(MoviesEntry.COLUMN_RELEASE_DATE, dateStr);
-        } else if(oldMovie.getVote_avg() != newMovie.getVote_avg())
+        } else if( oldMovie.getSynopsis() != null && oldMovie.getVote_avg() != newMovie.getVote_avg())
             values.put(MoviesEntry.COLUMN_VOTE_AVERAGE, newMovie.getVote_avg());
 
         return values;

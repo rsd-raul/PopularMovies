@@ -138,14 +138,27 @@ public class ActorActivity extends BaseActivity {
 
         mSwipeRefreshLayout.setRefreshing(false);
 
-        Log.e(TAG, "displayActor: " + mActor.getDeathday());
 
-        // Setup poster
-        if (mActor.getProfile_path() != null)
+        // Setup poster if available
+        String profile = mActor.getProfile_path();
+        if (profile != null && profile.length() > 5) {
             Picasso.with(this)
                     .load(NetworkUtils.buildActorProfileUri(mActor.getProfile_path()))
                     .placeholder(R.drawable.placeholder_poster)
                     .into(mProfileImageView);
+
+            // If is portrait, hide/show the profile picture on scroll
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+                // Customize the Appbar behaviour and react to scroll
+                ((AppBarLayout) findViewById(R.id.app_bar))
+                    .addOnOffsetChangedListener((appBarLayout1, verticalOffset) ->
+                        UIUtils.actionBarScrollControl(verticalOffset, mProfileImageView, mSpace));
+
+        // If not, adapt the interface not to show it
+        }else {
+            mProfileImageView.setVisibility(View.GONE);
+            mSpace.setVisibility(View.GONE);
+        }
 
         if (mBackdropImageView != null) {
             // Setup backdrop
@@ -170,12 +183,7 @@ public class ActorActivity extends BaseActivity {
 
 
 
-        // If is portrait, hide/show the profile picture on scroll
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-            // Customize the Appbar behaviour and react to scroll
-            ((AppBarLayout) findViewById(R.id.app_bar))
-                .addOnOffsetChangedListener( (appBarLayout1, verticalOffset) ->
-                    UIUtils.actionBarScrollControl(verticalOffset, mProfileImageView, mSpace));
+
 
         String notAvailable = getString(R.string.not_available);
 
@@ -245,7 +253,8 @@ public class ActorActivity extends BaseActivity {
         mMoviesRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mMoviesRV.setAdapter(fAdapter);
         for(MovieLight movie : movies)
-            fAdapter.add(movieItemProvider.get().withMovie(movie.getId(), movie.getPoster_path()));
+            if(movie.getPoster_path() != null && movie.getPoster_path().length() > 5)
+                fAdapter.add(movieItemProvider.get().withMovie(movie.getId(), movie.getPoster_path(), movie.getCharacter()));
 
         fAdapter.withOnClickListener((v, adapter, item, position) -> {
             MovieItem mi = (MovieItem) item;

@@ -28,7 +28,7 @@ public class InsertMovieTask extends AsyncTask<Movie, Void, ContentValues> {
         if(backdrop == null && backdropPath != null)
             backdrop = NetworkUtils.getBackdropFromUri(backdropPath);
 
-        byte[] backdropBytes = BitmapUtils.getBytesFromBitmap(backdrop);
+        byte[] backdropBytes = backdrop != null ? BitmapUtils.getBytesFromBitmap(backdrop) : new byte[0];
         values.put(MoviesContract.MoviesEntry.COLUMN_BACKDROP, backdropBytes);
 
         byte[] posterBytes = BitmapUtils.getBytesFromBitmap(movie.getPoster());

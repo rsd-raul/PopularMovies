@@ -68,19 +68,8 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MoviesAdap
         return mMovies;
     }
 
-//    private final MoviesAdapterOnClickHandler mClickHandler;
-
-//    DEPRECATED in favour of Dependency Injection and local onClick handling
-//    // -------------------------- INTERFACE --------------------------
-//
-//    public interface MoviesAdapterOnClickHandler {
-//        void onClick(long selectedMovieId);
-//    }
-
-
     // ------------------------- VIEW HOLDER -------------------------
 
-    // TODO Add fast adapter
     class MoviesAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView mMoviePoster;
 

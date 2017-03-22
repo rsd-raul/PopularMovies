@@ -28,61 +28,13 @@ public class MoviesAsyncHandler {
         return new MoviesAsyncQueryHandler(cr);
     }
 
-    // -------------------------- INTERFACE --------------------------
-
-    public interface AsyncQueryListener {
-        void onQueryComplete(int token, Object cookie, Cursor cursor);
-    }
-
     // ---------------------------- CLASS ----------------------------
 
     public static class MoviesAsyncQueryHandler extends AsyncQueryHandler {
 
-
-        // ------------------------- ATTRIBUTES --------------------------
-
-        private WeakReference<AsyncQueryListener> mListener;
-
-        // ------------------------- CONSTRUCTOR -------------------------
-
         @Inject
         MoviesAsyncQueryHandler(ContentResolver cr) {
             super(cr);
-        }
-
-        // FIXME Pasar a limpio y borrar
-        public void setAsyncQueryListener(AsyncQueryListener listener) {
-            mListener = new WeakReference<>(listener);
-        }
-
-        // -------------------------- AUXILIARY --------------------------
-
-        @Override
-        protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-            Log.e("AAAAA", "onQueryComplete: ");
-            final AsyncQueryListener listener = mListener.get();
-            if (listener != null)
-                listener.onQueryComplete(token, cookie, cursor);
-            else if (cursor != null)
-                cursor.close();
-        }
-
-        @Override
-        protected void onDeleteComplete(int token, Object cookie, int result) {
-            Log.e("AAAAA", "onDeleteComplete: ");
-            super.onDeleteComplete(token, cookie, result);
-        }
-
-        @Override
-        protected void onInsertComplete(int token, Object cookie, Uri uri) {
-            Log.e("AAAAA", "onInsertComplete: ");
-            super.onInsertComplete(token, cookie, uri);
-        }
-
-        @Override
-        protected void onUpdateComplete(int token, Object cookie, int result) {
-            Log.e("AAAAA", "onUpdateComplete: ");
-            super.onUpdateComplete(token, cookie, result);
         }
     }
 }

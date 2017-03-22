@@ -31,10 +31,6 @@
                 app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
                 app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title">
 
-                <!-- 170dp = 64 (actionbar vert) + 180(profile)/2(anchor) + 16(margin) -->
-
-                <!-- TODO add actionbarsize to minHeight-->
-
                 <ImageView
                     android:id="@+id/iv_actor_backdrop"
                     android:layout_width="match_parent"
