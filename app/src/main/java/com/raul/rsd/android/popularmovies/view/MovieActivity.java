@@ -124,7 +124,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
 
 
     private void startProviderRequest(){
-        Log.e(TAG, "startProviderRequest: ");
         changeFavourite(true);
 
         LoaderManager loaderManager = getSupportLoaderManager();
@@ -135,11 +134,12 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     private void startNetworkRequest(){
-        Log.e(TAG, "startNetworkRequest: ");
 
         // Notify the user if there is no internet, offer to retry or to close the app
-        if(!NetworkUtils.isNetworkAvailable(MovieActivity.this))
+        if(!NetworkUtils.isNetworkAvailable(MovieActivity.this)) {
             DialogsUtils.showErrorDialog(MovieActivity.this, (dialog, which) -> startNetworkRequest());
+            return;
+        }
 
         mSwipeRefreshLayout.setRefreshing(true);
 
@@ -355,7 +355,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         if(actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
 
-        Log.e(TAG, "adaptInterfaceWithBackdropColor: " + dominantColor);
         if(dominantColor == 0)
             return;
 
@@ -391,7 +390,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                 if (movie == null)
                     return;
 
-                Log.i(TAG, "startSilentNetworkRequest: response obtained");
+                Log.v(TAG, "startSilentNetworkRequest: response obtained");
 
                 // Update the UI
                 rateMain.setText(String.valueOf(movie.getVote_avg()));
@@ -411,7 +410,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                 if(values.size() > 1)
                     return;
 
-                Log.i(TAG, "startSilentNetworkRequest: updating Movie");
+                Log.v(TAG, "startSilentNetworkRequest: updating Movie");
                 Uri uri = MoviesContract.getMovieUriWithId(mMovie.getId());
                 moviesHandler.startUpdate(MoviesAsyncHandler.UPDATE_TOKEN, null, uri, values,
                         null, null);
@@ -425,8 +424,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     void favouriteMovie() {
-        Log.e(TAG, "favouriteMovie: " + status);
-
         if(!isSafe())
             return;
         status = BUSY;

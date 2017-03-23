@@ -19,8 +19,6 @@ import java.util.Date;
 
 public abstract class TMDBUtils {
 
-    private static final String TAG = "TMDBUtils";
-
     // -------------------------- USE CASES --------------------------
 
     /**

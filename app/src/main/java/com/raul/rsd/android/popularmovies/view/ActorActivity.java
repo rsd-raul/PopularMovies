@@ -101,11 +101,11 @@ public class ActorActivity extends BaseActivity {
     }
 
     private void startNetworkRequest(){
-        Log.e(TAG, "startNetworkRequest: ");
-
         // Notify the user if there is no internet, offer to retry or to close the app
-        if(!NetworkUtils.isNetworkAvailable(ActorActivity.this))
+        if(!NetworkUtils.isNetworkAvailable(ActorActivity.this)) {
             DialogsUtils.showErrorDialog(ActorActivity.this, (dialog, which) -> startNetworkRequest());
+            return;
+        }
 
         mSwipeRefreshLayout.setRefreshing(true);
 
@@ -135,9 +135,7 @@ public class ActorActivity extends BaseActivity {
     }
 
     private void displayActor(){
-
         mSwipeRefreshLayout.setRefreshing(false);
-
 
         // Setup poster if available
         String profile = mActor.getProfile_path();

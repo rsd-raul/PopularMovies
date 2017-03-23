@@ -14,6 +14,7 @@
     <!--Problems-->
     <string name="no_network_title">No internet connection</string>
     <string name="no_network_content">Ups, it seems like you don\'t have Internet right now, since we need that to access our databases, I\'m afraid we can only try again now or go back and try again later.</string>
+    <string name="no_network_go_favourites">Ups! You don\'t seem to have internet right now, but you still can browse your favourite movies or enable your data and try again.</string>
     <string name="no_fetch_title">Problems fetching data</string>
     <string name="no_fetch_content">We have problems getting the info from our servers, try again in now or go back and try again later.</string>
 
@@ -91,4 +92,5 @@
     <string name="cast">Cast</string>
     <string name="saving_offline">Saving Movie offline</string>
     <string name="no_videos">NO VIDEOS FOUND</string>
+    <string name="say_movie_or_actor">Say a movie or actor name</string>
 </resources>

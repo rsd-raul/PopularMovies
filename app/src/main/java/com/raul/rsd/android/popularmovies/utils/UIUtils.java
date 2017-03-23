@@ -97,23 +97,6 @@ public abstract class UIUtils {
     }
 
     /**
-     * Sets the active sort as a subtitle in the ActionBar.
-     *
-     * @param activity The Activity that contains the Actionbar
-     * @param activeFilter The filter currently active
-     */
-    public static void setSubtitle(AppCompatActivity activity, String activeFilter){
-        // Format the filter
-        String filter = activeFilter.replace('_',' ');
-        filter = filter.substring(0, 1).toUpperCase() + filter.substring(1);
-
-        // Set the subtitle
-        ActionBar actionBar = activity.getSupportActionBar();
-        if(actionBar != null)
-            actionBar.setSubtitle("Filter: " + filter);
-    }
-
-    /**
      * Extract the predominant color from an Image (Bitmap).
      *
      * @param bitmap The image we wish to obtain the color from

@@ -1,10 +1,6 @@
 package com.raul.rsd.android.popularmovies.utils;
 
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-
-import com.raul.rsd.android.popularmovies.R;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -53,40 +49,17 @@ public abstract class DateUtils {
         return new SimpleDateFormat("yyyy-MM-dd").format(date);
     }
 
-    /**
-     * Translate a given number of minutes into hours and minutes
-     *
-     * @param minutes Total number of minutes
-     * @param activity Context to obtain locale based units
-     * @return Hours and minutes formated
-     */
-    @SuppressWarnings("all")
-    public static String getDurationFromMinutes(int minutes, AppCompatActivity activity){
-        String duration = "";
-
-        double hoursDouble = Math.floor(minutes/60.0);
-        if(hoursDouble != 0)
-            duration = String.format("%.0f %s ", hoursDouble, activity.getString(R.string.time_hours));
-
-        int minutesInt = minutes%60;
-        duration += String.format("%d %s", minutesInt, activity.getString(R.string.time_minutes));
-
-        return duration;
-    }
-
+    @SuppressWarnings("deprecation")
     public static int calculateYearsBetweenDates(Date startDate, Date endDate) {
         int startDay = startDate.getDate(), endDay = endDate.getDate();
         int startMonth = startDate.getMonth(), endMonth = endDate.getMonth();
         int startYear = startDate.getYear(), endYear = endDate.getYear();
 
         int result = endYear - startYear;
-        Log.e(TAG, "calculateYearsBetweenDates: " + result);
         if (startMonth > endMonth)
             result--;
         else if (startMonth == endMonth && startDay > endDay)
             result--;
-
-        Log.e(TAG, "calculateYearsBetweenDates: " + result);
         return result;
     }
 }

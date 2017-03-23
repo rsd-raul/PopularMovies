@@ -71,6 +71,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
+        // TODO if offline, go to favourites by default
+
         // If we have the data already saved, restore those
         if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
             setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
@@ -86,12 +88,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     }
 
     private void setupActivity(MovieLight[] movies) {
-        // Notify the user if there is no internet, offer to retry or to close the app
-        if(!NetworkUtils.isNetworkAvailable(this)) {
-            DialogsUtils.showErrorDialog(this, (dialog, which) -> setupActivity(movies));
-            return;
-        }
-
         // Set ActionBar
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         ActionBar actionBar = getSupportActionBar();
@@ -125,10 +121,21 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     // -------------------------- USE CASES --------------------------
 
     public void loadData(){
+        // Notify the user if there is no internet, offer to retry or to close the app
+        if(!mActiveSort.equals(NetworkUtils.FAVOURITES) && !NetworkUtils.isNetworkAvailable(this)) {
+            DialogsUtils.showNetworkDialogMainActivity(this,
+                    // Go favourites
+                    (dialog, which) -> mBottomNavigation.setCurrentItem(2),
+                    // Retry
+                    (dialog, which) -> loadData());
+            return;
+        }
+
         mSwipeRefresh.setRefreshing(true);
 
         // If Favourites, start the CursorLoader
-        if(mActiveSort.equals(NetworkUtils.FAVOURITES)){
+        if (mActiveSort.equals(NetworkUtils.FAVOURITES)) {
+            // Set current item programmatically
             LoaderManager loaderManager = getSupportLoaderManager();
             if(loaderManager.getLoader(ID_MOVIE_FAVOURITES_LOADER) == null)
                 loaderManager.initLoader(ID_MOVIE_FAVOURITES_LOADER, null, this) ;
@@ -136,7 +143,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 loaderManager.restartLoader(ID_MOVIE_FAVOURITES_LOADER, null, this);
 
         // If Top rated or Popular, start network request
-        }else
+        } else
             NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
                 @Override
                 public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
@@ -214,9 +221,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         // Use colored navigation with circle reveal effect
         mBottomNavigation.setColored(true);
 
-        // Set current item programmatically
-        mBottomNavigation.setCurrentItem(0);
-
         // Set listeners
         mBottomNavigation.setOnTabSelectedListener((position, wasSelected) -> {
             switch (position){
@@ -267,20 +271,17 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             }
         });
 
-        mSearchView.setVoiceText("Say a movie or actor name");
+        mSearchView.setVoiceText(getString(R.string.say_movie_or_actor));
         mSearchView.setOnVoiceClickListener(() -> {
-            Toast.makeText(MainActivity.this, "onVoiceClick", Toast.LENGTH_SHORT).show();
             mSearchView.open(false);
             mSearchView.hideKeyboard();
         });
 
-
         mSearchAdapter.addOnItemClickListener((view, position) -> {
             Class itemClass;
             long itemId;
-            if(mMoviesFound != null){
-                Log.e(TAG, "configureSearchView: CLICKING MOVIE");
 
+            if(mMoviesFound != null){
                 MovieLight movie = mMoviesFound[position];
                 mMoviesFound = null;
                 mSearchView.close(false);
@@ -289,8 +290,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 itemId = movie.getId();
 
             } else if(mActorsFound != null){
-                Log.e(TAG, "configureSearchView: CLICKING ACTOR");
-
                 Actor actor = mActorsFound[position];
                 mActorsFound = null;
                 mSearchView.close(false);
@@ -299,8 +298,6 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                 itemId = actor.getId();
 
             } else {
-                Log.e(TAG, "configureSearchView: BAD FILTER");
-
                 Toast.makeText(this, R.string.select_filter, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -318,6 +315,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         mSearchView.setShouldClearOnClose(true);
         mSearchView.setNavigationIcon(R.drawable.ic_search_black_24dp);
         mSearchView.setOnMenuClickListener(() -> mSearchView.open(true));
+
         // Define filters
         List<SearchFilter> filters = new ArrayList<>();
         filters.add(new SearchFilter(getString(R.string.movie), true));
@@ -329,6 +327,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             public boolean onOpen() {
                 mBottomNavigation.hideBottomNavigation(false);
                 mSearchView.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
+                if(!NetworkUtils.isNetworkAvailable(MainActivity.this))
+                    Toast.makeText(MainActivity.this, R.string.no_network_title, Toast.LENGTH_SHORT).show();
                 return true;
             }
             @Override
