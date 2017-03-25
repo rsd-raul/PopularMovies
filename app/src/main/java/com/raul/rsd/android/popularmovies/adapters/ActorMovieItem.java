@@ -1,49 +1,42 @@
 package com.raul.rsd.android.popularmovies.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
-
 import java.util.List;
 
 import javax.inject.Inject;
 
-public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> implements Parcelable {
+public class ActorMovieItem extends AbstractItem<ActorMovieItem, ActorMovieItem.ViewHolder> {
 
     // ------------------------- ATTRIBUTES --------------------------
 
     public long id;
-    private String poster_path;
-    private Bitmap poster;
+    private String poster_path, character;
     private Context context;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public MovieItem(Context context) {
+    public ActorMovieItem(Context context) {
         this.context = context;
     }
 
-    public MovieItem withMovie(long id, String poster_path, Bitmap poster){
+    public ActorMovieItem withMovie(long id, String poster_path, String character){
         this.poster_path = poster_path;
-        this.poster = poster;
+        this.character = character;
         this.id = id;
         return this;
     }
 
     @Override
-    public int getLayoutRes() { return R.layout.movie_list_item; }
+    public int getLayoutRes() { return R.layout.actor_movie_item; }
 
     // -------------------------- AUXILIARY --------------------------
 
@@ -56,51 +49,23 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
     public void bindView(ViewHolder viewHolder, List<Object> payloads) {
         super.bindView(viewHolder, payloads);
 
-        if(poster_path != null)
-            Picasso.with(context)
-                    .load(NetworkUtils.buildMoviePosterUri(poster_path))
-                    .placeholder(R.drawable.placeholder_poster)
-                    .into(viewHolder.poster);
-        else
-            viewHolder.poster.setImageBitmap(poster);
+        viewHolder.character.setText(character);
+        Picasso.with(context)
+                .load(NetworkUtils.buildMoviePosterUri(poster_path))
+                .placeholder(R.drawable.placeholder_poster)
+                .into(viewHolder.poster);
     }
 
     // ------------------------- VIEW HOLDER -------------------------
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView poster;
+        private TextView character;
 
         public ViewHolder(View view) {
             super(view);
             this.poster = (ImageView) view.findViewById(R.id.iv_movie_poster);
+            this.character = (TextView) view.findViewById(R.id.tv__movie_character);
         }
     }
-
-    // ------------------------- PARCELABLE --------------------------
-
-    static final Creator<MovieItem> CREATOR = new Creator<MovieItem> () {
-        @Override
-        public MovieItem createFromParcel(Parcel in) {
-            return new MovieItem(in);
-        }
-
-        @Override
-        public MovieItem[] newArray(int size) {
-            return new MovieItem[size];
-        }
-    };
-
-    public MovieItem(Parcel in) {
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-
-    }
-
 }

@@ -3,7 +3,6 @@ package com.raul.rsd.android.popularmovies.view;
 import android.content.Intent;
 import android.database.Cursor;
 import android.speech.RecognizerIntent;
-import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -22,20 +21,24 @@ import com.lapism.searchview.SearchAdapter;
 import com.lapism.searchview.SearchFilter;
 import com.lapism.searchview.SearchItem;
 import com.lapism.searchview.SearchView;
+import com.mikepenz.fastadapter.IItem;
+import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
-import com.raul.rsd.android.popularmovies.adapters.MoviesAdapter;
+import com.raul.rsd.android.popularmovies.adapters.MovieItem;
 import com.raul.rsd.android.popularmovies.data.MoviesContract;
 import com.raul.rsd.android.popularmovies.domain.Actor;
 import com.raul.rsd.android.popularmovies.domain.ActorList;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.domain.MoviesList;
 import com.raul.rsd.android.popularmovies.utils.DialogsUtils;
+import com.raul.rsd.android.popularmovies.utils.extras.EndlessRecyclerViewScrollListener;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
 import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import retrofit2.Call;
@@ -55,8 +58,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
     @BindView(R.id.bottom_navigation) AHBottomNavigation mBottomNavigation;
     @BindView(R.id.searchView) SearchView mSearchView;
-    @Inject MoviesAdapter mMoviesAdapter;
+    @Inject FastItemAdapter<IItem> mFastAdapter;
+    @Inject Provider<MovieItem> mMovieItemProvider;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
+    private EndlessRecyclerViewScrollListener mScrollListener;
 
     // ------------------------- CONSTRUCTOR -------------------------
 
@@ -69,53 +74,67 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Initialize if necessary.
+        NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
         ButterKnife.bind(this);
 
-        // TODO if offline, go to favourites by default
-
-        // If we have the data already saved, restore those
-        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
-            setupActivity((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY));
-        else
-            setupActivity(null);
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        configureSearchView();
-    }
-
-    private void setupActivity(MovieLight[] movies) {
         // Set ActionBar
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null)
             actionBar.setTitle(R.string.none);
 
-        // Get references and values
-        NetworkUtils.setImagesSizeWithDpi(getResources().getDisplayMetrics().densityDpi);
-
         // Configure RecyclerView
-        boolean isPortrait = !getResources().getBoolean(R.bool.is_landscape);
-        int columnNumber = isPortrait ? 2 : 3;
+        int columnNumber = getResources().getBoolean(R.bool.is_landscape) ? 3 : 2;
         GridLayoutManager layoutManager = new GridLayoutManager(this, columnNumber);
+        mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                if(!mActiveSort.equals(NetworkUtils.FAVOURITES))
+                    queryTMDbServer(page);
+            }};
         mRecyclerView.setLayoutManager(layoutManager);
-        mRecyclerView.setAdapter(mMoviesAdapter);
+        mRecyclerView.addOnScrollListener(mScrollListener);
+        mRecyclerView.setAdapter(mFastAdapter);
         mRecyclerView.setHasFixedSize(true);
 
+        mFastAdapter.withOnClickListener((v, adapter, item, position) -> {
+            long selectedMovieId = ((MovieItem) item).id;
+
+            Intent intentDetailsActivity = new Intent(this, MovieActivity.class);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
+            this.startActivity(intentDetailsActivity);
+
+            return true;
+        });
+
         // Configure Swipe Refresh
-        mSwipeRefresh.setOnRefreshListener(this::loadData);
+        mSwipeRefresh.setOnRefreshListener(() -> {mScrollListener.resetState(); loadData();});
 
         // Configure Bottom Navigation Bar
         configureBottomNavigationBar();
+        configureSearchView();
 
-        // Load data in the RecyclerView with the default sorting
-        if(movies == null)
-            loadData();
+        // If we have the data already saved, restore those
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
+            addMoviesToRV((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY), true);
         else
-            mMoviesAdapter.setMoviesData(movies);
+            loadData();
+    }
+
+    private void addMoviesToRV(MovieLight[] moviesToAdd, boolean clearFirst){
+        if(clearFirst)
+            mFastAdapter.clear();
+
+        if(moviesToAdd == null)
+            return;
+
+        for (MovieLight movie : moviesToAdd)
+            mFastAdapter.add(mMovieItemProvider.get().withMovie(movie.getId(),
+                                                                movie.getPoster_path(),
+                                                                movie.getPoster()));
+        mFastAdapter.notifyDataSetChanged();
     }
 
     // -------------------------- USE CASES --------------------------
@@ -144,31 +163,32 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         // If Top rated or Popular, start network request
         } else
-            NetworkUtils.getMoviesByFilter(mActiveSort, new Callback<MoviesList>() {
-                @Override
-                public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
-
-                    MovieLight[] movies = response.body().getResults();
-
-                    if (movies != null) {
-                        mMoviesAdapter.setMoviesData(movies);
-                        mRecyclerView.smoothScrollToPosition(0);
-                    } else
-                        showErrorMessage();
-
-                    mSwipeRefresh.setRefreshing(false);
-                }
-
-                @Override
-                public void onFailure(Call<MoviesList> call, Throwable t) {
-                    Log.e(TAG, "loadData/onFailure: Failed to fetch movies from Server", t);
-                    showErrorMessage();
-                }
-            });
+            queryTMDbServer(1);
     }
 
-    private void showErrorMessage(){
-        DialogsUtils.showFetchingDataDialog(this, (dialog, which) -> loadData());
+    private void queryTMDbServer(int page){
+        NetworkUtils.getMoviesByFilter(mActiveSort, page, new Callback<MoviesList>() {
+            @Override
+            public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
+
+                MovieLight[] movies = response.body().getResults();
+
+                if (movies != null) {
+                    addMoviesToRV(movies, page == 1);
+                    if(page == 1)
+                        mRecyclerView.smoothScrollToPosition(0);
+                } else
+                    onFailure(null, null);
+
+                mSwipeRefresh.setRefreshing(false);
+            }
+
+            @Override
+            public void onFailure(Call<MoviesList> call, Throwable t) {
+                Log.e(TAG, "loadData/onFailure: Failed to fetch movies from Server", t);
+                DialogsUtils.showFetchingDataDialog(MainActivity.this, (dialog, which) -> queryTMDbServer(page));
+            }
+        });
     }
 
     // --------------------------- STATES ----------------------------
@@ -176,7 +196,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArray(MOVIES_KEY, mMoviesAdapter.getMoviesData());
+        // FIXME
+//        outState.putParcelableArray(MOVIES_KEY, mFastAdapter.getAdapterItems());
     }
 
 //    @Override // TODO handle restore
@@ -234,6 +255,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                     mActiveSort = NetworkUtils.FAVOURITES;
                     break;
             }
+            mScrollListener.resetState();
             loadData();
             return true;
         });
@@ -364,6 +386,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
         mSearchView.showProgress();
 
+        // TODO cleanup? merge? very similar methods
         switch (getActiveFilters()){
             case "movie":
                 NetworkUtils.findMovieByName(query, 1, new Callback<MoviesList>() {
@@ -461,7 +484,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         data.close();
 
         // Adapt the interface
-        mMoviesAdapter.setMoviesData(movies);
+        addMoviesToRV(movies, true);
         mSwipeRefresh.setRefreshing(false);
 
         if(mNoScroll) {
@@ -469,12 +492,11 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             return;
         }
 
-        mNoScroll = false;
         mRecyclerView.smoothScrollToPosition(0);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mMoviesAdapter.setMoviesData(null);
+        addMoviesToRV(null, true);
     }
 }

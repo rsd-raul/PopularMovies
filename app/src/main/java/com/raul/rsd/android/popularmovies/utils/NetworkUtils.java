@@ -67,7 +67,6 @@ public abstract class NetworkUtils {
     private static String BACKDROP_SIZE;
     private static String THUMBNAIL_SIZE;
 
-
     // ------------------------ URI BUILDERS -------------------------
 
     // https://www.youtube.com/watch?v=Zk3yLI0q794
@@ -168,10 +167,11 @@ public abstract class NetworkUtils {
 
     interface TMDBService {
 
-        //https://api.themoviedb.org/3/movie/popular?api_key=abc
+        //https://api.themoviedb.org/3/movie/popular?api_key=abc&page=1
         @GET("movie/{filter}")
         Call<MoviesList> getMoviesByFilter(@Path("filter") String filter,
-                                           @Query(API_PARAM) String api_key);
+                                           @Query(API_PARAM) String api_key,
+                                           @Query(PAGE_PARAM) int page);
 
         //http://api.themoviedb.org/3/movie/131634?api_key=<<api_key>>&append_to_response=videos,reviews
         @GET("movie/{id}")
@@ -221,8 +221,9 @@ public abstract class NetworkUtils {
                                                                                 .enqueue(callback);
     }
 
-    public static void getMoviesByFilter(String filter, Callback<MoviesList> callback){
-        getTMDBService().getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3).enqueue(callback);
+    public static void getMoviesByFilter(String filter, int page, Callback<MoviesList> callback){
+        getTMDBService().getMoviesByFilter(filter, BuildConfig.TMDB_API_KEY_V3, page)
+                                                                                .enqueue(callback);
     }
 
     public static void getFullMovieById(Long id, Callback<Movie> callback){

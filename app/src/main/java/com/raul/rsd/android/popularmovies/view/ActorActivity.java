@@ -22,7 +22,7 @@ import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
-import com.raul.rsd.android.popularmovies.adapters.MovieItem;
+import com.raul.rsd.android.popularmovies.adapters.ActorMovieItem;
 import com.raul.rsd.android.popularmovies.domain.Actor;
 import com.raul.rsd.android.popularmovies.domain.MovieLight;
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
@@ -65,7 +65,7 @@ public class ActorActivity extends BaseActivity {
     @BindView(R.id.poster_space) Space mSpace;
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Inject Provider<FastItemAdapter<IItem>> fastAdapterProvider;
-    @Inject Provider<MovieItem> movieItemProvider;
+    @Inject Provider<ActorMovieItem> movieItemProvider;
     private Actor mActor;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -178,11 +178,6 @@ public class ActorActivity extends BaseActivity {
                 mBackdropImageView.setImageResource(R.drawable.header_background_default);
         }
 
-
-
-
-
-
         String notAvailable = getString(R.string.not_available);
 
         // Name
@@ -255,7 +250,7 @@ public class ActorActivity extends BaseActivity {
                 fAdapter.add(movieItemProvider.get().withMovie(movie.getId(), movie.getPoster_path(), movie.getCharacter()));
 
         fAdapter.withOnClickListener((v, adapter, item, position) -> {
-            MovieItem mi = (MovieItem) item;
+            ActorMovieItem mi = (ActorMovieItem) item;
             Intent intentDetailsActivity = new Intent(this, MovieActivity.class);
             intentDetailsActivity.putExtra(Intent.EXTRA_UID, mi.id);
             startActivity(intentDetailsActivity);

@@ -107,21 +107,15 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         setupActivity();
     }
 
-
-
     private void setupActivity(){
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mFloatingActionButton.setOnClickListener(view -> favouriteMovie());
-
         // Retrieve the ID sent and fetch the movie from TMDB
         mMovie = new Movie(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
         new LoadMovieTask().execute();
     }
-
-
 
     private void startProviderRequest(){
         changeFavourite(true);
@@ -423,6 +417,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         });
     }
 
+    @OnClick(R.id.fab)
     void favouriteMovie() {
         if(!isSafe())
             return;
@@ -483,7 +478,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     private boolean isSafe(){
         if(status == SAFE)
             return true;
-        if(mToast == null)
+        if(mToast == null)  // TODO more generic string
             mToast = Toast.makeText(this, R.string.saving_offline, Toast.LENGTH_SHORT);
         else
             mToast.show();
