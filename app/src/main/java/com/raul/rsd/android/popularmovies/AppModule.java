@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
+import com.raul.rsd.android.popularmovies.adapters.MovieItem;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler;
 import com.raul.rsd.android.popularmovies.data.MoviesAsyncHandler.*;
 import com.raul.rsd.android.popularmovies.data.MoviesDbHelper;
@@ -55,6 +56,11 @@ public class AppModule {
 
     @Provides
     FastItemAdapter<IItem> fastItemAdapterProvider(){
+        return new FastItemAdapter<>();
+    }
+
+    @Provides
+    FastItemAdapter<MovieItem> fastItemAdapterForMovieProvider(){
         return new FastItemAdapter<>();
     }
 }

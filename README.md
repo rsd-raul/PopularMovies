@@ -5,10 +5,12 @@ First and Second project for the Google/Udacity scholarship, the "Associate Andr
 
 ## Features available:
 
-* Discover the most popular and most rated movies.
+* Discover the most popular, most rated and upcoming (**v2.0**) movies.
 * Access to details about those movies.
 * Store offline your favourite movies. **v2.0**
-* Access trailers and reviews. **v2.0**
+* Access trailers, reviews and cast. **v2.0**
+* Search movies by name. **v2.0**
+* Search actors by name. **v2.0**
 
 ## Configuration:
 
@@ -32,7 +34,6 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 ## Future:
 
 Features to be implemented:
-* Search movies by name or genre.
 
 Ext. Libraries to be used:
 * [Realm](https://github.com/realm/realm-java)  // Not allowed

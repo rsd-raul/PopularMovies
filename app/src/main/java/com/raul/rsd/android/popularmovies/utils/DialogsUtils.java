@@ -49,11 +49,9 @@ public abstract class DialogsUtils{
                 .cancelable(false);
 
         if(negativeCallback == null) {
-            Log.e("XXX", "showComplexDialog: AAAAA");
             dialog.negativeText(R.string.close);
             dialog.onNegative((dialog1, which) -> activity.finish());
         }else {
-            Log.e("XXX", "showComplexDialog: BBBBB");
             dialog.negativeText(negRes);
             dialog.onNegative(negativeCallback);
             dialog.neutralText(R.string.close);

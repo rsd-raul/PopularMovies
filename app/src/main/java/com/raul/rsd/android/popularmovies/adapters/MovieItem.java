@@ -2,14 +2,11 @@ package com.raul.rsd.android.popularmovies.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
-
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.raul.rsd.android.popularmovies.R;
 import com.raul.rsd.android.popularmovies.utils.NetworkUtils;
@@ -31,7 +28,7 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
     // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public MovieItem(Context context) {
+    MovieItem(Context context) {
         this.context = context;
     }
 
@@ -80,9 +77,7 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
 
     static final Creator<MovieItem> CREATOR = new Creator<MovieItem> () {
         @Override
-        public MovieItem createFromParcel(Parcel in) {
-            return new MovieItem(in);
-        }
+        public MovieItem createFromParcel(Parcel in) { return new MovieItem(); }
 
         @Override
         public MovieItem[] newArray(int size) {
@@ -90,17 +85,12 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
         }
     };
 
-    public MovieItem(Parcel in) {
-    }
+    private MovieItem() { }
 
     @Override
     public int describeContents() {
         return 0;
     }
-
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-
-    }
-
+    public void writeToParcel(Parcel parcel, int i) { }
 }

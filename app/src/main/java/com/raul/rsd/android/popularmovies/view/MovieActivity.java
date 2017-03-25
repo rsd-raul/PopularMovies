@@ -48,6 +48,9 @@ import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import java.util.Date;
+
 import javax.inject.Inject;
 import javax.inject.Provider;
 import butterknife.BindView;
@@ -199,10 +202,9 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
                         .placeholder(R.drawable.placeholder_poster)
                         .into(mPosterImageView);
 
+            // Setup recyclerViews and content
             setupTrailers(mMovie.getVideos());
-
             setupReviews(mMovie.getReviews());
-
             setupCast(mMovie.getCast());
         }
 
@@ -222,7 +224,12 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         rateSecondary.setText(String.valueOf(mMovie.getVote_count()));
         String desc = mMovie.getSynopsis();
         descriptionMain.setText(desc == null ? getString(R.string.no_description) : desc);
-        releaseDateMain.setText(DateUtils.getStringFromDate(mMovie.getRelease_date()));
+
+        Date releaseDate = mMovie.getRelease_date();
+        if(releaseDate != null)
+            releaseDateMain.setText(DateUtils.getStringFromDate(releaseDate));
+        else
+            releaseDateMain.setText(R.string.no_release_date);
     }
 
     private void setupTrailers(Video[] videos){

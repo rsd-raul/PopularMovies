@@ -46,7 +46,9 @@ public abstract class NetworkUtils {
 
     public static final String POPULAR = "popular";
     public static final String TOP_RATED = "top_rated";
+    public static final String UPCOMING = "upcoming";
     public static final String FAVOURITES = "favourites";
+
     private static final String VIDEOS = "videos";
     private static final String REVIEWS = "reviews";
     private static final String MOVIE_CREDITS = "movie_credits";

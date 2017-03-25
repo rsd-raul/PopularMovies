@@ -1,8 +1,9 @@
 package com.raul.rsd.android.popularmovies.utils.extras;
 
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 
+// https://guides.codepath.com/android/Endless-Scrolling-with-AdapterViews-and-RecyclerView
 public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnScrollListener {
     // The minimum amount of items to have below your current scroll position
     // before loading more.
@@ -16,9 +17,9 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     // Sets the starting page index
     private int startingPageIndex = 1;
 
-    private GridLayoutManager mLayoutManager;
+    private StaggeredGridLayoutManager mLayoutManager;
 
-    protected EndlessRecyclerViewScrollListener(GridLayoutManager layoutManager) {
+    protected EndlessRecyclerViewScrollListener(StaggeredGridLayoutManager layoutManager) {
         this.mLayoutManager = layoutManager;
         visibleThreshold = visibleThreshold * layoutManager.getSpanCount();
     }
@@ -28,11 +29,9 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     // but first we check if we are waiting for the previous load to finish.
     @Override
     public void onScrolled(RecyclerView view, int dx, int dy) {
-        int lastVisibleItemPosition = 0;
         int totalItemCount = mLayoutManager.getItemCount();
-
-        if (mLayoutManager instanceof GridLayoutManager)
-            lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+        int[] lastVisibleItemPositions = mLayoutManager.findLastVisibleItemPositions(null);
+        int lastVisibleItemPosition = getLastVisibleItem(lastVisibleItemPositions);
 
         // If the total item count is zero and the previous isn't, assume the
         // list is invalidated and should be reset back to initial state
@@ -60,6 +59,14 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
             onLoadMore(currentPage, totalItemCount, view);
             loading = true;
         }
+    }
+
+    private int getLastVisibleItem(int[] lastVisibleItemPositions) {
+        int maxSize = 0;
+        for (int i = 0; i < lastVisibleItemPositions.length; i++)
+            if (i == 0 || lastVisibleItemPositions[i] > maxSize)
+                maxSize = lastVisibleItemPositions[i];
+        return maxSize;
     }
 
     // Call this method whenever performing new searches

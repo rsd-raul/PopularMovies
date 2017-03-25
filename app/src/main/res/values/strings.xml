@@ -35,6 +35,7 @@
     <string name="popular">Popularity</string>
     <string name="top_rated">Top rated</string>
     <string name="favourites">Favourites</string>
+    <string name="upcoming">Upcoming</string>
 
     <!--Movie-->
     <string name="title_to_string">Title:</string>
@@ -93,4 +94,5 @@
     <string name="saving_offline">Saving Movie offline</string>
     <string name="no_videos">NO VIDEOS FOUND</string>
     <string name="say_movie_or_actor">Say a movie or actor name</string>
+    <string name="no_release_date">NO RELEASE DATE FOUND</string>
 </resources>

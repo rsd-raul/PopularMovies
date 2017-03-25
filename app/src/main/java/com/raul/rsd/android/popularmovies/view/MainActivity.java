@@ -2,6 +2,7 @@ package com.raul.rsd.android.popularmovies.view;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Parcelable;
 import android.speech.RecognizerIntent;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -9,8 +10,8 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,7 +22,6 @@ import com.lapism.searchview.SearchAdapter;
 import com.lapism.searchview.SearchFilter;
 import com.lapism.searchview.SearchItem;
 import com.lapism.searchview.SearchView;
-import com.mikepenz.fastadapter.IItem;
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter;
 import com.raul.rsd.android.popularmovies.App;
 import com.raul.rsd.android.popularmovies.R;
@@ -51,6 +51,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
 
     private static final String TAG = "MainActivity";
     private static final String MOVIES_KEY = "movies_parcelable";
+    private static final String ACTIVE_SORT_KEY = "active_sort_key";
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -58,7 +59,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @BindView(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefresh;
     @BindView(R.id.bottom_navigation) AHBottomNavigation mBottomNavigation;
     @BindView(R.id.searchView) SearchView mSearchView;
-    @Inject FastItemAdapter<IItem> mFastAdapter;
+    @Inject FastItemAdapter<MovieItem> mFastAdapter;
     @Inject Provider<MovieItem> mMovieItemProvider;
     private String mActiveSort = NetworkUtils.POPULAR;   // By default to popular
     private EndlessRecyclerViewScrollListener mScrollListener;
@@ -85,9 +86,13 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         if(actionBar != null)
             actionBar.setTitle(R.string.none);
 
+        if(savedInstanceState != null)
+            mActiveSort = savedInstanceState.getString(ACTIVE_SORT_KEY);
+
         // Configure RecyclerView
         int columnNumber = getResources().getBoolean(R.bool.is_landscape) ? 3 : 2;
-        GridLayoutManager layoutManager = new GridLayoutManager(this, columnNumber);
+        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(columnNumber, StaggeredGridLayoutManager.VERTICAL) ;
+
         mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
@@ -99,27 +104,30 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         mRecyclerView.setAdapter(mFastAdapter);
         mRecyclerView.setHasFixedSize(true);
 
-        mFastAdapter.withOnClickListener((v, adapter, item, position) -> {
-            long selectedMovieId = ((MovieItem) item).id;
+        mFastAdapter.withOnClickListener((v, adapter, movieItem, position) -> {
 
             Intent intentDetailsActivity = new Intent(this, MovieActivity.class);
-            intentDetailsActivity.putExtra(Intent.EXTRA_UID, selectedMovieId);
+            intentDetailsActivity.putExtra(Intent.EXTRA_UID, movieItem.id);
             this.startActivity(intentDetailsActivity);
 
             return true;
         });
 
-        // Configure Swipe Refresh
-        mSwipeRefresh.setOnRefreshListener(() -> {mScrollListener.resetState(); loadData();});
-
-        // Configure Bottom Navigation Bar
+        // Configure BottomNavigationBar, SearchView and SwipeRefresh
         configureBottomNavigationBar();
         configureSearchView();
+        mSwipeRefresh.setOnRefreshListener(() -> {
+                mScrollListener.resetState();
+                loadData();
+            });
 
         // If we have the data already saved, restore those
-        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY))
-            addMoviesToRV((MovieLight[]) savedInstanceState.getParcelableArray(MOVIES_KEY), true);
-        else
+        if(savedInstanceState != null && savedInstanceState.containsKey(MOVIES_KEY)) {
+            ArrayList<Parcelable> alp = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
+            if(alp != null)
+                for (Parcelable aa : alp)
+                    mFastAdapter.add((MovieItem) aa);
+        } else
             loadData();
     }
 
@@ -131,20 +139,23 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
             return;
 
         for (MovieLight movie : moviesToAdd)
-            mFastAdapter.add(mMovieItemProvider.get().withMovie(movie.getId(),
-                                                                movie.getPoster_path(),
-                                                                movie.getPoster()));
+            if(movie.getPoster_path() != null || movie.getPoster() != null)
+                mFastAdapter.add(mMovieItemProvider.get().withMovie(movie.getId(),
+                                                                    movie.getPoster_path(),
+                                                                    movie.getPoster()));
         mFastAdapter.notifyDataSetChanged();
     }
 
     // -------------------------- USE CASES --------------------------
 
     public void loadData(){
+
         // Notify the user if there is no internet, offer to retry or to close the app
         if(!mActiveSort.equals(NetworkUtils.FAVOURITES) && !NetworkUtils.isNetworkAvailable(this)) {
+            addMoviesToRV(null, true);
             DialogsUtils.showNetworkDialogMainActivity(this,
                     // Go favourites
-                    (dialog, which) -> mBottomNavigation.setCurrentItem(2),
+                    (dialog, which) -> mBottomNavigation.setCurrentItem(3),
                     // Retry
                     (dialog, which) -> loadData());
             return;
@@ -167,6 +178,7 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     }
 
     private void queryTMDbServer(int page){
+
         NetworkUtils.getMoviesByFilter(mActiveSort, page, new Callback<MoviesList>() {
             @Override
             public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
@@ -196,15 +208,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        // FIXME
-//        outState.putParcelableArray(MOVIES_KEY, mFastAdapter.getAdapterItems());
-    }
 
-//    @Override // TODO handle restore
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//        Toast.makeText(this, "hello", Toast.LENGTH_SHORT).show();
-//    }
+        outState.putString(ACTIVE_SORT_KEY, mActiveSort);
+        outState.putParcelableArrayList(MOVIES_KEY, (ArrayList<MovieItem>) mFastAdapter.getAdapterItems());
+    }
 
     // -------------------------- AUXILIARY --------------------------
 
@@ -231,6 +238,8 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         mBottomNavigation.addItem(new AHBottomNavigationItem(
                 R.string.top_rated, R.drawable.ic_rate_24dp, R.color.amberDark));
         mBottomNavigation.addItem(new AHBottomNavigationItem(
+                R.string.upcoming, R.drawable.ic_schedule_24dp, R.color.indigoDark));
+        mBottomNavigation.addItem(new AHBottomNavigationItem(
                 R.string.favourites, R.drawable.ic_favorite_border_24dp, R.color.redDark));
 
         // Display color under navigation bar (API 21+)
@@ -252,6 +261,9 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
                     mActiveSort = NetworkUtils.TOP_RATED;
                     break;
                 case 2:
+                    mActiveSort = NetworkUtils.UPCOMING;
+                    break;
+                case 3:
                     mActiveSort = NetworkUtils.FAVOURITES;
                     break;
             }

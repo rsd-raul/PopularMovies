@@ -3,6 +3,7 @@ package com.raul.rsd.android.popularmovies.domain;
 import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.raul.rsd.android.popularmovies.utils.DateUtils;
 import java.util.Date;
 
 public class Movie implements Parcelable{
@@ -16,7 +17,7 @@ public class Movie implements Parcelable{
     private String backdrop_path;
     private Bitmap backdrop;
     private Genre[] genres;             // Popular/TopRated doesn't provide genres name
-    private Date release_date;
+    private String release_date;
     private double vote_average;
     private long vote_count;
     private int runtime;               // Popular/TopRated doesn't provide duration
@@ -78,10 +79,14 @@ public class Movie implements Parcelable{
     }
 
     public Date getRelease_date() {
-        return release_date;
+        if(release_date == null || release_date.length() != 10)
+            return null;
+        return DateUtils.getDateFromTMDBSString(release_date);
     }
     public void setRelease_date(Date release_date) {
-        this.release_date = release_date;
+        if(release_date == null)
+            return;
+        this.release_date = DateUtils.getTMDBStringFromDate(release_date);
     }
 
     public double getVote_avg() {
@@ -154,7 +159,7 @@ public class Movie implements Parcelable{
         genres = new Genre[in.readInt()];
         in.readTypedArray(genres, Genre.CREATOR);
 
-        release_date = new Date(in.readLong());
+        release_date = in.readString();
         vote_average = in.readDouble();
         vote_count = in.readLong();
         runtime = in.readInt();
@@ -174,7 +179,7 @@ public class Movie implements Parcelable{
         out.writeInt(genres.length);
         out.writeTypedArray(genres, flags);
 
-        out.writeLong(release_date.getTime());
+        out.writeString(release_date);
         out.writeDouble(vote_average);
         out.writeLong(vote_count);
         out.writeInt(runtime);

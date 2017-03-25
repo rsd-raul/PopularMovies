@@ -46,10 +46,14 @@ public abstract class TMDBUtils {
                 .append(' ')
                 .append(movie.getVote_avg())
                 .append('\n');
-        builder.append(activity.getString(R.string.release_date_to_string))
-                .append(' ')
-                .append(DateUtils.getStringFromDate(movie.getRelease_date()))
-                .append('\n');
+
+        Date releaseDate = movie.getRelease_date();
+        if(releaseDate != null)
+            builder.append(activity.getString(R.string.release_date_to_string))
+                    .append(' ')
+                    .append(DateUtils.getStringFromDate(releaseDate))
+                    .append('\n');
+
         builder.append(activity.getString(R.string.duration_to_string))
                 .append(' ')
                 .append(String.format("%d %s", movie.getDuration(), activity.getString(R.string.time_minutes)));
@@ -128,8 +132,11 @@ public abstract class TMDBUtils {
         values.put(MoviesEntry.COLUMN_TITLE, movie.getTitle());
         String genresStr = TMDBUtils.getStringFromGenres(movie.getGenres());
         values.put(MoviesEntry.COLUMN_GENRES, genresStr);
-        String dateStr = DateUtils.getTMDBStringFromDate(movie.getRelease_date());
-        values.put(MoviesEntry.COLUMN_RELEASE_DATE, dateStr);
+
+        Date releaseDate = movie.getRelease_date();
+        if(releaseDate != null)
+            values.put(MoviesEntry.COLUMN_RELEASE_DATE, DateUtils.getTMDBStringFromDate(releaseDate));
+
         values.put(MoviesEntry.COLUMN_VOTE_AVERAGE, movie.getVote_avg());
         values.put(MoviesEntry.COLUMN_VOTE_COUNT, movie.getVote_count());
         values.put(MoviesEntry.COLUMN_RUNTIME, movie.getDuration());
