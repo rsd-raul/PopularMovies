@@ -80,7 +80,7 @@
     <string name="search">Search&#8230;</string>
     <string name="movie">Movie</string>
     <string name="movies">Movies</string>
-    <string name="actors">Actor</string>
+    <string name="actor">Actor</string>
     <string name="select_filter">Select either Movie or Actor</string>
     <string name="read_more">Read More</string>
 

@@ -18,6 +18,8 @@ import javax.inject.Inject;
 
 public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> implements Parcelable {
 
+    private final String TAG = "MovieItem";
+
     // ------------------------- ATTRIBUTES --------------------------
 
     public long id;
@@ -75,9 +77,11 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
 
     // ------------------------- PARCELABLE --------------------------
 
-    static final Creator<MovieItem> CREATOR = new Creator<MovieItem> () {
+    public static final Creator<MovieItem> CREATOR = new Creator<MovieItem> () {
         @Override
-        public MovieItem createFromParcel(Parcel in) { return new MovieItem(); }
+        public MovieItem createFromParcel(Parcel in) {
+            return new MovieItem(in);
+        }
 
         @Override
         public MovieItem[] newArray(int size) {
@@ -85,12 +89,24 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
         }
     };
 
-    private MovieItem() { }
+    private MovieItem(Parcel in) {
+        id = in.readLong();
+        poster_path = in.readString();
+
+
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int i) {
+        out.writeLong(id);
+        out.writeString(poster_path);
+
+        if(poster != null)
+            poster.writeToParcel(out, 0);
+    }
 
     @Override
     public int describeContents() {
         return 0;
     }
-    @Override
-    public void writeToParcel(Parcel parcel, int i) { }
 }

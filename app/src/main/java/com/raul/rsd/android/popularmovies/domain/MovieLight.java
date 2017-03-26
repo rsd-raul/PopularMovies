@@ -40,15 +40,9 @@ public class MovieLight implements Parcelable{
     public String getCharacter() {
         return character;
     }
-    public void setCharacter(String character) {
-        this.character = character;
-    }
 
     public String getPoster_path() {
         return poster_path;
-    }
-    public void setPoster_path(String poster_path) {
-        this.poster_path = poster_path;
     }
 
     public Bitmap getPoster() {
@@ -74,7 +68,10 @@ public class MovieLight implements Parcelable{
 
     private MovieLight(Parcel in) {
         id = in.readLong();
+        title = in.readString();
         poster_path = in.readString();
+        character = in.readString();
+        poster = null;
     }
 
     @Override
@@ -83,6 +80,8 @@ public class MovieLight implements Parcelable{
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeLong(id);
+        out.writeString(title);
         out.writeString(poster_path);
+        out.writeString(character);
     }
 }
