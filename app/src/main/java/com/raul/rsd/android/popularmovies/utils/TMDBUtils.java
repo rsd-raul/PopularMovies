@@ -98,8 +98,6 @@ public abstract class TMDBUtils {
         return builder.toString();
     }
 
-
-
     public static Movie extractMovieFromCursor(Cursor data){
 
         Movie movie = new Movie(data.getInt(MovieActivity.INDEX_ID));

@@ -3,7 +3,7 @@ package com.raul.rsd.android.popularmovies.domain;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class VideosList implements Parcelable{
+class VideosList implements Parcelable{
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -11,7 +11,7 @@ public class VideosList implements Parcelable{
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
-    public Video[] getResults() {
+    Video[] getResults() {
         return results;
     }
 

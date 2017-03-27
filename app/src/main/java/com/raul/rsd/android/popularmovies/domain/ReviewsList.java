@@ -3,7 +3,7 @@ package com.raul.rsd.android.popularmovies.domain;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class ReviewsList implements Parcelable{
+class ReviewsList implements Parcelable{
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -11,7 +11,7 @@ public class ReviewsList implements Parcelable{
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
-    public Review[] getResults() {
+    Review[] getResults() {
         return results;
     }
 

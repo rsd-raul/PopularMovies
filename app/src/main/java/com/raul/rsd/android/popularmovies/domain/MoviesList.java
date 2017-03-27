@@ -7,15 +7,14 @@ public class MoviesList implements Parcelable{
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private MovieLight[] results;
-    private MovieLight[] cast;
+    private MovieLight[] results, cast;
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
     public MovieLight[] getResults() {
         return results;
     }
-    public MovieLight[] getCast() {
+    MovieLight[] getCast() {
         return cast;
     }
 

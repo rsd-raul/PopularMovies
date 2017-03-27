@@ -24,16 +24,16 @@ public class MoviesContract {
 
         static final String TABLE_NAME = "movies";
 
-        public static final String COLUMN_TITLE = "title";
-        public static final String COLUMN_POSTER = "poster";
-        public static final String COLUMN_BACKDROP = "backdrop";
-        public static final String COLUMN_GENRES = "genres";
-        public static final String COLUMN_RELEASE_DATE = "release_date";
-        public static final String COLUMN_VOTE_AVERAGE = "vote_average";
-        public static final String COLUMN_VOTE_COUNT = "vote_count";
-        public static final String COLUMN_RUNTIME = "runtime";
-        public static final String COLUMN_OVERVIEW = "overview";
-        public static final String COLUMN_DOMINANT = "dominant_color";
-        public static final String COLUMN_TIMESTAMP = "timestamp";
+        public static final String COLUMN_TITLE = "title",
+                                   COLUMN_POSTER = "poster",
+                                   COLUMN_BACKDROP = "backdrop",
+                                   COLUMN_GENRES = "genres",
+                                   COLUMN_RELEASE_DATE = "release_date",
+                                   COLUMN_VOTE_AVERAGE = "vote_average",
+                                   COLUMN_VOTE_COUNT = "vote_count",
+                                   COLUMN_RUNTIME = "runtime",
+                                   COLUMN_OVERVIEW = "overview",
+                                   COLUMN_DOMINANT = "dominant_color",
+                                   COLUMN_TIMESTAMP = "timestamp";
     }
 }

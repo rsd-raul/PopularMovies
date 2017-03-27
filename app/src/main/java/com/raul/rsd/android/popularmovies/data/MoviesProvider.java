@@ -33,8 +33,8 @@ public class MoviesProvider extends ContentProvider {
     // ------------------------- ATTRIBUTES --------------------------
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
-    @Inject @Named("writable") Provider<SQLiteDatabase> wDB;
-    @Inject @Named("readable") Provider<SQLiteDatabase> rDB;
+    @Inject @Named("writable") Provider<SQLiteDatabase> writableDB;
+    @Inject @Named("readable") Provider<SQLiteDatabase> readableDB;
     @Inject Context context;
 
     // ------------------------- CONSTRUCTOR -------------------------
@@ -59,7 +59,7 @@ public class MoviesProvider extends ContentProvider {
 
     // -------------------------- AUXILIARY --------------------------
 
-    public static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(MoviesContract.AUTHORITY, MoviesContract.PATH_MOVIE, MOVIE);
         uriMatcher.addURI(MoviesContract.AUTHORITY, MoviesContract.PATH_MOVIE + "/#", MOVIE_WITH_ID);
@@ -96,12 +96,10 @@ public class MoviesProvider extends ContentProvider {
             deferInit();
 
         Cursor response;
-
         switch(sUriMatcher.match(uri)){
             case MOVIE:
-                response = rDB.get().query(MoviesEntry.TABLE_NAME, projection,
-                                                                        selection, selectionArgs,
-                                                                        null, null, sortOrder);
+                response = readableDB.get().query(MoviesEntry.TABLE_NAME, projection, selection,
+                                                            selectionArgs, null, null, sortOrder);
                 break;
             case MOVIE_WITH_ID:
                 // Retrieve the id, knowing the Uri has 2 paths "/tasks/id" we get the index
@@ -112,9 +110,8 @@ public class MoviesProvider extends ContentProvider {
                 String[] idSelectionArgs = new String[]{id};
 
                 // Construct a query as usual, but passing in the selection/args
-                response =  rDB.get().query(MoviesEntry.TABLE_NAME, projection,
-                                                                    idSelection, idSelectionArgs,
-                                                                    null, null, sortOrder);
+                response =  readableDB.get().query(MoviesEntry.TABLE_NAME, projection, idSelection,
+                                                            idSelectionArgs, null, null, sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("query: Not implemented for uri: " + uri);
@@ -136,7 +133,7 @@ public class MoviesProvider extends ContentProvider {
         if(sUriMatcher.match(uri) != MOVIE)
             throw new UnsupportedOperationException("insert: Unknown uri: " + uri);
 
-        long id = wDB.get().insert(MoviesEntry.TABLE_NAME, null, values);
+        long id = writableDB.get().insert(MoviesEntry.TABLE_NAME, null, values);
         if(id == -1)
             Log.e(TAG, "insert: Failed to insert row into: " + uri);
 
@@ -159,7 +156,8 @@ public class MoviesProvider extends ContentProvider {
                 if (selection == null)
                     selection = "1";
 
-                itemsDeleted =  wDB.get().delete(MoviesEntry.TABLE_NAME, selection, selectionArgs);
+                itemsDeleted =  writableDB.get().delete(MoviesEntry.TABLE_NAME, selection,
+                                                                                    selectionArgs);
                 break;
             case MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
@@ -169,7 +167,7 @@ public class MoviesProvider extends ContentProvider {
                 String[] idSelectionArgs = new String[]{id};
 
                 // Construct a query as you would normally, passing in the selection/args
-                itemsDeleted =  wDB.get().delete(MoviesEntry.TABLE_NAME,
+                itemsDeleted =  writableDB.get().delete(MoviesEntry.TABLE_NAME,
                                                                     idSelection, idSelectionArgs);
                 break;
             default:
@@ -199,7 +197,7 @@ public class MoviesProvider extends ContentProvider {
         String idSelection = MoviesEntry._ID + "=?";
         String[] idSelectionArgs = new String[]{id};
 
-        int itemsUpdated = wDB.get().update(MoviesEntry.TABLE_NAME, values,
+        int itemsUpdated = writableDB.get().update(MoviesEntry.TABLE_NAME, values,
                                                                     idSelection, idSelectionArgs);
 
         // Notify the change so the resolver can update the database and any associate UI

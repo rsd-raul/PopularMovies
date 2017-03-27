@@ -24,16 +24,16 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
                 MoviesEntry.TABLE_NAME + " (" +
                 MoviesEntry._ID 				+ " INTEGER PRIMARY KEY UNIQUE, " +
                 MoviesEntry.COLUMN_TITLE        + " TEXT NOT NULL, " +
-                MoviesEntry.COLUMN_POSTER       + " BLOB, " +   // Store image for offline use
+                MoviesEntry.COLUMN_POSTER       + " BLOB, " +   // Store images for offline use
                 MoviesEntry.COLUMN_BACKDROP	    + " BLOB, " +
-                MoviesEntry.COLUMN_GENRES	    + " TEXT, " +   // No offline search -> No need to save genres id
+                MoviesEntry.COLUMN_GENRES	    + " TEXT, " +   // No offline search -> No save
                 MoviesEntry.COLUMN_RELEASE_DATE + " TEXT, " +
                 MoviesEntry.COLUMN_VOTE_AVERAGE + " REAL, " +
                 MoviesEntry.COLUMN_VOTE_COUNT   + " REAL, " +
                 MoviesEntry.COLUMN_RUNTIME      + " INTEGER, " +
                 MoviesEntry.COLUMN_OVERVIEW     + " TEXT, " +
                 MoviesEntry.COLUMN_DOMINANT     + " INTEGER, " +
-                MoviesEntry.COLUMN_TIMESTAMP 	+ " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
+                MoviesEntry.COLUMN_TIMESTAMP 	+ " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +  // Sort
         ");";
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIES_TABLE);
     }

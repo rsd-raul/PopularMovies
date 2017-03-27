@@ -7,8 +7,7 @@ public class ActorList implements Parcelable {
 
     // ------------------------- ATTRIBUTES --------------------------
 
-    private Actor[] results;
-    private Actor[] cast;
+    private Actor[] results, cast;
 
     // ---------------------- GETTERS & SETTERS ----------------------
 
