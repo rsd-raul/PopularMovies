@@ -49,6 +49,7 @@ public class ActorActivity extends BaseActivity {
     // --------------------------- VALUES ----------------------------
 
     private static final String TAG = "ActorActivity";
+    private static final String ACTOR_KEY = "actor_key";
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -76,8 +77,8 @@ public class ActorActivity extends BaseActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
         setContentView(R.layout.activity_actor);
         ButterKnife.bind(this);
 
@@ -96,8 +97,20 @@ public class ActorActivity extends BaseActivity {
                 DialogsUtils.showBasicDialog(this, getString(R.string.biography), mActor.getBiography());
             });
 
-        // Retrieve the ID sent and fetch the actor from TMDB
-        startNetworkRequest();
+        if(savedState != null && savedState.containsKey(ACTOR_KEY))
+            mActor = savedState.getParcelable(ACTOR_KEY);
+
+        // If we have an actor saved previously
+        if(mActor != null)
+            displayActor();
+        else
+            startNetworkRequest();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(ACTOR_KEY, mActor);
+        super.onSaveInstanceState(outState);
     }
 
     private void startNetworkRequest(){

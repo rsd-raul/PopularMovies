@@ -187,14 +187,11 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
     }
 
     private void queryTMDbServer(){
-        Log.e(TAG, "queryTMDbServer: page loading" + mNextPage);
-
         NetworkUtils.getMoviesByFilter(mActiveSort, mNextPage, new Callback<MoviesList>() {
             @Override
             public void onResponse(Call<MoviesList> call, Response<MoviesList> response) {
 
                 MovieLight[] movies = response.body().getResults();
-
                 if (movies != null) {
                     addMoviesToRV(movies, mNextPage == 1);
                     if(mNextPage == 1)
@@ -415,12 +412,10 @@ public class MainActivity extends BaseActivity implements LoaderManager.LoaderCa
         if(query == null || query.equals(""))
             return;
 
-        mMoviesFound = null;
-        mActorsFound = null;
+        mMoviesFound = null; mActorsFound = null;
 
         mSearchView.showProgress();
 
-        // TODO cleanup? merge? very similar methods
         switch (getActiveFilters()){
             case "movie":
                 NetworkUtils.findMovieByName(query, 1, new Callback<MoviesList>() {

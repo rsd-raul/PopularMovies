@@ -136,8 +136,6 @@ public class Movie implements Parcelable{
 
     // ------------------------- PARCELABLE --------------------------
 
-    // FIXME add images to parcelable
-
     static final Creator<Movie> CREATOR = new Creator<Movie> () {
         @Override
         public Movie createFromParcel(Parcel in) {
@@ -164,6 +162,12 @@ public class Movie implements Parcelable{
         vote_count = in.readLong();
         runtime = in.readInt();
         overview = in.readString();
+
+        videos = in.readParcelable(VideosList.class.getClassLoader());
+        reviews = in.readParcelable(ReviewsList.class.getClassLoader());
+        credits = in.readParcelable(ActorList.class.getClassLoader());
+
+        dominantBackdropColor = in.readInt();
     }
 
     @Override
@@ -184,5 +188,11 @@ public class Movie implements Parcelable{
         out.writeLong(vote_count);
         out.writeInt(runtime);
         out.writeString(overview);
+
+        out.writeParcelable(videos, flags);
+        out.writeParcelable(reviews, flags);
+        out.writeParcelable(credits, flags);
+
+        out.writeInt(dominantBackdropColor);
     }
 }

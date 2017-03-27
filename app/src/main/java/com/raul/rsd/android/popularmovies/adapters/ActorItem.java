@@ -16,12 +16,17 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
+
+    // ------------------------- ATTRIBUTES --------------------------
+
     public long id;
     private String profile_path, name, character;
     private Context context;
 
+    // ------------------------- CONSTRUCTOR -------------------------
+
     @Inject
-    public ActorItem(Context context) {
+    ActorItem(Context context) {
         this.context = context;
     }
 
@@ -34,10 +39,14 @@ public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
     }
 
     @Override
-    public int getType() { return R.id.iv_actor_profile; }
+    public int getLayoutRes() { return R.layout.movie_actor_item; }
+
+    // -------------------------- AUXILIARY --------------------------
 
     @Override
-    public int getLayoutRes() { return R.layout.movie_actor_item; }
+    public int getType() { return R.id.iv_actor_profile; }
+
+    // -------------------------- USE CASES --------------------------
 
     @Override
     public void bindView(ViewHolder viewHolder, List<Object> payloads) {
@@ -50,6 +59,8 @@ public class ActorItem extends AbstractItem<ActorItem, ActorItem.ViewHolder> {
                 .placeholder(R.drawable.placeholder_backdrop)
                 .into(viewHolder.profile);
     }
+
+    // ------------------------- VIEW HOLDER -------------------------
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         private ImageView profile;

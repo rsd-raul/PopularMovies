@@ -23,7 +23,7 @@ public class VideoItem extends AbstractItem<VideoItem, VideoItem.ViewHolder> {
     // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public VideoItem(Context context) {
+    VideoItem(Context context) {
         this.context = context;
     }
 

@@ -63,14 +63,36 @@ public abstract class TMDBUtils {
         return builder.toString();
     }
 
-    // FIXME complete
     public static String toStringActor(Actor actor, AppCompatActivity activity){
         // Using builder to facilitate handling of different types of data
         StringBuilder builder = new StringBuilder();
 
-        builder.append(activity.getString(R.string.title_to_string))
+        builder.append(activity.getString(R.string.name_to_string))
                 .append(' ')
                 .append(actor.getName())
+                .append('\n');
+        builder.append(activity.getString(R.string.biography_to_string))
+                .append(' ')
+                .append(actor.getBiography())
+                .append('\n');
+        Date birthday = actor.getBirthday();
+        if(birthday != null)
+            builder.append(activity.getString(R.string.birthday_to_string))
+                    .append(' ')
+                    .append(DateUtils.getStringFromDate(birthday))
+                    .append('\n');
+
+        String deathDay = actor.getDeathday();
+        if(deathDay != null && deathDay.length() > 5) {
+            Date deathDayDate = DateUtils.getDateFromTMDBSString(deathDay);
+            builder.append(activity.getString(R.string.death_day_to_string))
+                    .append(' ')
+                    .append(DateUtils.getStringFromDate(deathDayDate))
+                    .append('\n');
+        }
+        builder.append(activity.getString(R.string.place_of_birth_to_string))
+                .append(' ')
+                .append(actor.getPlace_of_birth())
                 .append('\n');
 
         return builder.toString();

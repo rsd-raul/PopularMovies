@@ -1,10 +1,13 @@
 package com.raul.rsd.android.popularmovies.domain;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.raul.rsd.android.popularmovies.utils.DateUtils;
 
 import java.util.Date;
 
-public class Actor {
+public class Actor implements Parcelable{
 
     private long id;
     private String name;
@@ -84,5 +87,51 @@ public class Actor {
     }
     public void setCharacter(String character) {
         this.character = character;
+    }
+
+    // ------------------------- PARCELABLE --------------------------
+
+    static final Creator<Actor> CREATOR = new Creator<Actor> () {
+        @Override
+        public Actor createFromParcel(Parcel in) {
+            return new Actor(in);
+        }
+
+        @Override
+        public Actor[] newArray(int size) {
+            return new Actor[size];
+        }
+    };
+
+    private Actor(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        biography = in.readString();
+        birthday = in.readString();
+        place_of_birth = in.readString();
+        deathday = in.readString();
+
+        movie_credits = in.readParcelable(MoviesList.class.getClassLoader());
+
+        profile_path = in.readString();
+        character = in.readString();
+    }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeLong(id);
+        out.writeString(name);
+        out.writeString(biography);
+        out.writeString(birthday);
+        out.writeString(place_of_birth);
+        out.writeString(deathday);
+
+        out.writeParcelable(movie_credits, flags);
+
+        out.writeString(profile_path);
+        out.writeString(character);
     }
 }

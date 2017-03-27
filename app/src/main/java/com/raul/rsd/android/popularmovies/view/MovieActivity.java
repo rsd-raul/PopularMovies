@@ -48,9 +48,7 @@ import com.raul.rsd.android.popularmovies.utils.TMDBUtils;
 import com.raul.rsd.android.popularmovies.utils.UIUtils;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-
 import java.util.Date;
-
 import javax.inject.Inject;
 import javax.inject.Provider;
 import butterknife.BindView;
@@ -65,6 +63,8 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     // --------------------------- VALUES ----------------------------
 
     private static final String TAG = "MovieActivity";
+    private static final String MOVIE_KEY = "movie_key";
+    private static final String FAVOURITE_KEY = "favourite_key";
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -100,24 +100,48 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedState) {
+        super.onCreate(savedState);
         setContentView(R.layout.activity_movie);
         ButterKnife.bind(this);
 
         mSwipeRefreshLayout.setEnabled(false);
 
-        setupActivity();
-    }
-
-    private void setupActivity(){
         // Set ActionBar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Retrieve the ID sent and fetch the movie from TMDB
-        mMovie = new Movie(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
-        new LoadMovieTask().execute();
+        // Restore
+        if(savedState != null) {
+            if (savedState.containsKey(MOVIE_KEY))
+                mMovie = savedState.getParcelable(MOVIE_KEY);
+            if (savedState.containsKey(FAVOURITE_KEY))
+                isFavourite = savedState.getBoolean(FAVOURITE_KEY);
+        }
+
+        // If we have a movie saved previously streamline the process depending on the case
+        if(mMovie != null) {
+            if (mMovie.getPoster_path() != null)  // It's online -> Load from object and img cache
+                displayMovie(false);
+            else if (isFavourite)                 // It's a favourite -> Get from DB
+                startProviderRequest();
+            else                                  // It was a favourite, but was removed (query API)
+                startNetworkRequest();
+
+            changeFavourite(isFavourite);         // Adapt the fab
+
+        // If we don't have any info, retrieve the ID sent and fetch the movie from TMDb or our DB
+        } else {
+            mMovie = new Movie(getIntent().getLongExtra(Intent.EXTRA_UID, -1));
+            new LoadMovieTask().execute();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(MOVIE_KEY, mMovie);
+        outState.putBoolean(FAVOURITE_KEY, isFavourite);
+        super.onSaveInstanceState(outState);
     }
 
     private void startProviderRequest(){
@@ -278,12 +302,6 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         FastItemAdapter<IItem> fAdapter = fastAdapterProvider.get();
         mActorsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         mActorsRV.setAdapter(fAdapter);
-
-        // TODO Do something similar
-//        if(actors == null || actors.length == 0) {
-//            fAdapter.add(reviewItemProvider.get().withReview("", getString(R.string.no_reviews)));
-//            return;
-//        }
 
         for(Actor actor : actors)
             if(actor.getProfile_path() != null && actor.getProfile_path().length() > 4)
@@ -485,8 +503,8 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
     private boolean isSafe(){
         if(status == SAFE)
             return true;
-        if(mToast == null)  // TODO more generic string
-            mToast = Toast.makeText(this, R.string.saving_offline, Toast.LENGTH_SHORT);
+        if(mToast == null)
+            mToast = Toast.makeText(this, R.string.in_progress, Toast.LENGTH_SHORT);
         else
             mToast.show();
         return false;
@@ -546,8 +564,7 @@ public class MovieActivity extends BaseActivity implements LoaderManager.LoaderC
         if(loaderId != ID_MOVIE_DETAILS_LOADER)
             throw new RuntimeException("Loader Not Implemented: " + loaderId);
 
-        long id = getIntent().getLongExtra(Intent.EXTRA_UID, -1);
-        Uri movieWithIdUri = MoviesContract.getMovieUriWithId(id);
+        Uri movieWithIdUri = MoviesContract.getMovieUriWithId(mMovie.getId());
 
         return new CursorLoader(this, movieWithIdUri, MOVIE_DETAILS_PROJECTION, null, null, null);
     }

@@ -2,8 +2,6 @@ package com.raul.rsd.android.popularmovies.adapters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,9 +14,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> implements Parcelable {
-
-    private final String TAG = "MovieItem";
+public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> {
 
     // ------------------------- ATTRIBUTES --------------------------
 
@@ -73,40 +69,5 @@ public class MovieItem extends AbstractItem<MovieItem, MovieItem.ViewHolder> imp
             super(view);
             this.poster = (ImageView) view.findViewById(R.id.iv_movie_poster);
         }
-    }
-
-    // ------------------------- PARCELABLE --------------------------
-
-    public static final Creator<MovieItem> CREATOR = new Creator<MovieItem> () {
-        @Override
-        public MovieItem createFromParcel(Parcel in) {
-            return new MovieItem(in);
-        }
-
-        @Override
-        public MovieItem[] newArray(int size) {
-            return new MovieItem[size];
-        }
-    };
-
-    private MovieItem(Parcel in) {
-        id = in.readLong();
-        poster_path = in.readString();
-
-
-    }
-
-    @Override
-    public void writeToParcel(Parcel out, int i) {
-        out.writeLong(id);
-        out.writeString(poster_path);
-
-        if(poster != null)
-            poster.writeToParcel(out, 0);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 }

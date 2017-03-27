@@ -12,12 +12,15 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class ReviewItem extends AbstractItem<ReviewItem, ReviewItem.ViewHolder> {
-    public String author;
-    public String content;
+
+    // ------------------------- ATTRIBUTES --------------------------
+
+    public String author, content;
+
+    // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public ReviewItem() {
-    }
+    ReviewItem() { }
 
     public ReviewItem withReview(String author, String content){
         this.author = author;
@@ -26,10 +29,14 @@ public class ReviewItem extends AbstractItem<ReviewItem, ReviewItem.ViewHolder> 
     }
 
     @Override
-    public int getType() { return R.id.tv_review_content; }
+    public int getLayoutRes() { return R.layout.movie_review_item; }
+
+    // -------------------------- AUXILIARY --------------------------
 
     @Override
-    public int getLayoutRes() { return R.layout.movie_review_item; }
+    public int getType() { return R.id.tv_review_content; }
+
+    // -------------------------- USE CASES --------------------------
 
     @Override
     public void bindView(ViewHolder viewHolder, List<Object> payloads) {
@@ -39,9 +46,10 @@ public class ReviewItem extends AbstractItem<ReviewItem, ReviewItem.ViewHolder> 
         viewHolder.content.setText(content);
     }
 
+    // ------------------------- VIEW HOLDER -------------------------
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView author;
-        private TextView content;
+        private TextView author, content;
 
         public ViewHolder(View view) {
             super(view);

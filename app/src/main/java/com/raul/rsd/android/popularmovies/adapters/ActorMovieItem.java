@@ -24,7 +24,7 @@ public class ActorMovieItem extends AbstractItem<ActorMovieItem, ActorMovieItem.
     // ------------------------- CONSTRUCTOR -------------------------
 
     @Inject
-    public ActorMovieItem(Context context) {
+    ActorMovieItem(Context context) {
         this.context = context;
     }
 

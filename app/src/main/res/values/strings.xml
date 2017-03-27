@@ -55,6 +55,12 @@
     <string name="death_day">Died</string>
     <string name="birthday">Born</string>
 
+    <string name="name_to_string">Name:</string>
+    <string name="biography_to_string">Biography:</string>
+    <string name="birthday_to_string">Born:</string>
+    <string name="death_day_to_string">Died:</string>
+    <string name="place_of_birth_to_string">Place of Birth:</string>
+
 
     <!--Format-->
     <string name="format_voteAvg">
@@ -91,7 +97,7 @@
     <string name="not_available">Not available</string>
     <string name="not_available_short">N/A</string>
     <string name="cast">Cast</string>
-    <string name="saving_offline">Saving Movie offline</string>
+    <string name="in_progress">Operation in progress, try again</string>
     <string name="no_videos">NO VIDEOS FOUND</string>
     <string name="say_movie_or_actor">Say a movie or actor name</string>
     <string name="no_release_date">NO RELEASE DATE FOUND</string>

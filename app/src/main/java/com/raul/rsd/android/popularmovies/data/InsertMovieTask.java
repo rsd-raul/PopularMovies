@@ -14,7 +14,7 @@ public class InsertMovieTask extends AsyncTask<Movie, Void, ContentValues> {
     private MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler;
 
     @Inject
-    public InsertMovieTask(MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler) {
+    InsertMovieTask(MoviesAsyncHandler.MoviesAsyncQueryHandler moviesHandler) {
         this.moviesHandler = moviesHandler;
     }
 
