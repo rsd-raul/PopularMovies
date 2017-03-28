@@ -2,6 +2,10 @@
 
 First and Second project for the Google/Udacity scholarship, the "Associate Android Developer Fast Track".
 
+## Udacity reviews:
+
+* [Popular Movies Mk1](https://review.udacity.com/#!/reviews/359360/shared)
+* [Popular Movies Mk2](https://review.udacity.com/#!/reviews/422374/shared)
 
 ## Features available:
 
@@ -30,12 +34,15 @@ This app uses [The Movie Database](https://www.themoviedb.org/documentation/api)
 * [BottomNavigation](https://github.com/aurelhubert/ahbottomnavigation) **v2.0**
 * [FloatingActionButton](https://github.com/Clans/FloatingActionButton) **v1.0**
  
-
 ## Future:
 
 Features to be implemented:
+* In Theaters - location based feature (Cinema search if possible).
+* [Trakt.tv](https://trakt.tv/) integration.
+* [IMDB](http://www.imdb.com/) integration.
+* Upcoming movies with release reminder (notification/event).
 
 Ext. Libraries to be used:
-* [Realm](https://github.com/realm/realm-java)  // Not allowed
-* [RxJava](https://github.com/ReactiveX/RxJava)
-* [RxAndroid](https://github.com/ReactiveX/RxAndroid)
+* [Realm](https://github.com/realm/realm-java)  **v3.0**
+* [RxJava](https://github.com/ReactiveX/RxJava) **v3.0**
+* [RxAndroid](https://github.com/ReactiveX/RxAndroid) **v3.0**

@@ -3,7 +3,7 @@ package com.raul.rsd.android.popularmovies.data;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
-public class MoviesContract {
+public final class MoviesContract {
 
     // ----------------------------- URI -----------------------------
 
@@ -17,6 +17,9 @@ public class MoviesContract {
     public static Uri getMovieUriWithId(long id){
         return CONTENT_URI.buildUpon().appendPath(String.valueOf(id)).build();
     }
+
+    // Avoid instantiation
+    private MoviesContract(){}
 
     // -------------------------- DB TABLES --------------------------
 

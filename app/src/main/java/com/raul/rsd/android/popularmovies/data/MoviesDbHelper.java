@@ -38,9 +38,10 @@ public class MoviesDbHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIES_TABLE);
     }
 
+    // TODO handle future upgrades accordingly <- Realm migration
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesEntry.TABLE_NAME);
-        onCreate(sqLiteDatabase);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MoviesEntry.TABLE_NAME);
+//        onCreate(sqLiteDatabase);
     }
 }
